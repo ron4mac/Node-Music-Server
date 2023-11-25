@@ -1,0 +1,13 @@
+[Unit]
+Description=YTaudioExtractApp
+After=network.target
+
+[Service]
+Type=simple
+User=nimda
+ExecStart=/usr/bin/node /home/nimda/ytextr/extsrv.js
+WorkingDirectory=/home/nimda/ytextr
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

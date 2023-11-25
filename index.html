@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Cache-Control" content="max-age=0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YT Audio Extract</title>
+<link href="static/style.css" rel="stylesheet">
+<script>
+	var _pp = 0;
+	const getPlaylist = (frm) => {
+		let yturl = encodeURIComponent(frm.yturl.value.trim());
+		let wtrk = encodeURIComponent(frm.wtrk.value);
+		document.getElementById('dnldf').src = window.location.origin + `?pxtr=${yturl}&wtrk=${wtrk}`;
+		watchP();
+	};
+	const getVinfo = (frm) => {
+		let yturl = encodeURIComponent(frm.yturl.value.trim());
+		let tname = encodeURIComponent(frm.tname.value.trim());
+		let wtrk = encodeURIComponent(frm.wtrk.value);
+		tname = tname ? tname : 'audio_track';
+		document.getElementById('dnldf').src = window.location.origin + `?axtr=${yturl}&tnam=${tname}&wtrk=${wtrk}`;
+//		watchP();
+		return;
+		let fdata = new FormData(frm);
+		let fdo = Object.fromEntries(fdata.entries());
+		fdo.act = 'ginf';
+		let jdata = JSON.stringify(fdo);
+		fetch('', {method:'POST', headers:{"Content-Type": "application/json", "Cookie": "ytdl=none"}, body:jdata})
+		.then(resp => { console.log(resp); if (!resp.ok) throw new Error(`HTTP ${resp.status}`); if (false) return resp.json(); else return resp.text() })
+		.then(data => {
+			console.log(data);
+			let infe = document.getElementById('vinfo');
+			infe.innerHTML = '<xmp>'+data+'</xmp><button onclick="dlfile()">DownIt</button>';
+			document.getElementById('dnldf').src = 'video.mp4';
+		})
+		.catch(err => alert('Failure: '+err));
+	};
+	function watchP () {
+		fetch('?prog', {method:'GET'})
+		.then((resp) => resp.text())
+		.then(data => {
+			if (data == '.') {
+				_pb.innerHTML = '';
+				document.getElementById('dnldf').src = 'playlist.zip';
+			} else {
+				_pb.innerHTML = data;
+				setTimeout(watchP, 1000);
+			}
+		});
+	}
+	function wwwwatchP () {
+	//	_pb.value = ++_pp;
+		if (_pp != '.') {
+			fetch('?prog', {method:'GET'})
+			.then((resp) => resp.text())
+			.then(data => {
+				_pp = data;
+				_pb.innerHTML = _pp;
+			});
+			setTimeout(watchP, 1000);
+		} else {
+			_pp = 0;
+			_pb.innerHTML = '';
+			document.getElementById('dnldf').src = 'playlist.zip';
+		}
+	}
+	const dlfile = () => {
+		document.getElementById('dnldf').src = 'video.mp4';
+	};
+	const frequest = (evt, frm) => {
+		evt.preventDefault();
+		console.log(evt);
+		if (evt.submitter.name=='ginf') getVinfo(frm);
+	};
+	const prequest = (evt, frm) => {
+		evt.preventDefault();
+		console.log(evt);
+		if (evt.submitter.name=='ginf') getPlaylist(frm);
+	//	document.getElementById('dnldf').src = 'playlist.zip';
+	};
+</script>
+</head>
+<body>
+	<!-- Tab links -->
+	<div class="tab">
+		<button class="tablinks" onclick="openTab(event, 'sglTab')" id="defaultOpen">Extract from Single File</button>
+		<button class="tablinks" onclick="openTab(event, 'lstTab')">Extract an Entire Playlist</button>
+	</div>
+	<div id="sglTab" class="tabcontent">
+		<form action="#" name="sglform" method="post" onsubmit="frequest(event, this)">
+			<div>
+				<input class="yturl" type="text" name="yturl" placeholder="YT URL" value="" required><br>
+				<span>as: </span> <input class="tname" type="text" name="tname" value=""><br>
+				<label><input type="radio" name="wtrk" value="h" checked>Highest Quality &nbsp;</label>
+				<label><input type="radio" name="wtrk" value="4">MP4(M4A) &nbsp;</label>
+				<label><input type="radio" name="wtrk" value="w">WEBM</label><br>
+				<input type="submit" name="ginf" value="Get Audio Track">
+			</div>
+		</form>
+		<div id="vinfo"></div>
+	</div>
+	<div id="lstTab" class="tabcontent">
+		<form action="#" name="lstForm" method="post" onsubmit="prequest(event, this)">
+			<div>
+				<input class="yturl" type="text" name="yturl" placeholder="YT Playlist URL" value="" required><br>
+				<label><input type="radio" name="wtrk" value="h" checked>Highest Quality &nbsp;</label>
+				<label><input type="radio" name="wtrk" value="4">MP4(M4A) &nbsp;</label>
+				<label><input type="radio" name="wtrk" value="w">WEBM</label><br>
+				<div id="prog"></div>
+				<input type="submit" name="ginf" value="Get Playlist Audio Tracks">
+			</div>
+		</form>
+	</div>
+	<iframe id="dnldf" style="display:none;"></iframe>
+	<script>
+	_pb = document.getElementById('prog');
+	function openTab(evt, tabName) {
+		// Declare all variables
+		var i, tabcontent, tablinks;
+
+		// Get all elements with class="tabcontent" and hide them
+		tabcontent = document.getElementsByClassName("tabcontent");
+		for (i = 0; i < tabcontent.length; i++) {
+		tabcontent[i].style.display = "none";
+		}
+
+		// Get all elements with class="tablinks" and remove the class "active"
+		tablinks = document.getElementsByClassName("tablinks");
+		for (i = 0; i < tablinks.length; i++) {
+			tablinks[i].className = tablinks[i].className.replace(" active", "");
+		}
+
+		// Show the current tab, and add an "active" class to the button that opened the tab
+		document.getElementById(tabName).style.display = "block";
+		evt.currentTarget.className += " active";
+	}
+	document.getElementById("defaultOpen").click();
+	</script>
+</body>
+</html>
+

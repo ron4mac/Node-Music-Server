@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "ytdl-core": "^4.11.5",
+    "ytpl": "^2.3.0"
+  }
+}
