@@ -16,6 +16,8 @@ const documentRoot = '.';
 var progv = 'Scanning playlist ...';
 
 var tlist = [];
+var pwtrk = '';
+var errs = [];
 
 const emptyDir = (dir) => {
 	fs.readdir(dir, (err, files) => {
@@ -28,36 +30,41 @@ const emptyDir = (dir) => {
 	});
 }
 const getTrack = (trk) => {
-//	console.log(trk.index,trk.title);
-	progv = 'Processing file ' + trk.index;
-	ytdl.getInfo(trk.shortUrl).then(info => {
-		ytdl.downloadFromInfo(info, {quality: 'highestaudio'}).pipe(fs.createWriteStream('playlist/'+trk.title+'.mp4'));
-		//console.log(trk.index,trk.title);
+	//console.log(trk.index,trk.title);
+	progv = trk.index + ' files processed';
+	getAudioStream(trk.shortUrl, pwtrk, (aud) => {
+		//console.log(aud);
+		if (aud.error) {
+			errs.push(aud.error);
+		} else {
+			aud.stream.pipe(fs.createWriteStream('playlist/'+trk.title+'.'+aud.fext));
+		}
 		if (tlist.length) {
 			getTrack(tlist.shift());
 		} else {
-		//	console.log('fini');
+			//console.log('fini');
 			progv = 'Zipping Files ...';
 			require('child_process').exec('zip -r playlist playlist',{},(error, stdout, stderr)=>{
-			//	console.log('zipped');
+				//console.log('zipped');
 				progv = '.';
 			});
-		//	progv = '.';
 		}
 	});
 }
 const getPlaylist = async (parms, resp) => {
 	const ytpl = require('ytpl');
+	fs.unlink('playlist.zip', (err) => 1);
 	emptyDir('playlist');
 	let plurl = parms.pxtr;
 	let list = await ytpl(plurl, {limit:Infinity});
 	tlist = list.items;
+	pwtrk = parms.wtrk;
 	getTrack(tlist.shift());
 }
 
 
 const sendExtraction = (filePath) => {
-//	console.log('[Info] Sending audio track');
+	//console.log('[Info] Sending audio track');
 	let stats = fs.statSync(filePath);
 	gresp.setHeader('Content-Type', 'application/octet-stream');
 	gresp.setHeader('Content-Length', stats.size);
@@ -75,7 +82,7 @@ const sendExtraction = (filePath) => {
 };
 
 const sendzip = (filePath, resp) => {
-//	console.log('[Info] Sending zip file');
+	//console.log('[Info] Sending zip file');
 	let stats = fs.statSync(filePath);
 	resp.setHeader('Content-Type', 'application/zip');
 	resp.setHeader('Content-Length', stats.size);
@@ -90,9 +97,65 @@ const sendzip = (filePath, resp) => {
 	});
 };
 
+
+const fmtSearch = (cntnr, fmts) => {
+	let ix = 0;
+	do {
+		if (fmts[ix].container == cntnr) return ix;
+		++ix;
+	} while (ix < fmts.length);
+	return 0;
+}
+
+const getAudioStream = (yturl, which, cb) => {
+	let rslt = {};
+	let fext = 'mp4';
+	ytdl.getInfo(yturl, {quality: 'highestaudio'})
+	.then(info => {
+		let audioFormats = ytdl.filterFormats(info.formats, 'audioonly');
+		let tfmt = null;
+		switch (which) {
+			case '4':
+				tfmt = audioFormats[fmtSearch('mp4', audioFormats)];
+				fext = 'm4a';
+				break;
+			case 'w':
+				tfmt = audioFormats[fmtSearch('webm', audioFormats)];
+				fext = 'webm';
+				break;
+			default:
+				tfmt = audioFormats[0];
+				fext = tfmt.container;
+		}
+		rslt.fext = fext;
+		rslt.mimeType = tfmt.mimeType;
+		rslt.contentLength = tfmt.contentLength;
+		rslt.stream = ytdl(yturl,{format: tfmt});
+		cb(rslt);
+	})
+	.catch((error) => {
+		cb({error});
+	});
+}
+
+const audioExtract = (parms, resp) => {
+	//console.log(parms);
+	let yturl = parms.axtr;
+	getAudioStream(parms.axtr, parms.wtrk, (aud) => {
+		//console.log(aud);
+		if (aud.error) {
+			resp.end(`<script>alert("${aud.error}")</script>`);
+		} else {
+			resp.writeHead(200, {'Content-Type': aud.mimeType, 'Content-Length': aud.contentLength, 'Content-Disposition': `attachment; filename="${parms.tnam}.${aud.fext}"`});
+			aud.stream.pipe(resp);
+		}
+	});
+};
+
+
 // serve a file
 const serveFile = (filePath, response, url) => {
-//	console.log('SERVE FILE: '+filePath);
+	//console.log('SERVE FILE: '+filePath);
 	let extname = String(path.extname(filePath)).toLowerCase();
 	const MIME_TYPES = {
 		'.html': 'text/html',
@@ -161,56 +224,17 @@ const serveFile = (filePath, response, url) => {
 			response.writeHead(200, { 'Content-Type':contentType });
 			response.end(content, 'utf-8');
 			// log served response
-		//	console.log('[Info] Served:', url);
+			//console.log('[Info] Served:', url);
 		}
 	});
 };
 
-
-const fmtSearch = (cntnr, fmts) => {
-	let ix = 0;
-	do {
-		if (fmts[ix].container == cntnr) return ix;
-		++ix;
-	} while (ix < fmts.length);
-	return 0;
-}
-
-const audioExtract = (parms, resp) => {
-//	console.log(parms);
-	let yturl = parms.axtr;
-	let fext = 'mp4';
-	ytdl.getInfo(yturl, {quality: 'highestaudio'})
-	.then(info => {
-		let audioFormats = ytdl.filterFormats(info.formats, 'audioonly');
-		let tfmt = null;
-		switch (parms.wtrk) {
-			case '4':
-				tfmt = audioFormats[fmtSearch('mp4', audioFormats)];
-				fext = 'm4a';
-				break;
-			case 'w':
-				tfmt = audioFormats[fmtSearch('webm', audioFormats)];
-				fext = 'webm';
-				break;
-			default:
-				tfmt = audioFormats[0];
-				fext = tfmt.container;
-		}
-		resp.writeHead(200, {'Content-Type': tfmt.mimeType, 'Content-Length': tfmt.contentLength, 'Content-Disposition': `attachment; filename="${parms.tnam}.${fext}"`});
-		ytdl(yturl,{format: tfmt}).pipe(resp);
-	})
-	.catch((rej) => {
-		resp.writeHead(200, {'Content-Type': 'text/html', });
-		resp.end(`<script>alert("${rej}")</script>`);
-	});
-};
 
 // Web server
 http.createServer(function (request, response) {
 	const {method, url} = request;
 
-//	console.log('[Info] Requested:', url);
+	//console.log('[Info] Requested:', url);
 	if (debugMode === true && enableUrlDecoding === true) {
 		console.log('[Debug] Decoded:', decodeURI(url));
 	}
@@ -243,7 +267,7 @@ http.createServer(function (request, response) {
 		return;
 	}
 	if (url.startsWith('/?prog')) {
-	//	console.log(progv);
+		//console.log(progv);
 		response.writeHead(200, {'Content-Type': 'text/plain'});
 		response.end(progv);
 		return;
