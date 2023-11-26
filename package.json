@@ -1,6 +1,24 @@
 {
-  "dependencies": {
-    "ytdl-core": "^4.11.5",
-    "ytpl": "^2.3.0"
-  }
+  "name": "ytextr",
+  "version": "1.0.0",
+  "description": "Get audio tracks from YT content",
+  "main": "extrsvr.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ron4mac/yt-audio-extract.git"
+  },
+  "keywords": [
+    "YouTube",
+    "audio",
+    "extract"
+  ],
+  "author": "ron4mac",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ron4mac/yt-audio-extract/issues"
+  },
+  "homepage": "https://github.com/ron4mac/yt-audio-extract#readme"
 }
