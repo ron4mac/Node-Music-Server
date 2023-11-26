@@ -21,23 +21,8 @@
 		let wtrk = encodeURIComponent(frm.wtrk.value);
 		tname = tname ? tname : 'audio_track';
 		document.getElementById('dnldf').src = window.location.origin + `?axtr=${yturl}&tnam=${tname}&wtrk=${wtrk}`;
-//		watchP();
-		return;
-		let fdata = new FormData(frm);
-		let fdo = Object.fromEntries(fdata.entries());
-		fdo.act = 'ginf';
-		let jdata = JSON.stringify(fdo);
-		fetch('', {method:'POST', headers:{"Content-Type": "application/json", "Cookie": "ytdl=none"}, body:jdata})
-		.then(resp => { console.log(resp); if (!resp.ok) throw new Error(`HTTP ${resp.status}`); if (false) return resp.json(); else return resp.text() })
-		.then(data => {
-			console.log(data);
-			let infe = document.getElementById('vinfo');
-			infe.innerHTML = '<xmp>'+data+'</xmp><button onclick="dlfile()">DownIt</button>';
-			document.getElementById('dnldf').src = 'video.mp4';
-		})
-		.catch(err => alert('Failure: '+err));
 	};
-	function watchP () {
+	const watchP = () => {
 		fetch('?prog', {method:'GET'})
 		.then((resp) => resp.text())
 		.then(data => {
@@ -49,36 +34,32 @@
 				setTimeout(watchP, 1000);
 			}
 		});
-	}
-	function wwwwatchP () {
-	//	_pb.value = ++_pp;
-		if (_pp != '.') {
-			fetch('?prog', {method:'GET'})
-			.then((resp) => resp.text())
-			.then(data => {
-				_pp = data;
-				_pb.innerHTML = _pp;
-			});
-			setTimeout(watchP, 1000);
-		} else {
-			_pp = 0;
-			_pb.innerHTML = '';
-			document.getElementById('dnldf').src = 'playlist.zip';
-		}
-	}
+	};
 	const dlfile = () => {
 		document.getElementById('dnldf').src = 'video.mp4';
 	};
 	const frequest = (evt, frm) => {
 		evt.preventDefault();
-		console.log(evt);
+	//	console.log(evt);
 		if (evt.submitter.name=='ginf') getVinfo(frm);
 	};
 	const prequest = (evt, frm) => {
 		evt.preventDefault();
-		console.log(evt);
+	//	console.log(evt);
 		if (evt.submitter.name=='ginf') getPlaylist(frm);
-	//	document.getElementById('dnldf').src = 'playlist.zip';
+	};
+	var tabcontent, tablinks;
+	const openTab = (evt, tabName) => {
+		let i;
+		for (i = 0; i < tabcontent.length; i++) {
+			tabcontent[i].style.display = 'none';
+		}
+		for (i = 0; i < tablinks.length; i++) {
+			tablinks[i].className = tablinks[i].className.replace(' active', '');
+		}
+		// Show the current tab, and add an "active" class to the button that opened the tab
+		document.getElementById(tabName).style.display = 'block';
+		evt.currentTarget.className += ' active';
 	};
 </script>
 </head>
@@ -116,27 +97,12 @@
 	<iframe id="dnldf" style="display:none;"></iframe>
 	<script>
 	_pb = document.getElementById('prog');
-	function openTab(evt, tabName) {
-		// Declare all variables
-		var i, tabcontent, tablinks;
-
-		// Get all elements with class="tabcontent" and hide them
-		tabcontent = document.getElementsByClassName("tabcontent");
-		for (i = 0; i < tabcontent.length; i++) {
-		tabcontent[i].style.display = "none";
-		}
-
-		// Get all elements with class="tablinks" and remove the class "active"
-		tablinks = document.getElementsByClassName("tablinks");
-		for (i = 0; i < tablinks.length; i++) {
-			tablinks[i].className = tablinks[i].className.replace(" active", "");
-		}
-
-		// Show the current tab, and add an "active" class to the button that opened the tab
-		document.getElementById(tabName).style.display = "block";
-		evt.currentTarget.className += " active";
-	}
-	document.getElementById("defaultOpen").click();
+	// Get all elements with class="tabcontent" and hide them
+	tabcontent = document.getElementsByClassName('tabcontent');
+	// Get all elements with class="tablinks" and remove the class "active"
+	tablinks = document.getElementsByClassName('tablinks');
+	// Show the default tab
+	document.getElementById('defaultOpen').click();
 	</script>
 </body>
 </html>

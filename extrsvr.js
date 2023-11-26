@@ -28,8 +28,7 @@ const emptyDir = (dir) => {
 	});
 }
 const getTrack = (trk) => {
-	//console.log(trk.shortUrl);
-	console.log(trk.index,trk.title);
+//	console.log(trk.index,trk.title);
 	progv = 'Processing file ' + trk.index;
 	ytdl.getInfo(trk.shortUrl).then(info => {
 		ytdl.downloadFromInfo(info, {quality: 'highestaudio'}).pipe(fs.createWriteStream('playlist/'+trk.title+'.mp4'));
@@ -37,10 +36,10 @@ const getTrack = (trk) => {
 		if (tlist.length) {
 			getTrack(tlist.shift());
 		} else {
-			console.log('fini');
+		//	console.log('fini');
 			progv = 'Zipping Files ...';
 			require('child_process').exec('zip -r playlist playlist',{},(error, stdout, stderr)=>{
-				console.log('zipped');
+			//	console.log('zipped');
 				progv = '.';
 			});
 		//	progv = '.';
@@ -58,7 +57,7 @@ const getPlaylist = async (parms, resp) => {
 
 
 const sendExtraction = (filePath) => {
-	console.log('[Info] Sending audio track');
+//	console.log('[Info] Sending audio track');
 	let stats = fs.statSync(filePath);
 	gresp.setHeader('Content-Type', 'application/octet-stream');
 	gresp.setHeader('Content-Length', stats.size);
@@ -76,7 +75,7 @@ const sendExtraction = (filePath) => {
 };
 
 const sendzip = (filePath, resp) => {
-	console.log('[Info] Sending zip file');
+//	console.log('[Info] Sending zip file');
 	let stats = fs.statSync(filePath);
 	resp.setHeader('Content-Type', 'application/zip');
 	resp.setHeader('Content-Length', stats.size);
@@ -93,7 +92,7 @@ const sendzip = (filePath, resp) => {
 
 // serve a file
 const serveFile = (filePath, response, url) => {
-	console.log('SERVE FILE: '+filePath);
+//	console.log('SERVE FILE: '+filePath);
 	let extname = String(path.extname(filePath)).toLowerCase();
 	const MIME_TYPES = {
 		'.html': 'text/html',
@@ -162,52 +161,9 @@ const serveFile = (filePath, response, url) => {
 			response.writeHead(200, { 'Content-Type':contentType });
 			response.end(content, 'utf-8');
 			// log served response
-			console.log('[Info] Served:', url);
+		//	console.log('[Info] Served:', url);
 		}
 	});
-};
-
-
-// send back some text/html data
-const textRespond = (data) => {
-	gresp.writeHead(200, { 'Content-Type': 'text/html' });
-	gresp.end(data);
-};
-
-
-const performAction = async (parms) => {
-	console.log(parms);
-	if (parms.act=='ginf') {
-		ytdl.getInfo(parms.yturl)
-		.then(info => {
-			//let drs = ytdl.downloadFromInfo(info, {filter: f => f.container === 'mp4' && f.mimeType.indexOf('audio/mp4') == 0});
-			//let dws = fs.createWriteStream('video.mp4');
-			//dws.on('end', () => textRespond('FF'));
-			//drs.pipe(dws);
-			//dws.end();
-
-			// start the response to hold the browser timeout
-			gresp.setHeader('Content-Disposition', 'attachment; filename="audio.m4a"');
-		//	gresp.writeHead(200, { 'Content-Type': 'text/html' });
-			gresp.writeHead(200, { 'Content-Type': 'application/octet-stream' });
-		//	ytdl.downloadFromInfo(info, {filter: f => f.container === 'mp4' && f.mimeType.indexOf('audio/mp4') == 0}).pipe(fs.createWriteStream('video.mp4')).on('finish', () => {
-			ytdl.downloadFromInfo(info, {filter: f => f.container === 'mp4' && f.mimeType.indexOf('audio/mp4') == 0}).pipe(gresp);	//.on('finish', () => {
-			//	console.log('[Info] Audio extraction complete');
-				//textRespond('EE');
-				// finish the response
-			//	gresp.end('~~~');
-			//	});
-			});
-		//.then(() => textRespond('EE'))
-		//;
-//		let info = await ytdl.getInfo(parms.yturl);
-//		let audioFormats = ytdl.filterFormats(info.formats, 'audioonly');
-//		let format = ytdl.chooseFormat(audioFormats, { filter: format => format.container === 'mp4' });
-//		ytdl.downloadFromInfo(info, {filter: f => f.container === 'mp4' && f.mimeType.indexOf('audio/mp4') == 0}).pipe(fs.createWriteStream('video.mp4'));
-//		textRespond(JSON.stringify(format, null, "  "));
-		return;
-	}
-	textRespond(`<span class="good">Playlist added to picture frame.</span>`);
 };
 
 
@@ -221,7 +177,7 @@ const fmtSearch = (cntnr, fmts) => {
 }
 
 const audioExtract = (parms, resp) => {
-	console.log(parms);
+//	console.log(parms);
 	let yturl = parms.axtr;
 	let fext = 'mp4';
 	ytdl.getInfo(yturl, {quality: 'highestaudio'})
@@ -254,14 +210,10 @@ const audioExtract = (parms, resp) => {
 http.createServer(function (request, response) {
 	const {method, url} = request;
 
-	console.log('[Info] Requested:', url);
+//	console.log('[Info] Requested:', url);
 	if (debugMode === true && enableUrlDecoding === true) {
 		console.log('[Debug] Decoded:', decodeURI(url));
 	}
-
-//	console.log('::',request.headers/*.cookie*/,'::');
-
-//	gresp = response;
 
 	if (method=='POST') {
 		let body = '';
@@ -291,8 +243,7 @@ http.createServer(function (request, response) {
 		return;
 	}
 	if (url.startsWith('/?prog')) {
-		//if (progv < 95) progv++;
-		console.log(progv);
+	//	console.log(progv);
 		response.writeHead(200, {'Content-Type': 'text/plain'});
 		response.end(progv);
 		return;
@@ -311,6 +262,6 @@ http.createServer(function (request, response) {
 	serveFile(filePath.split('?').shift(), response, url);
 
 }).listen(svrport, hostname, () => {
-	console.log(`Picframe/Server (http://${hostname}:${svrport}) started`);
+	console.log(`YT Audio Extraction Server (http://${hostname}:${svrport}) started`);
 });
 
