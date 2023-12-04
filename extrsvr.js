@@ -1,4 +1,5 @@
-const http = require('http')
+const settings = require('./config');
+const http = require('http');
 const https = require('https');
 const process = require('process');
 const {parse} = require('querystring');
@@ -7,7 +8,6 @@ const path = require('path');
 const ytdl = require('ytdl-core');
 
 const hostname = process.env.NODE_WEB_HOST || '0.0.0.0';
-const svrport = 6680;
 const debugMode = false;
 const enableUrlDecoding = true;
 const documentRoot = '.';
@@ -175,7 +175,7 @@ const getNavMenu = (dir, resp) => {
 	resp.write(nav+'</div>');
 }
 
-const baseDir = '/var/www/html/';
+const baseDir = settings.baseDir;
 const getDirList = (dir, resp) => {
 	fs.readdir(baseDir+dir, {withFileTypes: true}, (err, files) => {
 		if (err) throw err;
@@ -455,7 +455,7 @@ http.createServer(function (request, response) {
 	// serve the file
 	serveFile(filePath.split('?').shift(), response, url, pdata);
 
-}).listen(svrport, hostname, () => {
-	console.log(`YT Audio Extraction Server (http://${hostname}:${svrport}) started`);
+}).listen(settings.port, hostname, () => {
+	console.log(`YT Audio Extraction Server (http://${hostname}:${settings.port}) started`);
 });
 

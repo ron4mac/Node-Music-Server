@@ -1,0 +1,6 @@
+var settings = {
+  port: '6680',
+  baseDir: '/var/www/html/'
+}; 
+
+module.exports = settings;
