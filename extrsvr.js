@@ -153,8 +153,135 @@ const audioExtract = (parms, resp) => {
 };
 
 
+const getNavMenu = (dir, resp) => {
+	let nav = '<div class="fmnav">';
+	let _D = '';
+	let parts = dir.split('/');
+	if (parts[0]) {
+		nav += '<span class="isdir" data-dpath=""><i class="fa fa-home" aria-hidden="true"></i></span> / ';
+	} else {
+		nav += '<span><i class="fa fa-home" aria-hidden="true"></i></span>';
+	}
+	do {
+		let _d = parts.shift();
+		let _dd = _d;
+		if (parts.length) {
+			_D += _d + (parts.length>1 ? '/' : '');
+			nav += `<span class="isdir" data-dpath="${_D}">${_dd}</span> / `;
+		} else {
+			nav += `<span>${_d}</span>`;
+		}
+	} while (parts.length);
+	resp.write(nav+'</div>');
+}
+
+const baseDir = '/var/www/html/';
+const getDirList = (dir, resp) => {
+	fs.readdir(baseDir+dir, {withFileTypes: true}, (err, files) => {
+		if (err) throw err;
+		let rows = [];
+		for (const file of files) {
+			let fcl, icn;
+			if (file.isDirectory()) {
+				let pdir = dir == '' ? dir : (dir+'/');
+				icn = '<i class="fa fa-folder d-icn" aria-hidden="true"></i> ';
+				fcl = 'isdir" data-dpath="'+pdir+file.name;
+			} else {
+				icn = '<i class="fa fa-file-o" aria-hidden="true"></i> ';
+				fcl = 'isfil';
+			}
+			if (file.isSymbolicLink()) icn = '<i class="fa fa-long-arrow-right" aria-hidden="true"></i>';
+			rows.push('<td><input type="checkbox" class="fsel" name="files[]" value="'+/*path.join(dir, */file.name/*)*/+'"></td>'
+				+'<td class="'+fcl+'">'+icn+file.name+'</td>');
+		}
+		resp.write('<table><tr>'+rows.join('</tr><tr>')+'</tr></table>');
+		resp.end();
+	});
+}
+
+const sendFile = (parms, fname, resp) => {
+	//console.log('[Info] Sending zip file');
+	let filePath = atob(parms.sndf);
+	let stats = fs.statSync(filePath);
+	resp.setHeader('Content-Type', 'application/octet-stream');
+	resp.setHeader('Content-Length', stats.size);
+	resp.setHeader('Content-Disposition', 'attachment; filename="'+path.basename(filePath)+'"');
+	let stream = fs.createReadStream(filePath);
+	stream.on('open', () => {
+		stream.pipe(resp);
+	});
+	stream.on('error', () => {
+		resp.setHeader('Content-Type','text/plain');
+		resp.status(404).end('Not found');
+	});
+};
+
+const filemanAction = (parms, resp) => {
+	console.log(parms);
+	let rmsg = 'NOT YET IMPLEMENTED';
+	resp.writeHead(200, {'Content-Type': 'text/plain'});
+	let pbase;
+	switch (parms.act) {
+	case 'frnam':
+		pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
+		fs.renameSync(pbase+parms.file, pbase+parms.to);
+		rmsg = null;
+		break;
+	case 'fdele':
+		pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
+		for (const file of parms.files) {
+			fs.unlinkSync(pbase+file);
+		}
+		rmsg = null;
+		break;
+	case 'fdnld':
+		if (parms.files.length>1) {
+			rmsg = JSON.stringify({err: 'Multiple file download not yet implemented'});
+			break;
+		}
+		let fpath = baseDir+parms.dir+parms.files[0];
+		let stats = fs.statSync(fpath);
+		if (stats.isDirectory()) {
+			rmsg = JSON.stringify({err: 'Multiple file (i.e. folder) download not yet implemented'});
+			break;
+		}
+		rmsg = JSON.stringify({err: '', fnam: parms.files[0], f64: btoa(fpath)});
+		break;
+	case 'fmove':
+		let fdir = baseDir+parms.fdir;
+		let tdir = baseDir+parms.tdir;
+		for (const file of parms.files) {
+			fs.renameSync(fdir+file, tdir+file);
+		}
+		rmsg = null;
+		break;
+	}
+	resp.end(rmsg);
+}
+
+const runScript = (file, url, pdata, response) => {
+	//console.log('SCRIPT: '+url);
+	file = file.replace(/^\.\//,'');
+	let param = url.substr(url.indexOf('?')+1);
+	if (pdata) {
+		param = param + '" "' + pdata;
+	}
+	//console.log(file,param);
+	require('child_process').exec('php ' + file + ' "' + param +'" ',{},(error, stdout, stderr)=>{
+		if (error) {
+			response.writeHead(500, {'Content-Type': 'text/plain;charset=utf-8'});
+			response.write(stderr + "\n");
+			response.end();
+		} else {
+			response.writeHead(200,{'Content-Type': 'text/html;charset=utf-8'});
+			response.write(stdout);
+			response.end();
+		}
+	});
+};
+
 // serve a file
-const serveFile = (filePath, response, url) => {
+const serveFile = (filePath, response, url, pdata) => {
 	//console.log('SERVE FILE: '+filePath);
 	let extname = String(path.extname(filePath)).toLowerCase();
 	const MIME_TYPES = {
@@ -180,6 +307,11 @@ const serveFile = (filePath, response, url) => {
 
 	if (contentType.indexOf('mp4')>0) {
 		sendExtraction('video.mp4');
+		return;
+	}
+
+	if (extname == '.php') {
+		runScript(filePath, url, pdata, response);
 		return;
 	}
 
@@ -233,6 +365,7 @@ const serveFile = (filePath, response, url) => {
 // Web server
 http.createServer(function (request, response) {
 	const {method, url} = request;
+	let pdata = null;
 
 	//console.log('[Info] Requested:', url);
 	if (debugMode === true && enableUrlDecoding === true) {
@@ -249,14 +382,42 @@ http.createServer(function (request, response) {
 			response.on('error', (err) => {
 				console.error(err);
 			});
-			performAction(JSON.parse(body));
+			if (url.startsWith('/?_FM')) {
+				let rdata = request.headers['content-type'] == 'application/json' ? JSON.parse(body) : parse(body);
+				filemanAction(rdata, response);
+				return;
+			}
+			//performAction(JSON.parse(body));
 			//performAction(body);
+		//	console.log(body);
+			pdata = body;
+			console.log(pdata);
+
+
+	let filePath = parse(url.substring(1));
+
+	// Correct root path
+	if (filePath === '/') {
+		filePath = documentRoot + '/index.html';
+	} else {
+		filePath = documentRoot + (enableUrlDecoding === true ? decodeURI(url) : url);
+	}
+
+	// serve the file
+	serveFile(filePath.split('?').shift(), response, url, pdata);
+
+
+
 		});
 		return;
 	}
 
 	if (url.startsWith('/?axtr')) {
 		audioExtract(parse(url.substring(2)), response);
+		return;
+	}
+	if (url.startsWith('/?sndf')) {
+		sendFile(parse(url.substring(2)), 'testing.txt', response);
 		return;
 	}
 	if (url.startsWith('/?pxtr')) {
@@ -272,6 +433,15 @@ http.createServer(function (request, response) {
 		response.end(progv);
 		return;
 	}
+	if (url.startsWith('/?dirl')) {
+		//console.log(progv);
+		response.writeHead(200, {'Content-Type': 'text/plain'});
+		let dpath = parse(url.substring(2)).dirl;
+		getNavMenu(dpath, response);
+		getDirList(dpath, response);
+		//response.end();
+		return;
+	}
 
 	let filePath = parse(url.substring(1));
 
@@ -283,7 +453,7 @@ http.createServer(function (request, response) {
 	}
 
 	// serve the file
-	serveFile(filePath.split('?').shift(), response, url);
+	serveFile(filePath.split('?').shift(), response, url, pdata);
 
 }).listen(svrport, hostname, () => {
 	console.log(`YT Audio Extraction Server (http://${hostname}:${svrport}) started`);

@@ -7,7 +7,7 @@ body {
 input, label, span {
 	font-size: large;
 }
-[type="checkbox"], [type="radio"] {
+form [type="checkbox"], form [type="radio"] {
 	height:20px; 
 	width:20px;
 	vertical-align: middle;
@@ -62,6 +62,7 @@ input, label, span {
 	cursor: pointer;
 	padding: 14px 16px;
 	transition: 0.3s;
+	border-right: 1px solid #DDD;
 }
 
 /* Change background color of buttons on hover */
@@ -82,3 +83,27 @@ input, label, span {
 	border-top: none;
 }
 
+/* filemanager */
+.fmenu a {
+	margin-left: .3rem;
+	color: green;
+}
+.fmenu a:visited {
+	color: green;
+}
+.fmnav {
+	margin-left: .3rem;
+}
+.fmnav .isdir {
+	color: gray;
+}
+table {
+	line-height: 1rem;
+}
+.isdir {
+	cursor: pointer;
+}
+.d-icn {
+	color: teal;
+	font-size: large;
+}
