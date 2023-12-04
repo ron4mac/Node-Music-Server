@@ -3,6 +3,13 @@
   "version": "1.0.0",
   "description": "Get audio tracks from YT content",
   "main": "extrsvr.js",
+  "files": [
+    "extrsvr.js",
+    "index.html",
+    "404.html",
+    "favicon.ico",
+    "static"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
