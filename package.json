@@ -30,6 +30,7 @@
   "homepage": "https://github.com/ron4mac/yt-audio-extract#readme",
   "dependencies": {
     "archiver": "^6.0.1",
+    "formidable": "^2.1.2",
     "ytdl-core": "^4.11.5",
     "ytpl": "^2.3.0"
   }

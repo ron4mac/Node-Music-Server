@@ -7,10 +7,17 @@ const fs = require('fs');
 const path = require('path');
 const ytdl = require('ytdl-core');
 
+const formidable = require('formidable');	//, {errors as formidableErrors} from 'formidable';
+const formidableErrors = formidable.errors;		//require('formidable:errors');
+
 const hostname = process.env.NODE_WEB_HOST || '0.0.0.0';
 const debugMode = false;
 const enableUrlDecoding = true;
 const documentRoot = '.';
+
+// polyfills 
+if (typeof btoa === 'undefined') global.btoa = (str) => Buffer.from(str, 'binary').toString('base64');
+if (typeof atob === 'undefined') global.atob = (b64) => Buffer.from(b64, 'base64').toString('binary');
 
 //var gresp = null;	// global response
 var progv = 'Scanning playlist ...';
@@ -181,7 +188,7 @@ const getDirList = (dir, resp) => {
 		if (err) throw err;
 		let rows = [];
 		for (const file of files) {
-			let fcl, icn;
+			let fcl, icn, lnk='';
 			if (file.isDirectory()) {
 				let pdir = dir == '' ? dir : (dir+'/');
 				icn = '<i class="fa fa-folder d-icn" aria-hidden="true"></i> ';
@@ -190,9 +197,16 @@ const getDirList = (dir, resp) => {
 				icn = '<i class="fa fa-file-o" aria-hidden="true"></i> ';
 				fcl = 'isfil';
 			}
-			if (file.isSymbolicLink()) icn = '<i class="fa fa-long-arrow-right" aria-hidden="true"></i>';
+			if (file.isSymbolicLink()) {
+				lnk = ' <i class="fa fa-arrow-right" aria-hidden="true"></i> ';
+				let lnk2 = fs.readlinkSync(baseDir+dir+'/'+file.name);
+			//	if (fs.statSync(lnk2).isDirectory()) {
+			//		fcl = 'isdir" data-dpath="'+lnk2;
+			//	}
+				lnk += lnk2;
+			}
 			rows.push('<td><input type="checkbox" class="fsel" name="files[]" value="'+/*path.join(dir, */file.name/*)*/+'"></td>'
-				+'<td class="'+fcl+'">'+icn+file.name+'</td>');
+				+'<td class="'+fcl+'">'+icn+file.name+lnk+'</td>');
 		}
 		resp.write('<table><tr>'+rows.join('</tr><tr>')+'</tr></table>');
 		resp.end();
@@ -216,17 +230,29 @@ const sendFile = (parms, fname, resp) => {
 	});
 };
 
+const receiveUpload = async (req, res) => {
+	const form = new formidable.IncomingForm({uploadDir: '/data/INTERNAL', maxFileSize: 2147483648});	// formidable({});
+	//let fields;
+	//let files;
+	form.parse(req, function(err, fields, files) {
+		if (err) {
+			console.error(err);
+			res.writeHead(err.httpCode || 400, {'Content-Type': 'text/plain'});
+			res.end(String(err));
+		} else {
+			fs.renameSync(files.upld.filepath, path.join(baseDir+fields.dir, files.upld.originalFilename));
+			res.writeHead(200, {'Content-Type': 'text/plain'});
+			res.end(JSON.stringify({ fields, files }, null, 2));
+		}
+	});
+}
+
 const filemanAction = (parms, resp) => {
 	console.log(parms);
 	let rmsg = 'NOT YET IMPLEMENTED';
 	resp.writeHead(200, {'Content-Type': 'text/plain'});
 	let pbase;
 	switch (parms.act) {
-	case 'frnam':
-		pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
-		fs.renameSync(pbase+parms.file, pbase+parms.to);
-		rmsg = null;
-		break;
 	case 'fdele':
 		pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
 		for (const file of parms.files) {
@@ -253,6 +279,16 @@ const filemanAction = (parms, resp) => {
 		for (const file of parms.files) {
 			fs.renameSync(fdir+file, tdir+file);
 		}
+		rmsg = null;
+		break;
+	case 'fnewf':
+		let pdir = baseDir+parms.dir;
+		fs.mkdirSync(path.join(pdir, parms.newf));
+		rmsg = null;
+		break;
+	case 'frnam':
+		pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
+		fs.renameSync(pbase+parms.file, pbase+parms.to);
 		rmsg = null;
 		break;
 	}
@@ -365,6 +401,12 @@ const serveFile = (filePath, response, url, pdata) => {
 // Web server
 http.createServer(function (request, response) {
 	const {method, url} = request;
+
+	if (url.startsWith('/?upld')) {
+		receiveUpload(request, response);
+		return;
+	}
+
 	let pdata = null;
 
 	//console.log('[Info] Requested:', url);
@@ -387,11 +429,18 @@ http.createServer(function (request, response) {
 				filemanAction(rdata, response);
 				return;
 			}
+			if (url.startsWith('/?upld')) {
+				receiveUpload(request, response);
+				return;
+			}
 			//performAction(JSON.parse(body));
 			//performAction(body);
 		//	console.log(body);
-			pdata = body;
-			console.log(pdata);
+		//	pdata = body;
+		//	console.log(pdata);
+			
+//		});
+
 
 
 	let filePath = parse(url.substring(1));

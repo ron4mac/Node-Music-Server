@@ -1,6 +1,7 @@
 var settings = {
   port: '6680',
-  baseDir: '/var/www/html/'
+  baseDir: '/data/INTERNAL/',
+  extr2Intrn: true
 }; 
 
 module.exports = settings;

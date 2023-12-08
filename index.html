@@ -9,6 +9,7 @@
 <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <link href="static/style.css" rel="stylesheet">
 <script src="static/client.js"></script>
+<script src="static/upload.js"></script>
 </head>
 <body>
 	<!-- Tab links -->
@@ -46,12 +47,22 @@
 		<div class="fmenu">
 			<a href="#" data-menu="fdele">Delete</a>
 			<a href="#" data-menu="fdnld">Download</a>
-			<a href="#" data-menu="fmove">Move</a>
+			<a href="#" data-menu="fmove">Move<span></span></a>
+			<a href="#" data-menu="fnewf">New Folder</a>
 			<a href="#" data-menu="frnam">Rename</a>
 			<a href="#" data-menu="fupld">Upload</a>
 			<a href="#" data-menu="funzp">Unzip</a>
 		</div>
 		<div id="fileman">
+		</div>
+		<div id="filupld" class="uplddlog" style="display: none;">
+			<input type="file" id="upload_field" name="upld" multiple="multiple" style="display:none">
+			<div id="dropArea" onclick="YTx._Id('upload_field').click()" style="display: block;">Drop files here to upload<br>(or click to select)</div>
+			<div id="result"></div>
+			<div class="prgwrp"><div id="totprogress"></div></div>
+			<div id="fprogress"></div>
+			<hr>
+			<button onclick="this.parentNode.style.display='none'">Close</button>
 		</div>
 	</div>
 	<iframe id="dnldf" style="display:none;"></iframe>
@@ -66,8 +77,8 @@
 	const mnus = document.querySelectorAll('.fmenu a');
 	mnus.forEach(elm => {
 		elm.addEventListener('click', (evt) => {
-			evt.preventDefault();
-			doMenu(evt.target.dataset.menu, evt);
+			evt.preventDefault();	console.log(evt);
+			doMenu(evt.target.dataset.menu || evt.target.parentElement.dataset.menu, evt);
 		});
 	});
 	// Show the default tab

@@ -1,4 +1,11 @@
 'use strict';
+var YTx = {};	// js container
+YTx.fup_done = (errs) => {
+	if (!errs) {
+		document.getElementById('filupld').style.display = 'none';
+	}
+	getDirList(curDir);
+}
 var _pp = 0;
 var _pb, _fm;
 var curDir;
@@ -109,8 +116,11 @@ const doMenu = (actn, evt) => {
 		if (scnt) {
 			const files = Array.from(slctd).map(el => el.value);
 			let usp = JSON.stringify({'fdir': curDir?(curDir+'/'):'','files': files});
+			// remember the items in local storage
 			sessionStorage.nfm_mvto = usp;
-			evt.target.innerHTML = `Move(${files.length})`;
+			console.log(evt);
+			// show the item count in the span element
+			evt.target.firstElementChild.innerHTML = `(${files.length})`;
 		} else {
 			if (!sessionStorage.nfm_mvto) {
 				alert('Nothing previously selected to move');
@@ -119,14 +129,26 @@ const doMenu = (actn, evt) => {
 			let parms = JSON.parse(sessionStorage.nfm_mvto);
 			parms.act = 'fmove';
 			parms.tdir = curDir?(curDir+'/'):'';
+			// clear the remembered items from local storage
 			sessionStorage.removeItem('nfm_mvto');
+			// resolve the span element and clear it
+			let spne = evt.target.dataset.menu ? evt.target.firstElementChild : evt.target;
+			spne.innerHTML = '';
+			// send the command and then redisplay
 			postAndRefresh(parms, 1);
 		}
+		break;
+	case 'fnewf':
+			let nfnm = prompt('New folder named:');
+			if (nfnm) {
+				postAndRefresh('act=fnewf&dir='+encodeURIComponent(curDir)+'&newf='+encodeURIComponent(nfnm));
+			//	postAndRefresh({act: 'frnam',dir: curDir,file: curfn,to: nnam});
+			}
 		break;
 	case 'frnam':
 		if (oneItem())  {
 			let curfn = slctd[0].value;
-			let nnam = prompt(`Rename ${curfn} to:`);
+			let nnam = prompt(`Rename ${curfn} to:`, curfn);
 			if (nnam) {
 				postAndRefresh('act=frnam&dir='+encodeURIComponent(curDir)+'&file='+encodeURIComponent(curfn)+'&to='+encodeURIComponent(nnam));
 			//	postAndRefresh({act: 'frnam',dir: curDir,file: curfn,to: nnam});
@@ -134,6 +156,9 @@ const doMenu = (actn, evt) => {
 		}
 		break;
 	case 'fupld':
+		fup_payload.dir = curDir;
+		YTx.Upld5d.Init();
+		document.getElementById('filupld').style.display = 'block';
 //		sessionStorage.nfm_curD = curDir;
 		if (doesSupportAjaxUploadWithProgress()) {
 			if (upload_winpop) {
