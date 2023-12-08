@@ -176,27 +176,8 @@ const doMenu = (actn, evt) => {
 		break;
 	case 'funzp':
 		if (oneItem()) {
-			curfn = /*curDir+*/$(slctd[0]).parents('tr').attr('data-fref');
-			trmFrm = document.forms.cliterm;
-			if (cmd=='zip') {
-				var zcmd = 'zip ';
-				if ($(slctd[0]).parent().next().hasClass('foldCtxt')) { zcmd += '-r '; }
-				destfn = curfn.replace(/\s/g,'_');
-				trmFrm.cmdlin.value = zcmd+destfn+'.zip "'+curfn+'"';
-				if (evt.shiftKey) {
-					let xyz = prompt('COMMAND:',trmFrm.cmdlin.value+' -x "*/sv_*" -x "*/.git*"');
-					if (xyz) { trmFrm.cmdlin.value = xyz; }
-					else break;
-				}
-			} else if (cmd=='uzip') {
-				trmFrm.cmdlin.value = 'unzip "'+curfn+'"';
-			} else if (cmd=='tarz') {
-				destfn = curfn.replace(/\s/g,'_');
-				trmFrm.cmdlin.value = 'tar -czf '+destfn+'.tgz "'+curfn+'"';
-			} else if (cmd=='utrz') {
-				trmFrm.cmdlin.value = 'tar -xzf "'+curfn+'"';
-			}
-			trmFrm.submit();
+			let curfn = slctd[0].value;
+			postAndRefresh('act=funzp&dir='+encodeURIComponent(curDir)+'&file='+encodeURIComponent(curfn));
 		}
 		break;
 	}

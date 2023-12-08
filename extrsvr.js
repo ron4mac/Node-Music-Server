@@ -251,12 +251,18 @@ const filemanAction = (parms, resp) => {
 	console.log(parms);
 	let rmsg = 'NOT YET IMPLEMENTED';
 	resp.writeHead(200, {'Content-Type': 'text/plain'});
-	let pbase;
+	let pbase, fpath, stats;
 	switch (parms.act) {
 	case 'fdele':
 		pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
 		for (const file of parms.files) {
-			fs.unlinkSync(pbase+file);
+			fpath = pbase+file;
+			stats = fs.statSync(fpath);
+			if (stats.isDirectory()) {
+				fs.rmSync(fpath, {recursive: true, force: true});
+			} else {
+				fs.unlinkSync(fpath);
+			}
 		}
 		rmsg = null;
 		break;
@@ -265,8 +271,8 @@ const filemanAction = (parms, resp) => {
 			rmsg = JSON.stringify({err: 'Multiple file download not yet implemented'});
 			break;
 		}
-		let fpath = baseDir+parms.dir+parms.files[0];
-		let stats = fs.statSync(fpath);
+		fpath = baseDir+parms.dir+parms.files[0];
+		stats = fs.statSync(fpath);
 		if (stats.isDirectory()) {
 			rmsg = JSON.stringify({err: 'Multiple file (i.e. folder) download not yet implemented'});
 			break;
@@ -290,6 +296,15 @@ const filemanAction = (parms, resp) => {
 		pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
 		fs.renameSync(pbase+parms.file, pbase+parms.to);
 		rmsg = null;
+		break;
+	case 'funzp':
+		pbase  = baseDir+parms.dir+(parms.dir==''?'':'/');
+		require('child_process').exec('unzip -d "'+pbase+'" "'+pbase+parms.file+'"',{},(error, stdout, stderr)=>{
+				console.log(error);
+				rmsg = error ? String(error) : null;
+				resp.end(rmsg);
+			});
+		return;
 		break;
 	}
 	resp.end(rmsg);
