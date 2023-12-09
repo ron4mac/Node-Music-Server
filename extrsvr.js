@@ -15,7 +15,7 @@ const debugMode = false;
 const enableUrlDecoding = true;
 const documentRoot = '.';
 
-// polyfills 
+// polyfills
 if (typeof btoa === 'undefined') global.btoa = (str) => Buffer.from(str, 'binary').toString('base64');
 if (typeof atob === 'undefined') global.atob = (b64) => Buffer.from(b64, 'base64').toString('binary');
 
@@ -187,18 +187,18 @@ const getDirList = (dir, resp) => {
 	fs.readdir(baseDir+dir, {withFileTypes: true}, (err, files) => {
 		if (err) throw err;
 		let rows = [];
+		let pdir = dir == '' ? dir : (dir+'/');
 		for (const file of files) {
 			let fcl, icn, lnk='';
 			if (file.isDirectory()) {
-				let pdir = dir == '' ? dir : (dir+'/');
-				icn = '<i class="fa fa-folder d-icn" aria-hidden="true"></i> ';
+				icn = '<i class="fa fa-folder d-icn" aria-hidden="true"></i>';
 				fcl = 'isdir" data-dpath="'+pdir+file.name;
 			} else {
-				icn = '<i class="fa fa-file-o" aria-hidden="true"></i> ';
-				fcl = 'isfil';
+				icn = '<i class="fa fa-file-o" aria-hidden="true"></i>';
+				fcl = 'isfil" data-fpath="'+file.name;
 			}
 			if (file.isSymbolicLink()) {
-				lnk = ' <i class="fa fa-arrow-right" aria-hidden="true"></i> ';
+				lnk = ' <i class="fa fa-arrow-right" aria-hidden="true"></i>';
 				let lnk2 = fs.readlinkSync(baseDir+dir+'/'+file.name);
 			//	if (fs.statSync(lnk2).isDirectory()) {
 			//		fcl = 'isdir" data-dpath="'+lnk2;
@@ -217,9 +217,13 @@ const sendFile = (parms, fname, resp) => {
 	//console.log('[Info] Sending zip file');
 	let filePath = atob(parms.sndf);
 	let stats = fs.statSync(filePath);
-	resp.setHeader('Content-Type', 'application/octet-stream');
 	resp.setHeader('Content-Length', stats.size);
-	resp.setHeader('Content-Disposition', 'attachment; filename="'+path.basename(filePath)+'"');
+	if (parms.v) {
+		resp.setHeader('Content-Type', 'audio/mp4');
+	} else {
+		resp.setHeader('Content-Type', 'application/octet-stream');
+		resp.setHeader('Content-Disposition', 'attachment; filename="'+path.basename(filePath)+'"');
+	}
 	let stream = fs.createReadStream(filePath);
 	stream.on('open', () => {
 		stream.pipe(resp);
@@ -231,7 +235,7 @@ const sendFile = (parms, fname, resp) => {
 };
 
 const receiveUpload = async (req, res) => {
-	const form = new formidable.IncomingForm({uploadDir: '/data/INTERNAL', maxFileSize: 2147483648});	// formidable({});
+	const form = new formidable.IncomingForm({uploadDir: settings.upldTmpDir, maxFileSize: 2147483648});	// formidable({});
 	//let fields;
 	//let files;
 	form.parse(req, function(err, fields, files) {
@@ -305,6 +309,11 @@ const filemanAction = (parms, resp) => {
 				resp.end(rmsg);
 			});
 		return;
+		break;
+	case 'fview':
+		fpath = baseDir+parms.fpath;
+	//	stats = fs.statSync(fpath);
+		rmsg = JSON.stringify({err: '', f64: btoa(fpath)});
 		break;
 	}
 	resp.end(rmsg);

@@ -100,12 +100,47 @@ form [type="checkbox"], form [type="radio"] {
 table {
 	line-height: 1rem;
 }
-.isdir {
+table .fa {
+	width: 1.5rem;
+}
+.isdir, .isfil {
 	cursor: pointer;
 }
 .d-icn {
 	color: teal;
 	font-size: large;
+}
+#fvewd {
+	position: absolute;
+	width: 480px;
+	height: 294px;
+	top: 20%;
+	left: 50%;
+	transform: translate(-50%, 0);
+	border: 1px solid #888;
+	border-radius: 5px;
+	background-color: #FFF;
+	box-shadow: 2px 2px 8px #BBB;
+	padding-top: 24px;
+}
+#fvewd span {
+	position: absolute;
+	top: 0;
+	left: 5px;
+	line-height: 24px;
+	font-size: medium;
+}
+#fvewd i {
+	position: absolute;
+	top: 5px;
+	right: 6px;
+	cursor: pointer;
+	color: #888;
+}
+#fvewf {
+	height: 100%;
+	width: 100%;
+	border: none;
 }
 
 /* ============================ file upload dialog with drag and drop

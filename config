@@ -1,6 +1,7 @@
 var settings = {
   port: '6680',
-  baseDir: '/data/INTERNAL/',
+  baseDir: '/var/www/',
+  upldTmpDir: '/var/www/',
   extr2Intrn: true
 }; 
 

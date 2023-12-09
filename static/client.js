@@ -77,8 +77,32 @@ const getDirList = (dirPath) => {
 				getDirList(todir);
 			});
 		});
+		const fils = _fm.querySelectorAll('.isfil');
+		fils.forEach(elm => {
+			elm.addEventListener('click', (evt) => {
+				console.log(evt);
+				let fpath = evt.target.dataset.fpath || evt.target.parentNode.dataset.fpath || '';
+				viewFile(fpath);
+			});
+		});
 	});
 };
+const viewFile = (fpath) => {
+	postAction(null, {act:'fview', 'fpath':(curDir?(curDir+'/'):'')+fpath}, (data) => {
+		if (data) {
+			console.log(data);
+			if (data.err) {
+				alert(data.err);
+			} else {
+				document.querySelector('#fvewd span').innerHTML = fpath;
+				document.getElementById('fvewd').style.display = 'block';
+				document.getElementById('fvewf').src = '/?sndf='+data.f64+'&v=1';
+			}
+		} else { alert('download not available'); }
+	}, 2);
+};
+
+
 const fmpop = () => {
 	if (!fileseen) getDirList('');
 	fileseen = true;
