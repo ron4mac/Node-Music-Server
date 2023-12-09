@@ -130,5 +130,6 @@ dist
 .pnp.*
 
 # YTEXTR specific
+config
 playlist*
 
