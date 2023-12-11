@@ -16,19 +16,23 @@ const getPlaylist = (frm) => {
 	watchP();
 };
 const getVinfo = (frm) => {
+	document.querySelector('#sglTab i').style.display = 'inline-block';
 	let yturl = encodeURIComponent(frm.yturl.value.trim());
 	let tname = encodeURIComponent(frm.tname.value.trim());
 	let wtrk = encodeURIComponent(frm.wtrk.value);
 	tname = tname ? tname : 'audio_track';
 	document.getElementById('dnldf').src = window.location.origin + `?axtr=${yturl}&tnam=${tname}&wtrk=${wtrk}`;
 };
+function extrFini (wch) {
+	document.querySelector('#'+wch+'Tab i').style.display = 'none';
+}
 const watchP = () => {
 	fetch('?prog', {method:'GET'})
 	.then((resp) => resp.text())
 	.then(data => {
 		if (data == '.') {
 			_pb.innerHTML = '';
-			document.getElementById('dnldf').src = 'playlist.zip';
+//			document.getElementById('dnldf').src = 'playlist.zip';
 		} else {
 			_pb.innerHTML = data;
 			setTimeout(watchP, 1000);
@@ -240,4 +244,3 @@ const postAction = (act, parms={}, cb=()=>{}, json=false) => {
 const postAndRefresh = (parms, json=false) => {
 	postAction(null, parms, (data) => { if (data) alert(data); else getDirList(curDir) }, json);
 };
-

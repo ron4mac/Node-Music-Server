@@ -27,6 +27,7 @@
 				<label><input type="radio" name="wtrk" value="4">MP4(M4A) &nbsp;</label>
 				<label><input type="radio" name="wtrk" value="w">WEBM</label><br>
 				<input type="submit" name="ginf" value="Get Audio Track">
+				<i class="fa fa-spinner fa-pulse fa-lg"></i>
 			</div>
 		</form>
 		<div id="vinfo"></div>
@@ -68,6 +69,7 @@
 	<div id="fvewd" style="display:none"><span>TITLE</span><i class="fa fa-window-close-o" aria-hidden="true" onclick="this.parentElement.style.display='none';this.nextElementSibling.src=''"></i><iframe id="fvewf"></iframe></div>
 	<iframe id="dnldf" style="display:none"></iframe>
 	<script>
+	var xtrLocal='XTRLOCALV';
 	_pb = document.getElementById('prog');
 	_fm = document.getElementById('fileman');
 	// Get all elements with class="tabcontent" and hide them

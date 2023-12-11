@@ -36,7 +36,7 @@ const emptyDir = (dir) => {
 		}
 	});
 }
-const getTrack = (trk) => {
+const getTrack = (trk, dest) => {
 	//console.log(trk.index,trk.title);
 	progv = trk.index + ' files processed';
 	getAudioStream(trk.shortUrl, pwtrk, (aud) => {
@@ -44,17 +44,19 @@ const getTrack = (trk) => {
 		if (aud.error) {
 			errs.push(aud.error);
 		} else {
-			aud.stream.pipe(fs.createWriteStream('playlist/'+trk.title+'.'+aud.fext));
+			aud.stream.pipe(fs.createWriteStream(dest+'/'+trk.title+'.'+aud.fext));
 		}
 		if (tlist.length) {
-			getTrack(tlist.shift());
+			getTrack(tlist.shift(), dest);
 		} else {
-			//console.log('fini');
-			progv = 'Zipping Files ...';
-			require('child_process').exec('zip -r playlist playlist',{},(error, stdout, stderr)=>{
-				//console.log('zipped');
+			if (settings.extr2Intrn) {
 				progv = '.';
-			});
+			} else {
+				progv = 'Zipping Files ...';
+				require('child_process').exec('zip -r playlist playlist',{},(error, stdout, stderr)=>{
+					progv = '.';
+				});
+			}
 		}
 	});
 }
@@ -63,10 +65,19 @@ const getPlaylist = async (parms, resp) => {
 	fs.unlink('playlist.zip', (err) => 1);
 	emptyDir('playlist');
 	let plurl = parms.pxtr;
-	let list = await ytpl(plurl, {limit:Infinity});
+	let list = [];
+	try {
+		list = await ytpl(plurl, {limit:Infinity});
+		resp.end();
+	} catch (err) {
+		resp.end(`<script>alert("${err}")</script>`);
+		return;
+	}
 	tlist = list.items;
 	pwtrk = parms.wtrk;
-	getTrack(tlist.shift());
+	let _dd = baseDir+'playlist_'+Date.now();
+	fs.mkdirSync(_dd);
+	getTrack(tlist.shift(), _dd);
 }
 
 
@@ -151,7 +162,15 @@ const audioExtract = (parms, resp) => {
 	getAudioStream(parms.axtr, parms.wtrk, (aud) => {
 		//console.log(aud);
 		if (aud.error) {
-			resp.end(`<script>alert("${aud.error}")</script>`);
+			resp.end(`<script>parent.extrFini("sgl");alert("${aud.error}")</script>`);
+		} else if (settings.extr2Intrn) {
+			let ws = fs.createWriteStream(baseDir+parms.tnam+'.'+aud.fext);
+			ws.on('finish', () => {
+				console.log('ws-end');
+				resp.end(`<script>alert("Audio extracted as '${parms.tnam}.${aud.fext}'")</script>`);
+			});
+			aud.stream.pipe(ws);
+		//	resp.end(`<script>alert("Audio extracted as '${parms.tnam}.${aud.fext}'")</script>`);
 		} else {
 			resp.writeHead(200, {'Content-Type': aud.mimeType, 'Content-Length': aud.contentLength, 'Content-Disposition': `attachment; filename="${parms.tnam}.${aud.fext}"`});
 			aud.stream.pipe(resp);
@@ -191,14 +210,14 @@ const getDirList = (dir, resp) => {
 		for (const file of files) {
 			let fcl, icn, lnk='';
 			if (file.isDirectory()) {
-				icn = '<i class="fa fa-folder d-icn" aria-hidden="true"></i>';
+				icn = '<i class="fa fa-folder fa-fw d-icn" aria-hidden="true"></i>';
 				fcl = 'isdir" data-dpath="'+pdir+file.name;
 			} else {
-				icn = '<i class="fa fa-file-o" aria-hidden="true"></i>';
+				icn = '<i class="fa fa-file-o fa-fw" aria-hidden="true"></i>';
 				fcl = 'isfil" data-fpath="'+file.name;
 			}
 			if (file.isSymbolicLink()) {
-				lnk = ' <i class="fa fa-arrow-right" aria-hidden="true"></i>';
+				lnk = ' <i class="fa fa-arrow-right fa-fw" aria-hidden="true"></i>';
 				let lnk2 = fs.readlinkSync(baseDir+dir+'/'+file.name);
 			//	if (fs.statSync(lnk2).isDirectory()) {
 			//		fcl = 'isdir" data-dpath="'+lnk2;
@@ -413,7 +432,7 @@ const serveFile = (filePath, response, url, pdata) => {
 			if (contentType=='text/html') {
 				response.setHeader('Cache-Control', ['no-cache','max-age=0']);
 			}
-			response.writeHead(200, { 'Content-Type':contentType });
+			response.writeHead(200, {'Content-Type':contentType});
 			response.end(content, 'utf-8');
 			// log served response
 			//console.log('[Info] Served:', url);
@@ -496,8 +515,8 @@ http.createServer(function (request, response) {
 	if (url.startsWith('/?pxtr')) {
 		progv = 'Scanning playlist ...';
 		getPlaylist(parse(url.substring(2)), response);
-		response.writeHead(200, {'Content-Type': 'text/plain'});
-		response.end();
+		response.writeHead(200, {'Content-Type': 'text/html'});
+	//	response.end();
 		return;
 	}
 	if (url.startsWith('/?prog')) {

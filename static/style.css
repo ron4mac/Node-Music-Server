@@ -12,6 +12,9 @@ form [type="checkbox"], form [type="radio"] {
 	width:20px;
 	vertical-align: middle;
 }
+form i.fa {
+	display: none;
+}
 .yturl {
 	width: 50rem;
 }
@@ -101,7 +104,7 @@ table {
 	line-height: 1rem;
 }
 table .fa {
-	width: 1.5rem;
+	width: 1.7rem;
 }
 .isdir, .isfil {
 	cursor: pointer;
