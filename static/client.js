@@ -1,21 +1,29 @@
 'use strict';
 var YTx = {};	// js container
+// establish some variables
+var _pp = 0,
+	_pb,
+	_fm,
+	curDir = '',
+	tabcontent,
+	tablinks,
+	fileseen = false;
+
 YTx.fup_done = (errs) => {
 	if (!errs) {
 		document.getElementById('filupld').style.display = 'none';
 	}
 	getDirList(curDir);
 }
-var _pp = 0;
-var _pb, _fm;
-var curDir;
 const getPlaylist = (frm) => {
+	document.querySelector('#lstTab input[type="submit"]').disabled = true;
 	let yturl = encodeURIComponent(frm.yturl.value.trim());
 	let wtrk = encodeURIComponent(frm.wtrk.value);
 	document.getElementById('dnldf').src = window.location.origin + `?pxtr=${yturl}&wtrk=${wtrk}`;
 	watchP();
 };
 const getVinfo = (frm) => {
+	document.querySelector('#sglTab input[type="submit"]').disabled = true;
 	document.querySelector('#sglTab i').style.display = 'inline-block';
 	let yturl = encodeURIComponent(frm.yturl.value.trim());
 	let tname = encodeURIComponent(frm.tname.value.trim());
@@ -23,19 +31,24 @@ const getVinfo = (frm) => {
 	tname = tname ? tname : 'audio_track';
 	document.getElementById('dnldf').src = window.location.origin + `?axtr=${yturl}&tnam=${tname}&wtrk=${wtrk}`;
 };
-function extrFini (wch) {
+function extrFini (wch, msg) {
+console.log(wch, msg);
+	fileseen = false;
 	document.querySelector('#'+wch+'Tab i').style.display = 'none';
+	document.querySelector('#'+wch+'Tab input[type="submit"]').disabled = false;
+	if (msg) setTimeout(()=>alert(msg),100);
 }
 const watchP = () => {
 	fetch('?prog', {method:'GET'})
 	.then((resp) => resp.text())
 	.then(data => {
 		if (data == '.') {
+			fileseen = false;
 			_pb.innerHTML = '';
-//			document.getElementById('dnldf').src = 'playlist.zip';
+			document.querySelector('#lstTab input[type="submit"]').disabled = false;
 		} else {
 			_pb.innerHTML = data;
-			setTimeout(watchP, 1000);
+			setTimeout(watchP, 1200);
 		}
 	});
 };
@@ -52,8 +65,6 @@ const prequest = (evt, frm) => {
 //	console.log(evt);
 	if (evt.submitter.name=='ginf') getPlaylist(frm);
 };
-var tabcontent, tablinks;
-var fileseen = false;
 const openTab = (evt, tabName, cb) => {
 	let i;
 	for (i = 0; i < tabcontent.length; i++) {
@@ -108,7 +119,7 @@ const viewFile = (fpath) => {
 
 
 const fmpop = () => {
-	if (!fileseen) getDirList('');
+	if (!fileseen) getDirList(curDir);
 	fileseen = true;
 };
 const doMenu = (actn, evt) => {

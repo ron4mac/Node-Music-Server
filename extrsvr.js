@@ -65,12 +65,13 @@ const getPlaylist = async (parms, resp) => {
 	fs.unlink('playlist.zip', (err) => 1);
 	emptyDir('playlist');
 	let plurl = parms.pxtr;
-	let list = [];
+	let list;
 	try {
 		list = await ytpl(plurl, {limit:Infinity});
 		resp.end();
 	} catch (err) {
-		resp.end(`<script>alert("${err}")</script>`);
+		let msg = err.message.replace(/\"/g,'');
+		resp.end(`<script>alert("${msg}")</script>`);
 		return;
 	}
 	tlist = list.items;
@@ -162,12 +163,13 @@ const audioExtract = (parms, resp) => {
 	getAudioStream(parms.axtr, parms.wtrk, (aud) => {
 		//console.log(aud);
 		if (aud.error) {
-			resp.end(`<script>parent.extrFini("sgl");alert("${aud.error}")</script>`);
+			let msg = aud.error.message.replace(/\"/g,'');
+			resp.end(`<script>parent.extrFini("sgl","${msg}")</script>`);
 		} else if (settings.extr2Intrn) {
 			let ws = fs.createWriteStream(baseDir+parms.tnam+'.'+aud.fext);
 			ws.on('finish', () => {
 				console.log('ws-end');
-				resp.end(`<script>alert("Audio extracted as '${parms.tnam}.${aud.fext}'")</script>`);
+				resp.end(`<script>parent.extrFini("sgl","Audio extracted as '${parms.tnam}.${aud.fext}'")</script>`);
 			});
 			aud.stream.pipe(ws);
 		//	resp.end(`<script>alert("Audio extracted as '${parms.tnam}.${aud.fext}'")</script>`);
