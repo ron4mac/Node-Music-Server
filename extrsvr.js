@@ -42,6 +42,7 @@ const getTrack = (trk, dest) => {
 	getAudioStream(trk.shortUrl, pwtrk, (aud) => {
 		//console.log(aud);
 		if (aud.error) {
+			console.log(aud.error.message);
 			errs.push(aud.error);
 		} else {
 			aud.stream.pipe(fs.createWriteStream(dest+'/'+trk.title+'.'+aud.fext));
@@ -75,6 +76,7 @@ const getPlaylist = async (parms, resp) => {
 		return;
 	}
 	tlist = list.items;
+console.log(tlist.length+' tracks');
 	pwtrk = parms.wtrk;
 	let _dd = baseDir+'playlist_'+Date.now();
 	fs.mkdirSync(_dd);
@@ -522,7 +524,7 @@ http.createServer(function (request, response) {
 		return;
 	}
 	if (url.startsWith('/?prog')) {
-		//console.log(progv);
+		console.log('P '+progv);
 		response.writeHead(200, {'Content-Type': 'text/plain'});
 		response.end(progv);
 		return;

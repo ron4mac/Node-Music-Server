@@ -20,7 +20,7 @@ const getPlaylist = (frm) => {
 	let yturl = encodeURIComponent(frm.yturl.value.trim());
 	let wtrk = encodeURIComponent(frm.wtrk.value);
 	document.getElementById('dnldf').src = window.location.origin + `?pxtr=${yturl}&wtrk=${wtrk}`;
-	watchP();
+	setTimeout(watchP, 1000);
 };
 const getVinfo = (frm) => {
 	document.querySelector('#sglTab input[type="submit"]').disabled = true;
