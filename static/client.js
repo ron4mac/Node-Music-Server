@@ -31,6 +31,15 @@ const getVinfo = (frm) => {
 	tname = tname ? tname : 'audio_track';
 	document.getElementById('dnldf').src = window.location.origin + `?axtr=${yturl}&tnam=${tname}&wtrk=${wtrk}`;
 };
+const getVideo = (frm) => {
+	document.querySelector('#vidTab input[type="submit"]').disabled = true;
+	document.querySelector('#vidTab i').style.display = 'inline-block';
+	let yturl = encodeURIComponent(frm.yturl.value.trim());
+	let tname = encodeURIComponent(frm.tname.value.trim());
+	let wtrk = encodeURIComponent(frm.wtrk.value);
+	tname = tname ? tname : 'video_track';
+	document.getElementById('dnldf').src = window.location.origin + `?vxtr=${yturl}&tnam=${tname}&wtrk=${wtrk}`;
+};
 function extrFini (wch, msg) {
 console.log(wch, msg);
 	fileseen = false;
@@ -64,6 +73,11 @@ const prequest = (evt, frm) => {
 	evt.preventDefault();
 //	console.log(evt);
 	if (evt.submitter.name=='ginf') getPlaylist(frm);
+};
+const vrequest = (evt, frm) => {
+	evt.preventDefault();
+//	console.log(evt,frm);
+	if (evt.submitter.name=='ginf') getVideo(frm);
 };
 const openTab = (evt, tabName, cb) => {
 	let i;

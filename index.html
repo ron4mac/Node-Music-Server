@@ -16,6 +16,7 @@
 	<div class="tab">
 		<button class="tablinks" onclick="openTab(event, 'sglTab')" id="defaultOpen">Extract Audio from a Single File</button>
 		<button class="tablinks" onclick="openTab(event, 'lstTab')">Extract Audio from an Entire Playlist</button>
+		<button class="tablinks" onclick="openTab(event, 'vidTab')">Get YT Video</button>
 		<button class="tablinks" onclick="openTab(event, 'filemanTab', fmpop)">Manage File Storage</button>
 	</div>
 	<div id="sglTab" class="tabcontent">
@@ -43,6 +44,20 @@
 				<input type="submit" name="ginf" value="Get Playlist Audio Tracks">
 			</div>
 		</form>
+	</div>
+	<div id="vidTab" class="tabcontent">
+		<form action="#" name="vidform" method="post" onsubmit="vrequest(event, this)">
+			<div>
+				<input class="yturl" type="text" name="yturl" placeholder="YT URL" value="" required><br>
+				<span>as: </span> <input class="tname" type="text" name="tname" value=""><br>
+				<label><input type="radio" name="wtrk" value="h" checked>Highest Quality &nbsp;</label>
+				<label><input type="radio" name="wtrk" value="4">MP4(M4A) &nbsp;</label>
+				<label><input type="radio" name="wtrk" value="w">WEBM</label><br>
+				<input type="submit" name="ginf" value="Get Video">
+				<i class="fa fa-spinner fa-pulse fa-lg"></i>
+			</div>
+		</form>
+		<div id="vinfov"></div>
 	</div>
 	<div id="filemanTab" class="tabcontent">
 		<div class="fmenu">

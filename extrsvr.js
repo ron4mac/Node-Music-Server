@@ -133,7 +133,7 @@ const getAudioStream = (yturl, which, cb) => {
 	let fext = 'mp4';
 	ytdl.getInfo(yturl, {quality: 'highestaudio'})
 	.then(info => {
-		let audioFormats = ytdl.filterFormats(info.formats, 'audioonly');
+		let audioFormats = ytdl.filterFormats(info.formats, 'audio');
 		let tfmt = null;
 		switch (which) {
 			case '4':
@@ -178,6 +178,61 @@ const audioExtract = (parms, resp) => {
 		} else {
 			resp.writeHead(200, {'Content-Type': aud.mimeType, 'Content-Length': aud.contentLength, 'Content-Disposition': `attachment; filename="${parms.tnam}.${aud.fext}"`});
 			aud.stream.pipe(resp);
+		}
+	});
+};
+
+const getVideo = (yturl, which, cb) => {
+	let rslt = {};
+	let fext = 'mp4';
+	ytdl.getInfo(yturl, {/*quality: 'highestvideo'*/})
+	.then(info => {
+		console.log(info.formats);
+		let videoFormats = ytdl.filterFormats(info.formats, 'video');	//console.log(videoFormats);
+		let tfmt = null;
+		switch (which) {
+			case '4':
+				tfmt = videoFormats[fmtSearch('mp4', videoFormats)];
+				fext = 'mp4';
+				break;
+			case 'w':
+				tfmt = videoFormats[fmtSearch('webm', videoFormats)];
+				fext = 'webm';
+				break;
+			default:
+				tfmt = videoFormats[0];
+				fext = tfmt.container;
+		}
+		rslt.fext = fext;
+		rslt.mimeType = tfmt.mimeType;
+		rslt.contentLength = tfmt.contentLength;
+		rslt.stream = ytdl(yturl,{format: tfmt});
+		cb(rslt);
+	})
+	.catch((error) => {
+		cb({error});
+	});
+}
+
+const videoExtract = (parms, resp) => {
+	//console.log(parms);
+	let yturl = parms.vxtr;
+	getVideo(parms.vxtr, parms.wtrk, (vid) => {
+		//console.log(vid);
+		if (vid.error) {
+			let msg = vid.error.message.replace(/\"/g,'');
+			resp.end(`<script>parent.extrFini("sgl","${msg}")</script>`);
+		} else if (settings.extr2Intrn) {
+			let ws = fs.createWriteStream(baseDir+parms.tnam+'.'+vid.fext);
+			ws.on('finish', () => {
+				console.log('ws-end');
+				resp.end(`<script>parent.extrFini("vid","Video extracted as '${parms.tnam}.${vid.fext}'")</script>`);
+			});
+			vid.stream.pipe(ws);
+		//	resp.end(`<script>alert("Video extracted as '${parms.tnam}.${vid.fext}'")</script>`);
+		} else {
+			resp.writeHead(200, {'Content-Type': vid.mimeType, 'Content-Length': vid.contentLength, 'Content-Disposition': `attachment; filename="${parms.tnam}.${vid.fext}"`});
+			vid.stream.pipe(resp);
 		}
 	});
 };
@@ -335,7 +390,10 @@ const filemanAction = (parms, resp) => {
 		break;
 	case 'fview':
 		fpath = baseDir+parms.fpath;
-	//	stats = fs.statSync(fpath);
+// @@@@@@@@@@
+// could get file type here and send to client for display adjustments
+//		stats = fs.statSync(fpath);
+//		console.log(stats);
 		rmsg = JSON.stringify({err: '', f64: btoa(fpath)});
 		break;
 	}
@@ -510,6 +568,10 @@ http.createServer(function (request, response) {
 
 	if (url.startsWith('/?axtr')) {
 		audioExtract(parse(url.substring(2)), response);
+		return;
+	}
+	if (url.startsWith('/?vxtr')) {
+		videoExtract(parse(url.substring(2)), response);
 		return;
 	}
 	if (url.startsWith('/?sndf')) {
