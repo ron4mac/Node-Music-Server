@@ -182,13 +182,14 @@ const audioExtract = (parms, resp) => {
 	});
 };
 
-const getVideo = (yturl, which, cb) => {
+const getVideo = (yturl, which, vida, cb) => {
 	let rslt = {};
 	let fext = 'mp4';
+	let filter = vida == 'a' ? 'videoandaudio' : 'video';
 	ytdl.getInfo(yturl, {/*quality: 'highestvideo'*/})
 	.then(info => {
 		console.log(info.formats);
-		let videoFormats = ytdl.filterFormats(info.formats, 'video');	//console.log(videoFormats);
+		let videoFormats = ytdl.filterFormats(info.formats, filter);	//console.log(videoFormats);
 		let tfmt = null;
 		switch (which) {
 			case '4':
@@ -217,7 +218,7 @@ const getVideo = (yturl, which, cb) => {
 const videoExtract = (parms, resp) => {
 	//console.log(parms);
 	let yturl = parms.vxtr;
-	getVideo(parms.vxtr, parms.wtrk, (vid) => {
+	getVideo(parms.vxtr, parms.wtrk, parms.vida, (vid) => {
 		//console.log(vid);
 		if (vid.error) {
 			let msg = vid.error.message.replace(/\"/g,'');
@@ -335,6 +336,28 @@ const filemanAction = (parms, resp) => {
 	resp.writeHead(200, {'Content-Type': 'text/plain'});
 	let pbase, fpath, stats;
 	switch (parms.act) {
+	case 'fcomb':
+		if (!fs.existsSync('/usr/bin/ffmpeg')) {
+			rmsg = 'Required ffmpeg is not present';
+			break;
+		}
+		pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
+		let eprms = '';
+		for (const file of parms.files) {
+			fpath = pbase+file;
+			eprms += ` -i "${fpath}"`;
+			stats = fs.statSync(fpath);
+		}
+		eprms += ` -codec copy "${pbase+parms.asfile}"`;
+		console.log(eprms);
+		require('child_process').exec('/usr/bin/ffmpeg'+eprms,{},(error, stdout, stderr)=>{
+				console.log(error);
+				rmsg = error ? String(error) : null;
+				resp.end(rmsg);
+			});
+		return;
+		rmsg = null;
+		break;
 	case 'fdele':
 		pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
 		for (const file of parms.files) {

@@ -10,7 +10,7 @@ input, label, span {
 form [type="checkbox"], form [type="radio"] {
 	height:20px; 
 	width:20px;
-	vertical-align: middle;
+	vertical-align: text-bottom;
 }
 form i.fa {
 	display: none;

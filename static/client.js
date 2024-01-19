@@ -37,8 +37,9 @@ const getVideo = (frm) => {
 	let yturl = encodeURIComponent(frm.yturl.value.trim());
 	let tname = encodeURIComponent(frm.tname.value.trim());
 	let wtrk = encodeURIComponent(frm.wtrk.value);
+	let vida = encodeURIComponent(frm.vida.value);
 	tname = tname ? tname : 'video_track';
-	document.getElementById('dnldf').src = window.location.origin + `?vxtr=${yturl}&tnam=${tname}&wtrk=${wtrk}`;
+	document.getElementById('dnldf').src = window.location.origin + `?vxtr=${yturl}&tnam=${tname}&wtrk=${wtrk}&vida=${vida}`;
 };
 function extrFini (wch, msg) {
 console.log(wch, msg);
@@ -143,11 +144,17 @@ const doMenu = (actn, evt) => {
 		oneItem = () => { if (!scnt) { alert('An item needs to be selected'); } else if (scnt>1) { alert('Please select only one item.'); } else { return true; } return false; },
 		hasSome = () => { if (scnt) { return true; } alert('Some items need to be selected'); return false; };
 	switch (actn) {
+	case 'fcomb':
+		let asf;
+		if (hasSome() && (asf = prompt('Combine/convert to a file named:'))) {
+			const files = Array.from(slctd).map(el => el.value);
+			postAndRefresh({act:'fcomb', 'dir': curDir, 'files': files, asfile: asf}, 1);
+		}
+		break;
 	case 'fdele':
 		if (hasSome() && ((scnt==1) || confirm('You have multiple files selected. Are you sure you want to delete ALL the selected files?'))) {
 			const files = Array.from(slctd).map(el => el.value);
-			//let usp = new URLSearchParams({act:'fdele','dir': curDir,'files': files});
-			postAndRefresh({act:'fdele','dir': curDir,'files': files}, 1);
+			postAndRefresh({act:'fdele', 'dir': curDir, 'files': files}, 1);
 		}
 		break;
 	case 'fdnld':
