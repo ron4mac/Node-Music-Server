@@ -240,6 +240,9 @@ const doMenu = (actn, evt) => {
 			postAndRefresh('act=funzp&dir='+encodeURIComponent(curDir)+'&file='+encodeURIComponent(curfn));
 		}
 		break;
+	case 'drefr':
+		getDirList(curDir);
+		break;
 	}
 };
 
