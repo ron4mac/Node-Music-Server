@@ -348,7 +348,8 @@ const filemanAction = (parms, resp) => {
 			eprms += ` -i "${fpath}"`;
 			stats = fs.statSync(fpath);
 		}
-		eprms += ` -codec copy "${pbase+parms.asfile}"`;
+		if (parms.files.length > 1) eprms += ' -codec copy';
+		eprms += ` "${pbase+parms.asfile}"`;
 		console.log(eprms);
 		require('child_process').exec('/usr/bin/ffmpeg -loglevel 16'+eprms,{},(error, stdout, stderr)=>{
 				console.log(error);

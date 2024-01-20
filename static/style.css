@@ -234,3 +234,26 @@ div.uplddlog input { width: 100% }
 	right: 3px;
 	cursor: pointer;
 }
+
+/* ============================ file combine/convert dialog
+*/
+.dlogs {
+}
+#comb {
+	position: absolute;
+	width: fit-content;
+	top: 120px;
+	background-color: lightcyan;
+	left: 50%;
+	transform: translate(-50%, 0);
+	padding: 2rem;
+	border: 1px solid #AAA;
+	border-radius: 5px;
+}
+#comb h4 {
+	margin: 0;
+}
+#comb button {
+	float: right;
+}
+
