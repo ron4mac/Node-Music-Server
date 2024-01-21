@@ -88,6 +88,9 @@ form i.fa {
 }
 
 /* filemanager */
+#filemanTab {
+	min-height: 480px;
+}
 .fmenu a {
 	margin-left: .3rem;
 	color: green;
@@ -118,9 +121,9 @@ table .fa {
 	position: absolute;
 	/*width: 480px;
 	height: 294px;*/
-	width: 80%;
-	height: 80%;
-	top: 10%;
+	min-width: 700px;
+	height: 100%;
+	top: 0;
 	left: 50%;
 	transform: translate(-50%, 0);
 	border: 1px solid #888;

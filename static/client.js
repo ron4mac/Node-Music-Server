@@ -244,7 +244,7 @@ const doMenu = (actn, evt) => {
 		YTx.Upld5d.Init();
 		modal(document.getElementById('filupld'), true);
 //		sessionStorage.nfm_curD = curDir;
-		if (doesSupportAjaxUploadWithProgress()) {
+		if (true || doesSupportAjaxUploadWithProgress()) {
 			if (upload_winpop) {
 				upldAction.H5w();
 			} else {
