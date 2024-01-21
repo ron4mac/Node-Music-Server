@@ -11,7 +11,7 @@ var _pp = 0,
 
 YTx.fup_done = (errs) => {
 	if (!errs) {
-		document.getElementById('filupld').style.display = 'none';
+		modal(document.getElementById('filupld'), false);
 	}
 	getDirList(curDir);
 }
@@ -131,7 +131,27 @@ const viewFile = (fpath) => {
 		} else { alert('download not available'); }
 	}, 2);
 };
-
+const doComb = (btn) => {
+	let asf = btn.parentElement.querySelector('input').value;
+	if (asf) {
+		btn.disabled = true;
+		btn.parentElement.querySelector('i').style.display = 'inline-block';
+		const slctd = document.querySelectorAll('.fsel:checked');
+		const files = Array.from(slctd).map(el => el.value);
+	//	postAndRefresh({act:'fcomb', 'dir': curDir, 'files': files, asfile: asf}, 1);
+		const parms = {act:'fcomb', 'dir': curDir, 'files': files, asfile: asf};
+		postAction(null, parms, (data) => {
+				btn.disabled = false;
+				btn.parentElement.querySelector('i').style.display = 'none';
+				if (data) {
+					alert(data);
+				} else {
+					modal(btn.parentElement, false);
+					getDirList(curDir);
+				}
+			}, true);
+	}
+}
 
 const fmpop = () => {
 	if (!fileseen) getDirList(curDir);
@@ -145,11 +165,15 @@ const doMenu = (actn, evt) => {
 		hasSome = () => { if (scnt) { return true; } alert('Some items need to be selected'); return false; };
 	switch (actn) {
 	case 'fcomb':
-		let asf;
-		if (hasSome() && (asf = prompt('Combine/convert to a file named:'))) {
-			const files = Array.from(slctd).map(el => el.value);
-			postAndRefresh({act:'fcomb', 'dir': curDir, 'files': files, asfile: asf}, 1);
+		if (hasSome()) {
+			document.querySelector('#comb i').style.display = 'none';
+			modal(document.getElementById('comb'), true);
 		}
+		//let asf;
+		//if (hasSome() && (asf = prompt('Combine/convert to a file named:'))) {
+		//	const files = Array.from(slctd).map(el => el.value);
+		//	postAndRefresh({act:'fcomb', 'dir': curDir, 'files': files, asfile: asf}, 1);
+		//}
 		break;
 	case 'fdele':
 		if (hasSome() && ((scnt==1) || confirm('You have multiple files selected. Are you sure you want to delete ALL the selected files?'))) {
@@ -218,7 +242,7 @@ const doMenu = (actn, evt) => {
 	case 'fupld':
 		fup_payload.dir = curDir;
 		YTx.Upld5d.Init();
-		document.getElementById('filupld').style.display = 'block';
+		modal(document.getElementById('filupld'), true);
 //		sessionStorage.nfm_curD = curDir;
 		if (doesSupportAjaxUploadWithProgress()) {
 			if (upload_winpop) {
@@ -245,6 +269,16 @@ const doMenu = (actn, evt) => {
 		break;
 	}
 };
+
+const modal = (dlg, oc) => {
+	if (oc) {
+		dlg.parentElement.style.display = 'block';
+		dlg.style.display = 'block';
+	} else {
+		dlg.style.display = 'none';
+		dlg.parentElement.style.display = 'none';
+	}
+}
 
 const toFormData = (obj) => {
 	const formData = new FormData();

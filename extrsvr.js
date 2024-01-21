@@ -351,7 +351,7 @@ const filemanAction = (parms, resp) => {
 		if (parms.files.length > 1) eprms += ' -codec copy';
 		eprms += ` "${pbase+parms.asfile}"`;
 		console.log(eprms);
-		require('child_process').exec('/usr/bin/ffmpeg -loglevel 16'+eprms,{},(error, stdout, stderr)=>{
+		require('child_process').exec('/usr/bin/ffmpeg -loglevel 16 -n'+eprms,{},(error, stdout, stderr)=>{
 				console.log(error);
 				rmsg = error ? String(error) : null;
 			//	rmsg += stderr ? ('@@@@@@'+String(stderr)) : null;

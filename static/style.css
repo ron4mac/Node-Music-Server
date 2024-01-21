@@ -1,5 +1,6 @@
 body {
 	background-color: #E0F0F0;
+	position: relative;
 	line-height: 2rem;
 	margin: 2rem;
 	width: fit-content;
@@ -150,7 +151,6 @@ table .fa {
 
 /* ============================ file upload dialog with drag and drop
 */
-
 .pbwrp {
 	position:relative;
 	border:1px solid #BBB;
@@ -238,6 +238,16 @@ div.uplddlog input { width: 100% }
 /* ============================ file combine/convert dialog
 */
 .dlogs {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #9992;
+	display: none;
+}
+.dlogs > div {
+	display: none;
 }
 #comb {
 	position: absolute;
@@ -246,14 +256,19 @@ div.uplddlog input { width: 100% }
 	background-color: lightcyan;
 	left: 50%;
 	transform: translate(-50%, 0);
-	padding: 2rem;
-	border: 1px solid #AAA;
+	padding: 1rem;
+	border: 1px solid #999;
 	border-radius: 5px;
+	box-shadow: 0 0 5px #AAA;
 }
 #comb h4 {
 	margin: 0;
 }
+#comb input {
+	width: 20rem;
+}
 #comb button {
 	float: right;
+	margin-left: 1rem;
 }
 
