@@ -4,9 +4,8 @@ After=network.target
 
 [Service]
 Type=simple
-User=nimda
-ExecStart=/usr/bin/node /home/nimda/ytextr/extsrv.js
-WorkingDirectory=/home/nimda/ytextr
+ExecStart=/usr/bin/node <path-to-install-location>/extrsvr.js
+WorkingDirectory=<path-to-install-location>
 Restart=on-failure
 
 [Install]

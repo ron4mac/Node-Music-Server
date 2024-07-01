@@ -133,7 +133,7 @@ const getAudioStream = (yturl, which, cb) => {
 	let fext = 'mp4';
 	ytdl.getInfo(yturl, {quality: 'highestaudio'})
 	.then(info => {
-		let audioFormats = ytdl.filterFormats(info.formats, 'audio');
+		let audioFormats = ytdl.filterFormats(info.formats, 'audioonly');
 		let tfmt = null;
 		switch (which) {
 			case '4':
