@@ -26,7 +26,8 @@
 				<span>as: </span> <input class="tname" type="text" name="tname" value=""><br>
 				<label><input type="radio" name="wtrk" value="h" checked>Highest Quality &nbsp;</label>
 				<label><input type="radio" name="wtrk" value="4">MP4(M4A) &nbsp;</label>
-				<label><input type="radio" name="wtrk" value="w">WEBM</label><br>
+				<label><input type="radio" name="wtrk" value="w">WEBM &nbsp;</label>
+				<label><input type="radio" name="wtrk" value="s">Specific Stream</label><br>
 				<input type="submit" name="ginf" value="Get Audio Track">
 				<i class="fa fa-spinner fa-pulse fa-lg"></i>
 			</div>
@@ -52,7 +53,8 @@
 				<span>as: </span> <input class="tname" type="text" name="tname" value=""><br>
 				<label><input type="radio" name="wtrk" value="h" checked>Highest Quality &nbsp;</label>
 				<label><input type="radio" name="wtrk" value="4">MP4 &nbsp;</label>
-				<label><input type="radio" name="wtrk" value="w">WEBM</label><br>
+				<label><input type="radio" name="wtrk" value="w">WEBM &nbsp;</label>
+				<label><input type="radio" name="wtrk" value="s">Specific Stream</label><br>
 				<label><input type="radio" name="vida" value="a" checked>Video that has audio (may be lower resolution) &nbsp;</label>
 				<label><input type="radio" name="vida" value="v">Highest resolution video only</label><br>
 				<input type="submit" name="ginf" value="Get Video">
@@ -76,7 +78,16 @@
 		<div id="fileman">
 		</div>
 	</div>
-	<div id="fvewd" style="display:none"><span>TITLE</span><i class="fa fa-window-close-o" aria-hidden="true" onclick="this.parentElement.style.display='none';this.nextElementSibling.src=''"></i><iframe id="fvewf"></iframe></div>
+	<div id="fvewd" style="display:none">
+		<span>TITLE</span>
+		<i class="fa fa-window-close-o" aria-hidden="true" onclick="this.parentElement.style.display='none';this.nextElementSibling.src=''"></i>
+		<iframe id="fvewf"></iframe>
+	</div>
+	<div id="sseld" style="display:none">
+		<i class="fa fa-times" aria-hidden="true" onclick="this.parentElement.style.display='none'"></i>
+		<table id="sselt"><tbody></tbody></table>
+		<button onclick="extractSelected(this)">Extract Stream</button>
+	</div>
 	<div class="dlogs">
 		<div id="filupld" class="uplddlog">
 			<input type="file" id="upload_field" name="upld" multiple="multiple" style="display:none">
@@ -115,6 +126,12 @@
 	});
 	// Show the default tab
 	document.getElementById('defaultOpen').click();
+//	console.log(document.forms.sglform.wtrk);
+//	document.forms.sglform.wtrk.forEach(rb=>rb.addEventListener('change',
+//	(evt)=>{
+//		if (evt.target.value=='s') alert('SPECIFIC');
+//	}
+//	));
 	</script>
 </body>
 </html>

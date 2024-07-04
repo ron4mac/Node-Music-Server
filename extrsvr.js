@@ -145,7 +145,12 @@ const getAudioStream = (yturl, which, cb) => {
 				fext = 'webm';
 				break;
 			default:
-				tfmt = audioFormats[0];
+				if (which.startsWith('s')) {
+					let itag = which.split('.')[1];
+					tfmt = ytdl.chooseFormat(info.formats, {quality: itag});
+				} else {
+					tfmt = audioFormats[0];
+				}
 				fext = tfmt.container;
 		}
 		rslt.fext = fext;
@@ -201,7 +206,12 @@ const getVideo = (yturl, which, vida, cb) => {
 				fext = 'webm';
 				break;
 			default:
-				tfmt = videoFormats[0];
+				if (which.startsWith('s')) {
+					let itag = which.split('.')[1];
+					tfmt = ytdl.chooseFormat(info.formats, {quality: itag});
+				} else {
+					tfmt = videoFormats[0];
+				}
 				fext = tfmt.container;
 		}
 		rslt.fext = fext;
@@ -238,6 +248,23 @@ const videoExtract = (parms, resp) => {
 	});
 };
 
+const getStreams = (parms, resp) => {
+	console.log(parms);
+	let yturl = parms.strms;
+	let whch = parms.whch;
+	ytdl.getInfo(yturl)
+	.then(info => {
+		let fmts = ytdl.filterFormats(info.formats, whch);
+		let strms = [];
+		if (whch=='audio') {
+			fmts.forEach(f => strms.push({itag: f.itag, mime: f.mimeType, audbr: f.audioBitrate, audsr: f.audioSampleRate}));
+		} else {
+			fmts.forEach(f => strms.push({itag: f.itag, mime: f.mimeType, size: f.width+'x'+f.height, reso: f.quality, audio: f.hasAudio}));
+		}
+		resp.end(JSON.stringify(strms));
+	});
+//	return strms;
+};
 
 const getNavMenu = (dir, resp) => {
 	let nav = '<div class="fmnav">';
@@ -337,7 +364,7 @@ const filemanAction = (parms, resp) => {
 	let pbase, fpath, stats;
 	switch (parms.act) {
 	case 'fcomb':
-		if (!fs.existsSync('/usr/bin/ffmpeg')) {
+		if (!fs.existsSync('/usr/bin/ffmpeg') && !fs.existsSync('/usr/local/bin/ffmpeg')) {
 			rmsg = 'Required ffmpeg is not present';
 			break;
 		}
@@ -351,7 +378,7 @@ const filemanAction = (parms, resp) => {
 		if (parms.files.length > 1) eprms += ' -codec copy';
 		eprms += ` "${pbase+parms.asfile}"`;
 		console.log(eprms);
-		require('child_process').exec('/usr/bin/ffmpeg -loglevel 16 -n'+eprms,{},(error, stdout, stderr)=>{
+		require('child_process').exec('ffmpeg -loglevel 16 -n'+eprms,{},(error, stdout, stderr)=>{
 				console.log(error);
 				rmsg = error ? String(error) : null;
 			//	rmsg += stderr ? ('@@@@@@'+String(stderr)) : null;
@@ -614,6 +641,12 @@ http.createServer(function (request, response) {
 		console.log('P '+progv);
 		response.writeHead(200, {'Content-Type': 'text/plain'});
 		response.end(progv);
+		return;
+	}
+	if (url.startsWith('/?strms')) {
+		response.writeHead(200, {'Content-Type': 'text/plain'});
+		getStreams(parse(url.substring(2)), response);
+	//	response.end(JSON.stringify(strms));
 		return;
 	}
 	if (url.startsWith('/?dirl')) {

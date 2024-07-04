@@ -22,21 +22,35 @@ const getPlaylist = (frm) => {
 	document.getElementById('dnldf').src = window.location.origin + `?pxtr=${yturl}&wtrk=${wtrk}`;
 	setTimeout(watchP, 1000);
 };
-const getVinfo = (frm) => {
+const getVinfo = (frm,itag=false) => {
 	document.querySelector('#sglTab input[type="submit"]').disabled = true;
 	document.querySelector('#sglTab i').style.display = 'inline-block';
 	let yturl = encodeURIComponent(frm.yturl.value.trim());
 	let tname = encodeURIComponent(frm.tname.value.trim());
 	let wtrk = encodeURIComponent(frm.wtrk.value);
+	if (itag) wtrk += '.'+itag;
 	tname = tname ? tname : 'audio_track';
 	document.getElementById('dnldf').src = window.location.origin + `?axtr=${yturl}&tnam=${tname}&wtrk=${wtrk}`;
 };
-const getVideo = (frm) => {
+const extractSelected = (elm) => {
+	let itag = elm.parentElement.querySelector('input[name="itag"]:checked').value;
+	if (itag) {
+		let typ = elm.getAttribute('stype');
+		elm.parentElement.style.display = 'none';
+		if (typ=='audio') {
+			getVinfo(document.forms.sglform, itag);
+		} else {
+			getVideo(document.forms.vidform, itag);
+		}
+	}
+};
+const getVideo = (frm,itag=false) => {
 	document.querySelector('#vidTab input[type="submit"]').disabled = true;
 	document.querySelector('#vidTab i').style.display = 'inline-block';
 	let yturl = encodeURIComponent(frm.yturl.value.trim());
 	let tname = encodeURIComponent(frm.tname.value.trim());
 	let wtrk = encodeURIComponent(frm.wtrk.value);
+	if (itag) wtrk += '.'+itag;
 	let vida = encodeURIComponent(frm.vida.value);
 	tname = tname ? tname : 'video_track';
 	document.getElementById('dnldf').src = window.location.origin + `?vxtr=${yturl}&tnam=${tname}&wtrk=${wtrk}&vida=${vida}`;
@@ -65,20 +79,46 @@ const watchP = () => {
 const dlfile = () => {
 	document.getElementById('dnldf').src = 'video.mp4';
 };
+const streamSelect = (frm, type) => {
+	let selt = document.querySelector('#sseld table tbody');
+	if (type=='audio') {
+		selt.innerHTML = '<tr><td></td><th>MIME</th><th>BITS</th><th>SAMPLE</th></tr>';
+	} else {
+		selt.innerHTML = '<tr><td></td><th>Mime</th><th>Size</th><th>Resolution</th><th>Has&nbsp;Audio</th></tr>';
+	}
+	document.querySelector('#sseld button').setAttribute('stype',type);
+	document.getElementById('sseld').style.display = 'block';
+	let yturl = encodeURIComponent(frm.yturl.value.trim());
+	fetch(`?strms=${yturl}&whch=${type}`, {method:'GET'})
+	.then((resp) => resp.json())
+	.then(data => {
+		console.log(data);
+		if (type=='audio') {
+			data.forEach(td => selt.innerHTML += `<tr><td><input type="radio" name="itag" value="${td.itag}"></td><td>${td.mime}</td><td>${td.audbr}</td><td>${td.audsr}</td></tr>`);
+		} else {
+			data.forEach(td => selt.innerHTML += `<tr><td><input type="radio" name="itag" value="${td.itag}"></td><td>${td.mime}</td><td>${td.size}</td><td>${td.reso}</td><td>${td.audio}</td></tr>`);
+		}
+	});
+};
 const frequest = (evt, frm) => {
 	evt.preventDefault();
-//	console.log(evt);
-	if (evt.submitter.name=='ginf') getVinfo(frm);
+	if (frm.wtrk.value=='s') {
+		streamSelect(frm, 'audio');
+	} else {
+		if (evt.submitter.name=='ginf') getVinfo(frm);
+	}
 };
 const prequest = (evt, frm) => {
 	evt.preventDefault();
-//	console.log(evt);
 	if (evt.submitter.name=='ginf') getPlaylist(frm);
 };
 const vrequest = (evt, frm) => {
 	evt.preventDefault();
-//	console.log(evt,frm);
-	if (evt.submitter.name=='ginf') getVideo(frm);
+	if (frm.wtrk.value=='s') {
+		streamSelect(frm, 'video');
+	} else {
+		if (evt.submitter.name=='ginf') getVideo(frm);
+	}
 };
 const openTab = (evt, tabName, cb) => {
 	let i;

@@ -1,3 +1,9 @@
+# YTEXTR specific
+config
+playlist*
+ytextr.service
+.gitignore
+
 # Logs
 logs
 *.log
@@ -128,8 +134,4 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-
-# YTEXTR specific
-config
-playlist*
 
