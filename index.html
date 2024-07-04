@@ -22,8 +22,8 @@
 	<div id="sglTab" class="tabcontent">
 		<form action="#" name="sglform" method="post" onsubmit="frequest(event, this)">
 			<div>
-				<input class="yturl" type="text" name="yturl" placeholder="YT URL" value="" required><br>
-				<span>as: </span> <input class="tname" type="text" name="tname" value=""><br>
+				<input class="yturl" type="text" name="yturl" placeholder="YT URL" value="" spellcheck="false" autocomplete="off" required><br>
+				<span>as: </span> <input class="tname" type="text" name="tname" value="" spellcheck="false" autocomplete="off"><br>
 				<label><input type="radio" name="wtrk" value="h" checked>Highest Quality &nbsp;</label>
 				<label><input type="radio" name="wtrk" value="4">MP4(M4A) &nbsp;</label>
 				<label><input type="radio" name="wtrk" value="w">WEBM &nbsp;</label>
@@ -37,7 +37,7 @@
 	<div id="lstTab" class="tabcontent">
 		<form action="#" name="lstForm" method="post" onsubmit="prequest(event, this)">
 			<div>
-				<input class="yturl" type="text" name="yturl" placeholder="YT Playlist URL" value="" required><br>
+				<input class="yturl" type="text" name="yturl" placeholder="YT Playlist URL" value="" spellcheck="false" autocomplete="off" required><br>
 				<label><input type="radio" name="wtrk" value="h" checked>Highest Quality &nbsp;</label>
 				<label><input type="radio" name="wtrk" value="4">MP4(M4A) &nbsp;</label>
 				<label><input type="radio" name="wtrk" value="w">WEBM</label><br>
@@ -49,8 +49,8 @@
 	<div id="vidTab" class="tabcontent">
 		<form action="#" name="vidform" method="post" onsubmit="vrequest(event, this)">
 			<div>
-				<input class="yturl" type="text" name="yturl" placeholder="YT URL" value="" required><br>
-				<span>as: </span> <input class="tname" type="text" name="tname" value=""><br>
+				<input class="yturl" type="text" name="yturl" placeholder="YT URL" value="" spellcheck="false" autocomplete="off" required><br>
+				<span>as: </span> <input class="tname" type="text" name="tname" value="" spellcheck="false" autocomplete="off"><br>
 				<label><input type="radio" name="wtrk" value="h" checked>Highest Quality &nbsp;</label>
 				<label><input type="radio" name="wtrk" value="4">MP4 &nbsp;</label>
 				<label><input type="radio" name="wtrk" value="w">WEBM &nbsp;</label>
@@ -100,7 +100,7 @@
 		</div>
 		<div id="comb">
 			<h4>Combine/convert as file:</h4>
-			<input type="text" placeholder="file name with extension"><br>
+			<input type="text" placeholder="file name with extension" spellcheck="false" autocomplete="off"><br>
 			<hr>
 			<button onclick="doComb(this)">Submit</button>
 			<button onclick="modal(this.parentElement, false)">Cancel</button>
