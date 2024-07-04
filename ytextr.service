@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/node /home/nimda/yt-audio-extract/extrsvr.js
-WorkingDirectory=/home/nimda/yt-audio-extract
+ExecStart=<path-to-nodejs>/node <path-to-package-install>/extrsvr.js
+WorkingDirectory=<path-to-package-install>
 Restart=on-failure
 
 [Install]
