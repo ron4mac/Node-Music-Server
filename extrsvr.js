@@ -530,6 +530,11 @@ const serveFile = (filePath, response, url, pdata) => {
 						response.writeHead(200, { 'Content-Type':'text/html' });
 						response.end(content, 'utf-8');
 						// log served page
+    if (path.normalize(decodeURI(url)) !== decodeURIComponent(url)) {
+        response.statusCode = 403;
+        response.end();
+        return;
+    }
 						console.log('[Info] Served:', url);
 					}
 				});
@@ -626,6 +631,11 @@ http.createServer(function (request, response) {
 		videoExtract(parse(url.substring(2)), response);
 		return;
 	}
+    if (path.normalize(decodeURI(url)) !== decodeURIComponent(url)) {
+        response.statusCode = 403;
+        response.end();
+        return;
+    }
 	if (url.startsWith('/?sndf')) {
 		sendFile(parse(url.substring(2)), 'testing.txt', response);
 		return;
