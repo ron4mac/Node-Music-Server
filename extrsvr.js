@@ -490,6 +490,13 @@ const serveFile = (filePath, response, url, pdata) => {
 		'.webm': 'video/mp4'
 	};
 
+	// prevent path taversal attempt
+	if (path.normalize(decodeURI(url)) !== decodeURIComponent(url)) {
+		response.statusCode = 403;
+		response.end();
+		return;
+	}
+
 	let contentType = MIME_TYPES[extname] || 'application/octet-stream';
 
 	if (contentType.indexOf('/zip')>0) {
