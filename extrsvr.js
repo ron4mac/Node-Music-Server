@@ -5,7 +5,8 @@ const process = require('process');
 const {parse} = require('querystring');
 const fs = require('fs');
 const path = require('path');
-const ytdl = require('ytdl-core');
+const ytdl = require('@distube/ytdl-core');
+const mpd = require('mpd');
 
 const formidable = require('formidable');	//, {errors as formidableErrors} from 'formidable';
 const formidableErrors = formidable.errors;		//require('formidable:errors');
@@ -14,6 +15,7 @@ const hostname = process.env.NODE_WEB_HOST || '0.0.0.0';
 const debugMode = false;
 const enableUrlDecoding = true;
 const documentRoot = '.';
+const playlistDir = 'playlist';
 
 // polyfills
 if (typeof btoa === 'undefined') global.btoa = (str) => Buffer.from(str, 'binary').toString('base64');
@@ -64,7 +66,7 @@ const getTrack = (trk, dest) => {
 const getPlaylist = async (parms, resp) => {
 	const ytpl = require('ytpl');
 	fs.unlink('playlist.zip', (err) => 1);
-	emptyDir('playlist');
+	emptyDir(playlistDir);
 	let plurl = parms.pxtr;
 	let list;
 	try {
@@ -286,6 +288,60 @@ const getNavMenu = (dir, resp) => {
 		}
 	} while (parts.length);
 	resp.write(nav+'</div>');
+};
+
+const queMPD = (files) => {
+	const writeStream = fs.createWriteStream('/var/lib/mpd/playlists/ytextrsvr.m3u');
+	writeStream.on('finish', () => {
+		console.log('Concatenation complete.');
+		const client = mpd.connect({
+		//	port: 6600, // Your MPD port
+		//	host: 'localhost' // Your MPD host
+			path: '/run/mpd/socket'
+		});
+
+		client.on('ready', () => {
+			console.log('Connected to MPD server');
+			client.sendCommands(['load ytextrsvr','play'], (err, status) => {console.log(err, status)});
+		//	client.sendCommand('command_list_begin', (err, status) => {console.log(err, status)});
+		//	client.sendCommand(mpd.cmd('load','ytextrsvr'), (err, status) => {console.log(err, status)});
+		//	client.sendCommand(mpd.cmd('play',''), (err, status) => {console.log(err, status)});
+		//	client.sendCommand('command_list_end', (err, status) => {console.log(err, status)});
+			//clent.close();
+		});
+	});
+
+	let fcnt = files.length - 1;
+	files.forEach((file, ix) => {
+		const readStream = fs.createReadStream(playlistDir+'/'+file);
+		if (ix < fcnt) {
+			readStream.pipe(writeStream, { end: false });
+		} else {
+			readStream.pipe(writeStream);
+		}
+	});
+};
+
+const playlistList = (resp) => {
+	resp.write('<section>');
+	fs.readdir(playlistDir, (err, files) => {
+		if (err) throw err;
+		for (const file of files) {
+			resp.write('<div><label><input type="checkbox" class="plsel" name="plsels[]" value="'+file+'">'+atob(file)+'</label></div>');
+		}
+		resp.end('</section>');
+	});
+};
+
+const playlistMenu = (resp) => {
+	resp.write('<select onchange="plselchg(this)"><option value="">- New Playlist -</option>');
+	fs.readdir(playlistDir, (err, files) => {
+		if (err) throw err;
+		for (const file of files) {
+			resp.write('<option value="'+file+'">'+atob(file)+'</option>');
+		}
+		resp.end('</select>');
+	});
 }
 
 const baseDir = settings.baseDir;
@@ -387,6 +443,25 @@ const filemanAction = (parms, resp) => {
 		return;
 		rmsg = null;
 		break;
+	case 'plply':
+		queMPD(parms.files);
+	//	let plst = '';
+	//	for (const file of parms.files) {
+	//		plst += playlistDir+'/'+file + "\n";
+	//		fs.unlinkSync(fpath);
+	//	}
+		rmsg = null;
+		break;
+	case 'pldel':
+		for (const file of parms.files) {
+			fpath = playlistDir+'/'+file;
+			fs.unlinkSync(fpath);
+		}
+		rmsg = null;
+		break;
+	case 'plvue':
+		rmsg = JSON.stringify({err:'', pl:fs.readFileSync(playlistDir+'/'+parms.file,{encoding:'utf8'})});
+		break;
 	case 'fdele':
 		pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
 		for (const file of parms.files) {
@@ -440,6 +515,22 @@ const filemanAction = (parms, resp) => {
 			});
 		return;
 		break;
+	case 'faddl':
+		pbase = baseDir+parms.dir;
+		console.log(pbase,parms.files);
+		let plst = '';
+		for (const file of parms.files) {
+			plst += pbase+file + "\n";
+		}
+		try {
+			fs.writeFileSync(playlistDir+'/'+btoa(parms.plnam), plst);
+			// file written successfully
+			rmsg = null;
+		} catch (err) {
+			console.error(err);
+			rmsg = 'Failed to write playlist';
+		}
+		break;
 	case 'fview':
 		fpath = baseDir+parms.fpath;
 // @@@@@@@@@@
@@ -447,6 +538,10 @@ const filemanAction = (parms, resp) => {
 //		stats = fs.statSync(fpath);
 //		console.log(stats);
 		rmsg = JSON.stringify({err: '', f64: btoa(fpath)});
+		break;
+	case 'splay':
+		fpath = baseDir+parms.fpath;
+		rmsg = JSON.stringify({err: 'NOT YET IMPLEMENTED', f64: btoa(fpath)});
 		break;
 	}
 	resp.end(rmsg);
@@ -625,6 +720,12 @@ http.createServer(function (request, response) {
 		return;
 	}
 
+	if (url.startsWith('/?plstl')) {
+		response.writeHead(200, {'Content-Type': 'text/plain'});
+		playlistList(response);
+		//response.end(playlistMenu());
+		return;
+	}
 	if (url.startsWith('/?axtr')) {
 		audioExtract(parse(url.substring(2)), response);
 		return;
@@ -663,6 +764,12 @@ http.createServer(function (request, response) {
 		getNavMenu(dpath, response);
 		getDirList(dpath, response);
 		//response.end();
+		return;
+	}
+	if (url.startsWith('/?plmn')) {
+		response.writeHead(200, {'Content-Type': 'text/plain'});
+		playlistMenu(response);
+		//response.end(playlistMenu());
 		return;
 	}
 

@@ -7,6 +7,7 @@ var _pp = 0,
 	curDir = '',
 	tabcontent,
 	tablinks,
+	plstseen = false,
 	fileseen = false;
 
 YTx.fup_done = (errs) => {
@@ -133,6 +134,14 @@ const openTab = (evt, tabName, cb) => {
 	evt.currentTarget.className += ' active';
 	if (typeof cb === 'function') cb();
 };
+const getPlaylists = () => {
+	fetch('?plstl', {method:'GET'})
+	.then((resp) => resp.text())
+	.then(data => {
+		console.log(data);
+		document.getElementById('playlists').innerHTML = data;
+	});
+};
 const getDirList = (dirPath) => {
 	fetch('?dirl='+encodeURIComponent(dirPath), {method:'GET'})
 	.then((resp) => resp.text())
@@ -143,7 +152,7 @@ const getDirList = (dirPath) => {
 		dirs.forEach(elm => {
 			elm.addEventListener('click', (evt) => {
 				console.log(evt);
-				let todir = evt.target.dataset.dpath || evt.target.parentNode.dataset.dpath || '';
+				let todir = evt.target.closest('[data-dpath]')?.dataset.dpath;
 				getDirList(todir);
 			});
 		});
@@ -151,11 +160,41 @@ const getDirList = (dirPath) => {
 		fils.forEach(elm => {
 			elm.addEventListener('click', (evt) => {
 				console.log(evt);
-				let fpath = evt.target.dataset.fpath || evt.target.parentNode.dataset.fpath || '';
+				let fpath = evt.target.closest('[data-fpath]')?.dataset.fpath;
+				if (evt.target.nodeName=='I') {
+					srvrPlay(fpath);
+					return;
+				}
 				viewFile(fpath);
 			});
 		});
 	});
+};
+const add2Playlist = () => {
+	fetch('?plmn', {method:'GET'})
+	.then((resp) => resp.text())
+	.then(data => {
+		document.querySelector('#plmnu i').style.display = 'none';
+		let dlg = document.getElementById('plmnu');
+		dlg.querySelector('div').innerHTML = data;
+		modal(dlg, true);
+	//	RJ_DlogMgr.hoistTmpl({cselect:'#plmnu'}, {});
+	});
+}
+const plselchg = (sel) => {
+	let ielm = sel.closest('.modl').querySelector('input');
+	let dsp = sel.value == '' ? 'visible' : 'hidden';
+	ielm.style.visibility = dsp;
+}
+const srvrPlay = (fpath) => {		//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	postAction(null, {act:'splay', 'fpath':(curDir?(curDir+'/'):'')+fpath}, (data) => {
+		if (data) {
+			console.log(data);
+			if (data.err) {
+				alert(data.err);
+			}
+		} else { alert('server play not available'); }
+	}, 2);
 };
 const viewFile = (fpath) => {
 	postAction(null, {act:'fview', 'fpath':(curDir?(curDir+'/'):'')+fpath}, (data) => {
@@ -192,6 +231,48 @@ const doComb = (btn) => {
 			}, true);
 	}
 }
+
+
+const plpop = () => {
+	if (!plstseen) getPlaylists();
+	plstseen = true;
+};
+const doPlMenu = (actn, evt) => {
+	console.log(actn);
+	const slctd = document.querySelectorAll('.plsel:checked'),
+		scnt = slctd.length,
+		oneItem = () => { if (!scnt) { alert('An item needs to be selected'); } else if (scnt>1) { alert('Please select only one item.'); } else { return true; } return false; },
+		hasSome = () => { if (scnt) { return true; } alert('Some items need to be selected'); return false; };
+	switch (actn) {
+	case 'pldel':
+		if (hasSome() && ((scnt==1) || confirm('You have multiple playlists selected. Are you sure you want to delete ALL the selected playlists?'))) {
+			const files = Array.from(slctd).map(el => el.value);
+			console.log(files);
+			postAndRefreshPL({act:'pldel','files':files}, 1);
+		}
+		break;
+	case 'plply':
+		if (hasSome()) {
+			const files = Array.from(slctd).map(el => el.value);
+			console.log(files);
+			postAndRefreshPL({act:'plply','files':files}, 1);
+		}
+		break;
+	case 'plvue':
+		if (oneItem()) {
+			const files = Array.from(slctd).map(el => el.value);
+			console.log(files);
+			const parms = {act:'plvue', 'file': files[0]};
+			postAction(null, parms, (data) => {
+				let dlg = document.getElementById('utldlg');
+				dlg.querySelector('div').innerHTML = data.pl;
+				modal(dlg,true);
+			}, 2);
+		}
+		break;
+	}
+};
+
 
 const fmpop = () => {
 	if (!fileseen) getDirList(curDir);
@@ -304,6 +385,26 @@ const doMenu = (actn, evt) => {
 			postAndRefresh('act=funzp&dir='+encodeURIComponent(curDir)+'&file='+encodeURIComponent(curfn));
 		}
 		break;
+	case 'plmnu':
+		if (!hasSome()) break;
+		add2Playlist();
+		break;
+	case 'faddl':
+		console.log(evt);
+		let dlg = document.getElementById('plmnu');
+		let psel = dlg.querySelector('select').value;
+		let pnam = dlg.querySelector('input').value.trim();
+		if (psel=='' && !pnam) {
+			alert('Please provide a playlist name');
+			break;
+		}
+		evt.target.parentElement.querySelector('i').style.display = 'inline-block';
+		const files = Array.from(slctd).map(el => el.value);
+		postAndRefresh({act:'faddl', plnam: pnam, dir:(curDir?curDir:''), 'files': files}, 1);
+		modal(dlg, false);
+		evt.target.parentElement.querySelector('i').style.display = 'none';
+		plstseen = false;
+		break;
 	case 'drefr':
 		getDirList(curDir);
 		break;
@@ -350,6 +451,9 @@ const postAction = (act, parms={}, cb=()=>{}, json=false) => {
 	.catch(err => alert(err));
 };
 
+const postAndRefreshPL = (parms, json=false) => {
+	postAction(null, parms, (data) => { if (data) alert(data); else getPlaylists() }, json);
+};
 const postAndRefresh = (parms, json=false) => {
 	postAction(null, parms, (data) => { if (data) alert(data); else getDirList(curDir) }, json);
 };

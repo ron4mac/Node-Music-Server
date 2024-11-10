@@ -5,6 +5,20 @@ body {
 	margin: 2rem;
 	width: fit-content;
 }
+/* navigation */
+nav ul {
+	padding: 0;
+	display: inline;
+	list-style-type: none;
+	margin: 0;
+	display: flex;
+	gap: 1rem;
+}
+.plmnu a {
+	color: green;
+}
+
+
 input, label, span {
 	font-size: large;
 }
@@ -48,6 +62,12 @@ form i.fa {
 	background-color: khaki;
 }
 .plst-ttl {font-size: x-large}
+
+#playlists input[type='checkbox'] {
+	vertical-align: text-bottom;
+	margin-right: .5rem;
+}
+
 
 /* ADMIN */
 /* Style the tab */
@@ -271,7 +291,13 @@ div.uplddlog input { width: 100% }
 .dlogs > div {
 	display: none;
 }
-#comb {
+
+#utldlg {
+	min-width: 400px;
+}
+
+
+.modl {
 	position: absolute;
 	width: fit-content;
 	top: 120px;
@@ -283,14 +309,43 @@ div.uplddlog input { width: 100% }
 	border-radius: 5px;
 	box-shadow: 0 0 5px #AAA;
 }
-#comb h4 {
+.modl h4 {
 	margin: 0;
 }
-#comb input {
+.modl input {
 	width: 20rem;
 }
-#comb button {
+.modl select {
+	font-size: medium;
+}
+.modl button {
 	float: right;
 	margin-left: 1rem;
 }
-
+.modl i.left {
+	float: left;
+}
+/*
+#plmnu {
+	position: absolute;
+	width: fit-content;
+	top: 120px;
+	background-color: lightcyan;
+	left: 50%;
+	transform: translate(-50%, 0);
+	padding: 1rem;
+	border: 1px solid #999;
+	border-radius: 5px;
+	box-shadow: 0 0 5px #AAA;
+}
+#plmnu h4 {
+	margin: 0;
+}
+#plmnu input {
+	width: 20rem;
+}
+#plmnu button {
+	float: right;
+	margin-left: 1rem;
+}
+*/
