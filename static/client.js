@@ -8,6 +8,7 @@ var _pp = 0,
 	tabcontent,
 	tablinks,
 	plstseen = false,
+	rdioseen = false,
 	fileseen = false;
 
 YTx.fup_done = (errs) => {
@@ -122,16 +123,19 @@ const vrequest = (evt, frm) => {
 	}
 };
 const openTab = (evt, tabName, cb) => {
+	let tab = evt.currentTarget;
 	let i;
 	for (i = 0; i < tabcontent.length; i++) {
 		tabcontent[i].style.display = 'none';
 	}
 	for (i = 0; i < tablinks.length; i++) {
-		tablinks[i].className = tablinks[i].className.replace(' active', '');
+		tablinks[i].classList.remove('active');
 	}
+	// hide/show MPD control as needed
+	document.getElementById('mpdcontrols').style.display = tab.classList.contains('nompd') ? 'none' : 'block';
 	// Show the current tab, and add an "active" class to the button that opened the tab
 	document.getElementById(tabName).style.display = 'block';
-	evt.currentTarget.className += ' active';
+	tab.classList.add('active');
 	if (typeof cb === 'function') cb();
 };
 const getPlaylists = () => {
@@ -232,9 +236,131 @@ const doComb = (btn) => {
 	}
 }
 
+// UI display
+const displayCurrent = (what) => {
+	document.getElementById('marquis').innerHTML = what;
+}
 
+// MPD direct
+const mpdCmd = (cmd) => {
+	const parms = {act:'mpd', what: 'cmd', bobj: cmd};
+	postAction(null, parms, (data) => {
+		if (data) alert(data);
+	}, 1);
+}
+const mpdCmdBug = (cmd) => {
+	let mpc = prompt('MPD command:');
+	if (!mpc) return;
+	const parms = {act:'mpd', what: 'cmdb', bobj: mpc};
+	postAction(null, parms, (data) => {
+		if (data) alert(data);
+	}, 1);
+}
+
+// TuneIn radio interface
+const radioControl = (w) => {
+	let what, xtra;
+	switch (w) {
+	case 'clear':
+		what = 'clear';
+		displayCurrent('');
+		break;
+	}
+	const parms = {act:'radio', what: what, bobj: xtra};
+	postAction(null, parms, (data) => {
+		if (data) alert(data);
+	}, 1);
+};
+const radioBack = (evt) => {
+	console.log(evt);
+	evt.preventDefault();
+	if (evt.target.nodeName != 'A') return;
+	let bobj = evt.target.dataset.bobj;
+	const parms = {act:'radio', what: 'home', bobj: bobj};
+	postAction(null, parms, (data) => {
+		let el = document.getElementById('radio');
+		el.innerHTML = data;
+	//	let bt = elm.closest('a').innerHTML;
+	//	el = document.getElementById('radcrumbs');
+	//	if (el.innerHTML) el.innerHTML += '::';
+	//	el.innerHTML += '<a href="#" data-bobj="'+bobj+'">'+bt+'</a>';
+	}, 1);
+};
+const radioNav = (evt, elm) => {
+	evt.preventDefault();
+	let bobj = elm.closest('[data-url]').dataset.url;
+	const parms = {act:'radio', what: 'home', bobj: bobj};
+	postAction(null, parms, (data) => {
+		let el = document.getElementById('radio');
+		el.innerHTML = data;
+		let bt = elm.closest('a').innerHTML;
+		el = document.getElementById('radcrumbs');
+		if (el.innerHTML) el.innerHTML += '::';
+		el.innerHTML += '<a href="#" data-bobj="'+bobj+'">'+bt+'</a>';
+	}, 1);
+};
+const radioSearch = () => {
+	let sterm = prompt('Search radio stations');
+	if (sterm) {
+		const parms = {act:'radio', what: 'search', bobj: sterm};
+		postAction(null, parms, (data) => {
+			let el = document.getElementById('radio');
+			el.innerHTML = data;
+		//	let bt = elm.closest('a').innerHTML;
+		//	el = document.getElementById('radcrumbs');
+		//	if (el.innerHTML) el.innerHTML += '::';
+		//	el.innerHTML += '<a href="#" data-bobj="'+bobj+'">'+bt+'</a>';
+		}, 1);
+	}
+};
+const radioPlay = (evt) => {
+	evt.preventDefault();
+	let bobj = evt.target.closest('[data-url]').dataset.url;
+	const parms = {act:'radio', what: 'play', bobj: bobj};
+	postAction(null, parms, (data) => {
+		console.log(data);
+		displayCurrent('Radio: '+evt.target.closest('[data-url]').innerHTML);
+	}, 1);
+};
+const getRadio = () => {
+	const parms = {act:'radio', what: 'home'};
+	postAction(null, parms, (data) => {
+		let elm = document.getElementById('radio');
+		elm.innerHTML = data;
+	}, 1);
+};
+const setVolSlider = () => {
+	const parms = {act:'mpd',what:'getVolume',bobj:'getVolume'};
+	postAction(null, parms, (data) => {
+		document.getElementById('mpdvolume').value = data;
+	}, 1);
+}
+const chgVolume = (elm) => {
+	const parms = {act:'mpd',what:'setVolume',bobj:elm.value};
+	postAction(null, parms, (data) => {
+		if (data) alert(data);
+	}, 1);
+}
+const bmpVolume = (amt) => {
+	const parms = {act:'mpd',what:'bumpVolume',bobj:amt};
+	postAction(null, parms, (data) => {
+		document.getElementById('mpdvolume').value = data;
+	}, 1);
+}
+const tipop = () => {
+	if (!rdioseen) {
+		setVolSlider();
+		getRadio();
+	}
+	rdioseen = true;
+};
+
+// Playlists interface
 const plpop = () => {
-	if (!plstseen) getPlaylists();
+	if (!plstseen) {
+		setVolSlider();
+		getPlaylists();
+	}
 	plstseen = true;
 };
 const doPlMenu = (actn, evt) => {
@@ -255,17 +381,24 @@ const doPlMenu = (actn, evt) => {
 		if (hasSome()) {
 			const files = Array.from(slctd).map(el => el.value);
 			console.log(files);
-			postAndRefreshPL({act:'plply','files':files}, 1);
+			//postAndRefreshPL({act:'plply','files':files}, 1);
+			const parms = {act:'plply',files:files};
+			postAction(null, parms, (data) => {
+				if (data) alert(data);
+				slctd.forEach((cb)=>{cb.checked=false});
+				let plnam = files.length>1 ? '[ multiple ]' : atob(files[0]);
+				displayCurrent('Playlist: '+plnam);
+			}, 1);
 		}
 		break;
 	case 'plvue':
 		if (oneItem()) {
 			const files = Array.from(slctd).map(el => el.value);
 			console.log(files);
-			const parms = {act:'plvue', 'file': files[0]};
+			const parms = {act:'plvue', file: files[0]};
 			postAction(null, parms, (data) => {
 				let dlg = document.getElementById('utldlg');
-				dlg.querySelector('div').innerHTML = data.pl;
+				dlg.querySelector('div').innerHTML = data.pl.replace(/\n/gm, '<br>');
 				modal(dlg,true);
 			}, 2);
 		}

@@ -99,12 +99,19 @@ form i.fa {
 	background-color: #ccc;
 }
 
+/* the panels enclosure*/
+.panels {
+/*	padding: .75rem;*/
+	border: 1px solid #ccc;
+	border-top: none;
+}
+
 /* Style the tab content */
 .tabcontent {
 	display: none;
-	padding: 1rem;
-	border: 1px solid #ccc;
-	border-top: none;
+	padding: .75rem;
+/*	border: 1px solid #ccc;
+	border-top: none;*/
 }
 
 /* stream selector */
@@ -126,6 +133,63 @@ form i.fa {
 #sselt tr:nth-child(even) {background-color:lavender}
 #sselt tr:first-child {color:indigo}
 
+
+/* MPD control area*/
+.mpdcontrols {
+	padding: 0 .75rem;
+	color: blue;
+	background-color: lavender;
+	border-bottom: 1px solid #CCC;
+}
+.mpdcontrols i {
+	margin-right: .5rem;
+	cursor: pointer;
+}
+#marquis {
+	color: maroon;
+}
+#mpdvolume {
+	height: 4px;
+	width: 80px;
+	vertical-align: middle;
+}
+.volume-control {
+	display: inline-block;
+	float: right;
+}
+.volume-control i {
+	margin-right: 0;
+}
+
+
+/* Web Radio */
+#radcrumbs {
+	border-bottom: 1px solid #555;
+	padding-bottom: .5rem;
+}
+#radcrumbs i {
+	float: right;
+	font-size: larger;
+	color: gray;
+	cursor: pointer;
+}
+#radcrumbs i:hover {
+	color: magenta;
+}
+.rad-link {
+	line-height: 1.5rem;
+}
+.rad-station img {
+	width: 48px;
+	height: 48px;
+	vertical-align: middle;
+	margin: 2px 6px 2px 0;
+}
+.rheader {
+	background-color: gold;
+	font-size: x-large;
+	text-align: center;
+}
 /* filemanager */
 #filemanTab {
 	min-height: 480px;

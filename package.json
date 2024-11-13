@@ -31,8 +31,9 @@
   "dependencies": {
     "@distube/ytdl-core": "^4.15.1",
     "archiver": "^6.0.1",
+    "fast-xml-parser": "^4.5.0",
     "formidable": "^2.1.2",
-    "mpd": "^1.3.0",
+    "mpd2": "^1.0.5",
     "ytpl": "^2.3.0"
   }
 }

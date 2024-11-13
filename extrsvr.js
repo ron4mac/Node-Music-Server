@@ -6,7 +6,9 @@ const {parse} = require('querystring');
 const fs = require('fs');
 const path = require('path');
 const ytdl = require('@distube/ytdl-core');
-const mpd = require('mpd');
+//const mpd = require('mpd');
+const MyMPD = require('./mpd.js');
+const TuneIn = require('./tunein.js');
 
 const formidable = require('formidable');	//, {errors as formidableErrors} from 'formidable';
 const formidableErrors = formidable.errors;		//require('formidable:errors');
@@ -27,6 +29,8 @@ var progv = 'Scanning playlist ...';
 var tlist = [];
 var pwtrk = '';
 var errs = [];
+var mympd = null;
+var tunein = null;
 
 const emptyDir = (dir) => {
 	fs.readdir(dir, (err, files) => {
@@ -293,22 +297,7 @@ const getNavMenu = (dir, resp) => {
 const queMPD = (files) => {
 	const writeStream = fs.createWriteStream('/var/lib/mpd/playlists/ytextrsvr.m3u');
 	writeStream.on('finish', () => {
-		console.log('Concatenation complete.');
-		const client = mpd.connect({
-		//	port: 6600, // Your MPD port
-		//	host: 'localhost' // Your MPD host
-			path: '/run/mpd/socket'
-		});
-
-		client.on('ready', () => {
-			console.log('Connected to MPD server');
-			client.sendCommands(['load ytextrsvr','play'], (err, status) => {console.log(err, status)});
-		//	client.sendCommand('command_list_begin', (err, status) => {console.log(err, status)});
-		//	client.sendCommand(mpd.cmd('load','ytextrsvr'), (err, status) => {console.log(err, status)});
-		//	client.sendCommand(mpd.cmd('play',''), (err, status) => {console.log(err, status)});
-		//	client.sendCommand('command_list_end', (err, status) => {console.log(err, status)});
-			//clent.close();
-		});
+		mympd.sendCommands(['load ytextrsvr','play'], (err, status) => {console.log(err, status)});
 	});
 
 	let fcnt = files.length - 1;
@@ -411,7 +400,74 @@ const receiveUpload = async (req, res) => {
 			res.end(JSON.stringify({ fields, files }, null, 2));
 		}
 	});
-}
+};
+
+const webRadio = async (what, bobj, resp) => {
+	if (!tunein) {
+		if (!mympd) {
+			mympd = await MyMPD.init();
+		}
+		tunein = new TuneIn(mympd);
+	}
+	switch (what) {
+	case 'home':
+		let b = (bobj!=='undefined') ? atob(bobj) : '';
+		tunein.browse(b, resp);
+		break;
+	case 'search':
+		tunein.search(bobj, resp);
+		break;
+	case 'play':
+		tunein.play(bobj, resp);
+		break;
+	case 'clear':
+		mympd.clear();
+		resp.end();
+		break;
+	}
+};
+
+const mpdCtrl = async (what, bobj, resp) => {
+	if (!mympd) {
+		mympd = await MyMPD.init();
+	}
+	switch (what) {
+	case 'getVolume':
+		mympd.getVolume()
+		.then((v)=>resp.end(''+v));
+		break;
+	case 'setVolume':
+		mympd.setVolume(bobj);
+		resp.end();
+		break;
+	case 'bumpVolume':
+		mympd.bumpVolume(bobj)
+		.then((v)=>resp.end(''+v));
+		break;
+	case 'cmd':
+		mympd.sendCommand(bobj);
+		resp.end();
+		break;
+	case 'cmdb':
+		mympd.sendCommandB(bobj)
+		.then((d)=>resp.end(d));
+		break;
+	case 'search':
+		tunein.search(bobj, resp);
+		break;
+	case 'play':
+		tunein.play(bobj, resp);
+		break;
+	case 'clear':
+		//mympd.clear();
+		mympd.sendCommand('stop');
+		resp.end();
+		break;
+	default:
+		resp.end('Unknown mpdCtrl: '+what);
+		break;
+	}
+};
 
 const filemanAction = (parms, resp) => {
 	console.log(parms);
@@ -461,6 +517,14 @@ const filemanAction = (parms, resp) => {
 		break;
 	case 'plvue':
 		rmsg = JSON.stringify({err:'', pl:fs.readFileSync(playlistDir+'/'+parms.file,{encoding:'utf8'})});
+		break;
+	case 'radio':
+		webRadio(parms.what, parms.bobj??'', resp);
+		return;
+		break;
+	case 'mpd':
+		mpdCtrl(parms.what, parms.bobj??'', resp);
+		return;
 		break;
 	case 'fdele':
 		pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
@@ -655,7 +719,6 @@ const serveFile = (filePath, response, url, pdata) => {
 		}
 	});
 };
-
 
 // Web server
 http.createServer(function (request, response) {
