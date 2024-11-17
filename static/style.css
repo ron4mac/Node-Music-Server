@@ -68,6 +68,23 @@ form i.fa {
 	margin-right: .5rem;
 }
 
+/* LOCAL AUDIO */
+#localAudio {
+	display: none;
+	background-color: lavender;
+	border-bottom: 1px solid #CCC;
+}
+#localaudio {
+	height: 30px;
+	vertical-align: middle;
+/*	width: 100%;
+	display: none;*/
+}
+.marquis {
+	color: maroon;
+	font-size: larger;
+	vertical-align: middle;
+}
 
 /* ADMIN */
 /* Style the tab */

@@ -436,6 +436,7 @@ const webPandora = async (what, bobj, resp) => {
 	if (!settings.pandora_pass && what!='login') {
 		resp.write(fs.readFileSync('services/pandora/login.html',{encoding:'utf8'}));
 		resp.end();
+		return;
 	}
 	if (!pandora && what!='login') {
 		if (!mympd) {

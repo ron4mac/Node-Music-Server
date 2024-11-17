@@ -240,8 +240,18 @@ const doComb = (btn) => {
 
 // UI display
 const displayCurrent = (what) => {
-	document.getElementById('marquis').innerHTML = what;
+	//document.getElementById('marquis').innerHTML = what;
+	document.querySelectorAll('.marquis').forEach((elm)=>{elm.innerHTML = what});
 }
+
+// LOCAL AUDIO
+const showLocalAudio = (yn) => {
+	const acts = yn ? {mpdcontrols:'none',localAudio:'block'} : {localAudio:'none',mpdcontrols:'block'};
+	for (const [k, v] of Object.entries(acts)) {
+		document.getElementById(k).style.display = v;
+	}
+}
+
 
 // MPD direct
 const mpdCmd = (cmd) => {
@@ -316,6 +326,7 @@ const radioSearch = () => {
 	}
 };
 const radioPlay = (evt) => {
+console.log(evt);
 	let elm = evt.target;
 	let elmwurl = elm.closest('[data-url]');
 	if (elmwurl.parentElement.className=='rad-link') {
@@ -324,12 +335,13 @@ const radioPlay = (evt) => {
 	}
 	evt.preventDefault();
 	let bobj = elmwurl.dataset.url;
-	let how = elm.noneName=='IMG' ? 'play' : 'lplay';
+	let how = elm.nodeName=='IMG' ? 'lplay' : 'play';
 	const parms = {act:'radio', what: how, bobj: bobj};
 	postAction(null, parms, (data) => {
 		console.log(data);
-		displayCurrent('Radio: '+evt.target.closest('[data-url]').innerHTML);
+		displayCurrent('Radio: '+elmwurl.querySelector('a').innerHTML);
 		if (data) {
+			showLocalAudio(true);
 			const laudio = document.getElementById('localaudio');
 			laudio.src = data;
 			laudio.play();
