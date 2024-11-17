@@ -13,6 +13,28 @@ module.exports = class TuneIn {
 		this.mpdc = mympd;
 	}
 
+	action (what, bobj, resp) {
+		switch (what) {
+		case 'home':
+			let b = (bobj!=='undefined') ? atob(bobj) : '';
+			this.browse(b, resp);
+			break;
+		case 'search':
+			this.search(bobj, resp);
+			break;
+		case 'play':
+			this.play(bobj, resp);
+			break;
+		case 'lplay':
+			this.lplay(bobj, resp);
+			break;
+		case 'clear':
+			this.mpdc.clear();
+			resp.end();
+			break;
+		}
+	}
+
 	browse (surl, resp) {
 		let dat = '';
 		http.get(baseUrl+surl, (r) => {
@@ -84,7 +106,21 @@ module.exports = class TuneIn {
 				// drove me CRAZY discovering that linefeeds at the end caused things to hang!
 				let surl = dat.replace(/[\r\n]+/gm, '');
 				this.startRadio(surl);
-				resp.end()
+				resp.end();
+			});
+		}).end();
+	}
+
+	lplay (url, resp) {
+		let dat = '';
+		http.get(url, (r) => {
+			r.on('data', (chunk) => {
+				dat += chunk;
+			}).on('end', () => {
+				// drove me CRAZY discovering that linefeeds at the end caused things to hang!
+				let surl = dat.replace(/[\r\n]+/gm, '');
+				//this.startRadio(surl);
+				resp.end(surl);
 			});
 		}).end();
 	}
@@ -126,11 +162,11 @@ module.exports = class TuneIn {
 				case 'link':
 					let urlsuf = itm.URL.split('/').pop();
 					let aid = itm.guide_id??itm.key;
-					resp.write('<div class="rad-link"><a href="#'+aid+'" data-url="'+btoa(urlsuf)+'" onclick="radioNav(event,this)">'+txt+'</a></div>');
+					resp.write('<div class="rad-link"><a href="#'+aid+'" data-url="'+btoa(urlsuf)+'">'+txt+'</a></div>');
 					if (itm.children) webRadioParse(itm.children, resp);
 					break;
 				case 'audio':
-					resp.write('<div class="rad-station"><img src="'+itm.image+'"><a href="#'+itm.guide_id+'" data-url="'+itm.URL+'" onclick="radioPlay(event)">'+txt+'</a></div>');
+					resp.write('<div class="rad-station" data-url="'+itm.URL+'"><img src="'+itm.image+'"><a href="#'+itm.guide_id+'">'+txt+'</a></div>');
 				//	resp.write('<div class="rad-station">'+txt+'</div>');
 					break;
 				case 'text':

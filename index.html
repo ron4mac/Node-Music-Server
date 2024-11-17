@@ -14,9 +14,11 @@
 <script src="static/upload.js"></script>
 </head>
 <body>
+	<audio id ="localaudio">Your browser does not support the audio element.</audio>
 	<!-- Tab links -->
 	<div class="tab">
 		<button class="tablinks" onclick="openTab(event, 'tuninTab', tipop)">Internet Radio</button>
+		<button class="tablinks" onclick="openTab(event, 'pandoraTab', pdpop)">Pandora</button>
 		<button class="tablinks" onclick="openTab(event, 'plstsTab', plpop)" id="defaultOpen">Playlists</button>
 		<button class="tablinks nompd" onclick="openTab(event, 'sglTab')">Extract Audio from a Single File</button>
 		<button class="tablinks nompd" onclick="openTab(event, 'lstTab')">Extract Audio from an Entire Playlist</button>
@@ -38,7 +40,31 @@
 		</div>
 		<div id="tuninTab" class="tabcontent">
 			<div id="radcrumbs" onclick="radioBack(event)"><a href="#" data-bobj="">Home</a><i class="fa fa-search" aria-hidden="true" onclick="radioSearch()"></i></div>
-			<div id="radio"></div>
+			<div id="radio" onclick="radioPlay(event)"></div>
+		</div>
+		<div id="pandoraTab" class="tabcontent">
+			<!-- ><nav class="plmnu">
+				<ul>
+					<li><a href="#" data-menu="plply">Play</a></li>
+					<li><a href="#" data-menu="pldel">Delete</a></li>
+					<li><a href="#" data-menu="plvue">View</a></li>
+				</ul>
+			</nav> -->
+			<div id="stations"></div>
+			<div id="albumart">
+				<div class="prevnext" onclick="prevnext(event)">
+					<i class="fa fa-arrow-circle-left left" aria-hidden="true"></i>
+					<i class="fa fa-arrow-circle-right right" aria-hidden="true"></i>
+				</div>
+				<img src="">
+				<div>
+					<dl>
+					<dt>Artist: </dt><dd class="artist"></dd>
+					<dt>Album: </dt><dd class="album"></dd>
+					<dt>Song: </dt><dd class="song"></dd>
+					</dl>
+				</div>
+			</div>
 		</div>
 		<div id="plstsTab" class="tabcontent">
 			<nav class="plmnu">

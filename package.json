@@ -30,10 +30,14 @@
   "homepage": "https://github.com/ron4mac/yt-audio-extract#readme",
   "dependencies": {
     "@distube/ytdl-core": "^4.15.1",
+    "anesidora": "^1.2.1",
     "archiver": "^6.0.1",
+    "cookie": "^1.0.1",
     "fast-xml-parser": "^4.5.0",
     "formidable": "^2.1.2",
     "mpd2": "^1.0.5",
+    "snekfetch": "^4.0.4",
+    "ws": "^8.18.0",
     "ytpl": "^2.3.0"
   }
 }

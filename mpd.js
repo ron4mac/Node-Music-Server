@@ -4,9 +4,14 @@ const mpdConnOpts = {path: '/run/mpd/socket'};
 
 module.exports = class MyMPD {
 
-	constructor (mpdc, status) {
+	constructor (mpdc, status, full=false) {
 		this.mpdc = mpdc;
 		this.mstatus = status;
+		if (full) {
+			this.mpdc.on('system-player', (a,b) => {
+				console.log('on system player event ',a,b)
+			});
+		}
 	}
 
 	static async init () {
@@ -14,7 +19,7 @@ module.exports = class MyMPD {
 		//mop = {port:6600, host: 'localhost'};
 		const mpdc = await MPD.connect(mop);
 		const status = await mpdc.sendCommand('status').then(MPD.parseObject);
-		return new MyMPD(mpdc,status);
+		return new MyMPD(mpdc,status,true);
 	}
 
 	async getVolume () {
@@ -41,7 +46,7 @@ module.exports = class MyMPD {
 	}
 
 	sendCommand (cmd) {
-		this._sendCommand(cmd);
+		return this._sendCommand(cmd);
 	}
 
 	sendCommands (cmds) {
@@ -73,10 +78,17 @@ module.exports = class MyMPD {
 	async _status () {
 		console.log('status');
 		this.mstatus = await this.mpdc.sendCommand('status').then(MPD.parseObject);
+		return this.mstatus;
 	}
 
 	async _sendCommand (cmd) {
-		let rslt = await this.mpdc.sendCommand(cmd);
+		try {
+			let rslt = await this.mpdc.sendCommand(cmd);
+			return rslt;
+		} catch (error) {
+			console.log(cmd);
+			console.error(error);
+		}
 	}
 
 	async _sendCommands (cmds) {

@@ -3,7 +3,7 @@ body {
 	position: relative;
 	line-height: 2rem;
 	margin: 2rem;
-	width: fit-content;
+/*	width: fit-content;*/
 }
 /* navigation */
 nav ul {
@@ -184,12 +184,52 @@ form i.fa {
 	height: 48px;
 	vertical-align: middle;
 	margin: 2px 6px 2px 0;
+	cursor: pointer;
 }
 .rheader {
 	background-color: gold;
 	font-size: x-large;
 	text-align: center;
 }
+
+/* pandora */
+#pandoraTab {
+	position: relative;
+}
+#albumart {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 50%;
+	padding: .5em;
+	background-color: aliceblue;
+}
+#albumart .prevnext {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: .4em;
+	font-size: larger;
+}
+#albumart img {
+	object-fit: contain;
+	width: 100%;
+}
+#albumart dl {
+	line-height: 1.4rem;
+	margin: 0;
+}
+#albumart dt {
+	display: inline-block;
+	width: 4rem;
+	text-align: right;
+	margin-right: 8px;
+}
+#albumart dd {
+	display: inline-block;
+	margin-left: 0;
+	color: blue;
+}
+
 /* filemanager */
 #filemanTab {
 	min-height: 480px;

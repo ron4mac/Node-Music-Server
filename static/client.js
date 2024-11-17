@@ -9,7 +9,9 @@ var _pp = 0,
 	tablinks,
 	plstseen = false,
 	rdioseen = false,
-	fileseen = false;
+	pdorseen = false,
+	fileseen = false,
+	mpdSocket = null;
 
 YTx.fup_done = (errs) => {
 	if (!errs) {
@@ -314,12 +316,24 @@ const radioSearch = () => {
 	}
 };
 const radioPlay = (evt) => {
+	let elm = evt.target;
+	let elmwurl = elm.closest('[data-url]');
+	if (elmwurl.parentElement.className=='rad-link') {
+		radioNav(evt, elm);
+		return;
+	}
 	evt.preventDefault();
-	let bobj = evt.target.closest('[data-url]').dataset.url;
-	const parms = {act:'radio', what: 'play', bobj: bobj};
+	let bobj = elmwurl.dataset.url;
+	let how = elm.noneName=='IMG' ? 'play' : 'lplay';
+	const parms = {act:'radio', what: how, bobj: bobj};
 	postAction(null, parms, (data) => {
 		console.log(data);
 		displayCurrent('Radio: '+evt.target.closest('[data-url]').innerHTML);
+		if (data) {
+			const laudio = document.getElementById('localaudio');
+			laudio.src = data;
+			laudio.play();
+		}
 	}, 1);
 };
 const getRadio = () => {
@@ -329,6 +343,72 @@ const getRadio = () => {
 		elm.innerHTML = data;
 	}, 1);
 };
+
+
+const pandoraLogin = (evt) => {
+	console.log(evt);
+	let frm = evt.target.form;
+	const parms = {act:'pandora', what: 'login', bobj:{user:frm.user.value, pass:frm.pass.value}};
+	postAction(null, parms, (data) => {
+		if (data) {
+			alert(data);
+		} else {
+			getPandora();
+		}
+	}, 1);
+};
+const pandoraSocket = () => {
+	if (!mpdSocket) {
+		mpdSocket = new WebSocket('ws://'+window.location.hostname+':6681');
+		// Connection opened
+		mpdSocket.addEventListener('open', (event) => {
+			mpdSocket.send('probe');
+		});
+		// Listen for messages
+		mpdSocket.addEventListener('message', (event) => {
+			console.log('Message from server ', event.data);
+			let data = JSON.parse(event.data);
+			let aa = document.getElementById('albumart');
+			aa.querySelector('img').src = data.albumArtUrl ? data.albumArtUrl : 'noimage.png';
+			aa.querySelector('.artist').innerHTML = data.artistName;
+			aa.querySelector('.album').innerHTML = data.albumName;
+			aa.querySelector('.song').innerHTML = data.songName;
+		});
+	}
+}
+const getPandora = () => {
+	const parms = {act:'pandora', what: 'home'};
+	const elm = document.getElementById('stations');
+	elm.innerHTML = '<i class="fa fa-spinner fa-pulse fa-lg"></i>';
+	postAction(null, parms, (data) => {
+		elm.innerHTML = data;
+		pandoraSocket();
+	}, 1);
+};
+const pandoraPlay = (evt) => {
+	evt.preventDefault();
+	let bobj = evt.target.closest('[data-sid]').dataset.sid;
+	const parms = {act:'pandora', what: 'play', bobj: bobj};
+	postAction(null, parms, (data) => {
+		console.log('PPlay',data);
+		displayCurrent('Pandora: '+evt.target.closest('[data-sid]').innerHTML);
+	}, 1);
+};
+const prevnext = (evt) => {
+	let t = evt.target;
+	if (t.nodeName=='I') {
+		let act = t.classList.contains('left') ? 'previous' : 'next';
+		const parms = {act:'mpd', what: 'cmd', bobj: act};
+		postAction(null, parms, (data) => {
+			if (data) alert(data);
+		}, 1);
+	}
+};
+
+
+
+
+
 const setVolSlider = () => {
 	const parms = {act:'mpd',what:'getVolume',bobj:'getVolume'};
 	postAction(null, parms, (data) => {
@@ -347,6 +427,15 @@ const bmpVolume = (amt) => {
 		document.getElementById('mpdvolume').value = data;
 	}, 1);
 }
+
+const pdpop = () => {
+	if (!pdorseen) {
+		setVolSlider();
+		getPandora();
+	}
+	pdorseen = true;
+};
+
 const tipop = () => {
 	if (!rdioseen) {
 		setVolSlider();

@@ -8,7 +8,8 @@ const path = require('path');
 const ytdl = require('@distube/ytdl-core');
 //const mpd = require('mpd');
 const MyMPD = require('./mpd.js');
-const TuneIn = require('./tunein.js');
+const TuneIn = require('./services/tunein/tunein.js');
+const Pandora = require('./services/pandora/pandora.js');
 
 const formidable = require('formidable');	//, {errors as formidableErrors} from 'formidable';
 const formidableErrors = formidable.errors;		//require('formidable:errors');
@@ -17,6 +18,7 @@ const hostname = process.env.NODE_WEB_HOST || '0.0.0.0';
 const debugMode = false;
 const enableUrlDecoding = true;
 const documentRoot = '.';
+const settingsFile = 'settings.json';
 const playlistDir = 'playlist';
 
 // polyfills
@@ -31,6 +33,8 @@ var pwtrk = '';
 var errs = [];
 var mympd = null;
 var tunein = null;
+var pandora = null;
+var plogdin = false;		// may be later expendable
 
 const emptyDir = (dir) => {
 	fs.readdir(dir, (err, files) => {
@@ -409,7 +413,8 @@ const webRadio = async (what, bobj, resp) => {
 		}
 		tunein = new TuneIn(mympd);
 	}
-	switch (what) {
+	tunein.action(what, bobj, resp);
+/*	switch (what) {
 	case 'home':
 		let b = (bobj!=='undefined') ? atob(bobj) : '';
 		tunein.browse(b, resp);
@@ -423,6 +428,54 @@ const webRadio = async (what, bobj, resp) => {
 	case 'clear':
 		mympd.clear();
 		resp.end();
+		break;
+	}*/
+};
+
+const webPandora = async (what, bobj, resp) => {
+	if (!settings.pandora_pass && what!='login') {
+		resp.write(fs.readFileSync('services/pandora/login.html',{encoding:'utf8'}));
+		resp.end();
+	}
+	if (!pandora && what!='login') {
+		if (!mympd) {
+			mympd = await MyMPD.init();
+		}
+		pandora = await Pandora.init(mympd, settings);
+		console.log('p init done');
+	}
+	switch (what) {
+	case 'home':
+		let b = (bobj!=='undefined') ? atob(bobj) : '';
+		pandora.browse(b, resp);
+		break;
+	case 'search':
+		tunein.search(bobj, resp);
+		break;
+	case 'play':
+		pandora.play(bobj, resp);
+		break;
+	case 'clear':
+		mympd.clear();
+		resp.end();
+		break;
+	case 'login':
+		Pandora.authenticate(bobj)
+		.then((rslt) => {
+			if (rslt) {
+				resp.end(rslt);
+			} else {
+				plogdin = true;				//@@@@@  save the login credentials  @@@@@@@
+				settings.pandora_user = bobj.user;
+				settings.pandora_pass = bobj.pass;
+				fs.writeFileSync(settingsFile, JSON.stringify(settings,null,"\t"));
+				resp.end();
+			}
+		});
+	//	let rslt = await pandora.authenticate(bobj);
+		break;
+	default:
+		resp.end('Unknown webPandora: '+what);
 		break;
 	}
 };
@@ -520,6 +573,10 @@ const filemanAction = (parms, resp) => {
 		break;
 	case 'radio':
 		webRadio(parms.what, parms.bobj??'', resp);
+		return;
+		break;
+	case 'pandora':
+		webPandora(parms.what, parms.bobj??'', resp);
 		return;
 		break;
 	case 'mpd':
@@ -719,6 +776,14 @@ const serveFile = (filePath, response, url, pdata) => {
 		}
 	});
 };
+
+// merge settings
+try {
+	Object.assign(settings, JSON.parse(fs.readFileSync(settingsFile,{encoding:'utf8'})));
+	console.log(settings);
+} catch (err) {
+	console.error('no settings file merged');
+}
 
 // Web server
 http.createServer(function (request, response) {
