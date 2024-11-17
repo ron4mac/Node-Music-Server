@@ -1,6 +1,5 @@
 'use strict';
-//const { Client } = require('./pandora/index.js');
-const Anesidora = require('anesidora');
+const Anesidora = require('./anesidora');
 const WebSocket = require('ws');
 const iOSpartnerInfo = {
 		username: "iphone",
