@@ -1,12 +1,12 @@
 'use strict';
-const Anesidora = require('./anesidora');
+const Connect = require('./connect');
 const WebSocket = require('ws');
 const iOSpartnerInfo = {
-		username: "iphone",
-		password: "P2E4FC0EAD3*878N92B2CDp34I0B1@388137C",
-		deviceModel: "IP01",
-		decryptPassword: "20zE1E47BE57$51",
-		encryptPassword: "721^26xE22776"
+		username: 'iphone',
+		password: 'P2E4FC0EAD3*878N92B2CDp34I0B1@388137C',
+		deviceModel: 'IP01',
+		decryptPassword: '20zE1E47BE57$51',
+		encryptPassword: '721^26xE22776'
 	};
 
 
@@ -38,7 +38,7 @@ module.exports = class Pandora {
 	}
 
 	static async init (mpdc, settings) {
-		const client = new Anesidora(settings.pandora_user, settings.pandora_pass, iOSpartnerInfo);
+		const client = new Connect(settings.pandora_user, settings.pandora_pass, iOSpartnerInfo);
 		let rslt = await this._login(client);
 		return rslt ? null : new Pandora(client,mpdc,true);
 	}
@@ -66,7 +66,7 @@ module.exports = class Pandora {
 	}
 
 	static authenticate (parms) {
-		const client = new Anesidora(parms.user, parms.pass);
+		const client = new Connect(parms.user, parms.pass);
 		return this._login(client);
 	}
 
