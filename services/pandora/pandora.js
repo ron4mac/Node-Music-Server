@@ -1,4 +1,5 @@
 'use strict';
+const cntrlr = require('../../controller');
 const Connect = require('./connect');
 const WebSocket = require('ws');
 const iOSpartnerInfo = {
@@ -39,35 +40,96 @@ module.exports = class Pandora {
 
 	static async init (mpdc, settings) {
 		const client = new Connect(settings.pandora_user, settings.pandora_pass, iOSpartnerInfo);
-		let rslt = await this._login(client);
-		return rslt ? null : new Pandora(client,mpdc,true);
+		let rslt = false;	//await this._login(client);
+		return rslt ? null : new Pandora(client, mpdc, true);
+	}
+
+	action (what, bobj, resp) {
+		switch (what) {
+		case 'home':
+			this.authenticated()
+			.then(yn => {
+				if (yn) {
+					let b = (bobj!=='undefined') ? atob(bobj) : '';
+					this.browse(b, resp);
+				} else {
+					resp.write('<span class="warning">You are not authenticated with Pandora. ');
+					resp.end('Please login to Pandora (upper-right user icon)</span>');
+				}
+			});
+/*			if (!this.authenticated()) {
+				resp.write('<span class="warning">You are not authenticated with Pandora. ');
+				resp.end('Please login to Pandora (upper-right user icon)</span>');
+				return;
+			}
+			console.log('p-brose');
+			let b = (bobj!=='undefined') ? atob(bobj) : '';
+			this.browse(b, resp);*/
+			break;
+		case 'play':
+			this.play(bobj, resp);
+			break;
+		case 'clear':
+			this.mpdc.clear();
+			resp.end();
+			break;
+		case 'login':
+			this._login(this.client, bobj.user, bobj.pass)
+			.then(()=>{
+				if (this.client.authData) {
+					cntrlr.setSettings({pandora_user: bobj.user, pandora_pass: bobj.pass});
+					resp.end();
+				} else {
+					resp.end('FAILED TO AUTHENTICATE');
+				}
+			});
+			break;
+		case 'user':
+			const htm = this.client.authData ? 'user.html' : 'login.html';
+			resp.end(cntrlr.readFile('services/pandora/'+htm+'', 'FAILED TO READ'));
+			break;
+		default:
+			resp.end('Unknown webPandora: '+what);
+			break;
+		}
 	}
 
 	browse (surl, resp) {
 		if (this.client.authData) {
-		this.client.request('user.getStationList', (err, stationList) => {
-		//	console.log(stationList);
-			if (stationList) {
-				resp.end(this._parseStations(stationList.stations));
-			} else {
-				console.log(err);
-				resp.end('-- nope --');
-			}
-		});
+			this.client.request('user.getStationList', (err, stationList) => {
+			//	console.log(stationList);
+				if (stationList) {
+					resp.write(this._parseStations(stationList.stations));
+					resp.end();
+				} else {
+					console.log(err);
+					resp.end('-- nope --');
+				}
+			});
 		} else {
 			resp.end('-- NYA --');
 		}
 	}
 
 	play (stationid, resp) {
+		this.mpdc.sendCommand('clear');
 		this.stationid = stationid;
 		this._getTracks();
 		resp.end();
 	}
 
-	static authenticate (parms) {
-		const client = new Connect(parms.user, parms.pass);
-		return this._login(client);
+	// used to authenticate login
+	async authenticated () {
+		if (this.client.authData) return true;
+		const sets = cntrlr.settings;
+		if (!sets.pandora_user) return false;
+		console.log('trying to authenticate');
+		const yn = await this._login(this.client, sets.pandora_user, sets.pandora_pass)
+		.then(rslt => {
+			console.log('pdor auth',rslt);
+			return !rslt;
+		});
+		return yn;
 	}
 
 	// private methods
@@ -121,6 +183,7 @@ module.exports = class Pandora {
 	_playSocket () {
 		if (this.ws) {
 			this.mpdc.mpdc.on('system-player', (a,b) => {
+				if (!this.client.authData) return;
 				console.log('pdo on system player event ',a,b);
 				this.mpdc._status()
 				.then((stat) => {
@@ -155,10 +218,10 @@ module.exports = class Pandora {
 		}
 	}
 
-	static _login (client) {
+	_login (client, user, pass) {
 		return new Promise((resolve, reject) => {
 			try {
-				client.login((err) => {
+				client.login(user, pass, (err) => {
 					if (err) {
 						console.log(err);
 						resolve('Login Failure');

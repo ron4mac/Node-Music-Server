@@ -1,24 +1,28 @@
-const settings = require('./config');
+const config = require('./config');
+const cntrlr = require('./controller');
 const http = require('http');
 const https = require('https');
 const process = require('process');
 const {parse} = require('querystring');
 const fs = require('fs');
 const path = require('path');
-const ytdl = require('@distube/ytdl-core');
-//const mpd = require('mpd');
+//const ytdl = require('@distube/ytdl-core');
 const MyMPD = require('./mpd.js');
 const TuneIn = require('./services/tunein/tunein.js');
+const CalmRadio = require('./services/calmradio/calmradio.js');
 const Pandora = require('./services/pandora/pandora.js');
+const YTExtract = require('./services/ytextract/ytextract.js');
 
 const formidable = require('formidable');	//, {errors as formidableErrors} from 'formidable';
 const formidableErrors = formidable.errors;		//require('formidable:errors');
 
 const hostname = process.env.NODE_WEB_HOST || '0.0.0.0';
 const debugMode = false;
+
+const settings = cntrlr.getSettings();
+
 const enableUrlDecoding = true;
 const documentRoot = '.';
-const settingsFile = 'settings.json';
 const playlistDir = 'playlist';
 
 // polyfills
@@ -33,7 +37,9 @@ var pwtrk = '';
 var errs = [];
 var mympd = null;
 var tunein = null;
+var calmradio = null;
 var pandora = null;
+var ytextract = null;
 var plogdin = false;		// may be later expendable
 
 const emptyDir = (dir) => {
@@ -46,6 +52,7 @@ const emptyDir = (dir) => {
 		}
 	});
 }
+/*
 const getTrack = (trk, dest) => {
 	//console.log(trk.index,trk.title);
 	progv = trk.index + ' files processed';
@@ -60,7 +67,7 @@ const getTrack = (trk, dest) => {
 		if (tlist.length) {
 			getTrack(tlist.shift(), dest);
 		} else {
-			if (settings.extr2Intrn) {
+			if (config.extr2Intrn) {
 				progv = '.';
 			} else {
 				progv = 'Zipping Files ...';
@@ -182,7 +189,7 @@ const audioExtract = (parms, resp) => {
 		if (aud.error) {
 			let msg = aud.error.message.replace(/\"/g,'');
 			resp.end(`<script>parent.extrFini("sgl","${msg}")</script>`);
-		} else if (settings.extr2Intrn) {
+		} else if (config.extr2Intrn) {
 			let ws = fs.createWriteStream(baseDir+parms.tnam+'.'+aud.fext);
 			ws.on('finish', () => {
 				console.log('ws-end');
@@ -201,7 +208,7 @@ const getVideo = (yturl, which, vida, cb) => {
 	let rslt = {};
 	let fext = 'mp4';
 	let filter = vida == 'a' ? 'videoandaudio' : 'video';
-	ytdl.getInfo(yturl, {/*quality: 'highestvideo'*/})
+	ytdl.getInfo(yturl, {})
 	.then(info => {
 		console.log(info.formats);
 		let videoFormats = ytdl.filterFormats(info.formats, filter);	//console.log(videoFormats);
@@ -243,7 +250,7 @@ const videoExtract = (parms, resp) => {
 		if (vid.error) {
 			let msg = vid.error.message.replace(/\"/g,'');
 			resp.end(`<script>parent.extrFini("sgl","${msg}")</script>`);
-		} else if (settings.extr2Intrn) {
+		} else if (config.extr2Intrn) {
 			let ws = fs.createWriteStream(baseDir+parms.tnam+'.'+vid.fext);
 			ws.on('finish', () => {
 				console.log('ws-end');
@@ -275,7 +282,7 @@ const getStreams = (parms, resp) => {
 	});
 //	return strms;
 };
-
+*/
 const getNavMenu = (dir, resp) => {
 	let nav = '<div class="fmnav">';
 	let _D = '';
@@ -337,7 +344,7 @@ const playlistMenu = (resp) => {
 	});
 }
 
-const baseDir = settings.baseDir;
+const baseDir = config.baseDir;
 const getDirList = (dir, resp) => {
 	fs.readdir(baseDir+dir, {withFileTypes: true}, (err, files) => {
 		if (err) throw err;
@@ -390,7 +397,7 @@ const sendFile = (parms, fname, resp) => {
 };
 
 const receiveUpload = async (req, res) => {
-	const form = new formidable.IncomingForm({uploadDir: settings.upldTmpDir, maxFileSize: 2147483648});	// formidable({});
+	const form = new formidable.IncomingForm({uploadDir: config.upldTmpDir, maxFileSize: 2147483648});	// formidable({});
 	//let fields;
 	//let files;
 	form.parse(req, function(err, fields, files) {
@@ -414,71 +421,33 @@ const webRadio = async (what, bobj, resp) => {
 		tunein = new TuneIn(mympd);
 	}
 	tunein.action(what, bobj, resp);
-/*	switch (what) {
-	case 'home':
-		let b = (bobj!=='undefined') ? atob(bobj) : '';
-		tunein.browse(b, resp);
-		break;
-	case 'search':
-		tunein.search(bobj, resp);
-		break;
-	case 'play':
-		tunein.play(bobj, resp);
-		break;
-	case 'clear':
-		mympd.clear();
-		resp.end();
-		break;
-	}*/
+};
+
+const calmRadio = async (what, bobj, resp) => {
+	if (!calmradio) {
+		if (!mympd) {
+			mympd = await MyMPD.init();
+		}
+		calmradio = new CalmRadio(mympd);
+	}
+	calmradio.action(what, bobj, resp);
 };
 
 const webPandora = async (what, bobj, resp) => {
-	if (!settings.pandora_pass && what!='login') {
-		resp.write(fs.readFileSync('services/pandora/login.html',{encoding:'utf8'}));
-		resp.end();
-		return;
-	}
-	if (!pandora && what!='login') {
+	if (!pandora) {
 		if (!mympd) {
 			mympd = await MyMPD.init();
 		}
 		pandora = await Pandora.init(mympd, settings);
-		console.log('p init done');
 	}
-	switch (what) {
-	case 'home':
-		let b = (bobj!=='undefined') ? atob(bobj) : '';
-		pandora.browse(b, resp);
-		break;
-	case 'search':
-		tunein.search(bobj, resp);
-		break;
-	case 'play':
-		pandora.play(bobj, resp);
-		break;
-	case 'clear':
-		mympd.clear();
-		resp.end();
-		break;
-	case 'login':
-		Pandora.authenticate(bobj)
-		.then((rslt) => {
-			if (rslt) {
-				resp.end(rslt);
-			} else {
-				plogdin = true;				//@@@@@  save the login credentials  @@@@@@@
-				settings.pandora_user = bobj.user;
-				settings.pandora_pass = bobj.pass;
-				fs.writeFileSync(settingsFile, JSON.stringify(settings,null,"\t"));
-				resp.end();
-			}
-		});
-	//	let rslt = await pandora.authenticate(bobj);
-		break;
-	default:
-		resp.end('Unknown webPandora: '+what);
-		break;
+	pandora.action(what, bobj, resp);
+};
+
+const webYtextr = async (what, bobj, resp) => {
+	if (!ytextract) {
+		ytextract = new YTExtract();
 	}
+	ytextract.action(what, bobj, resp);
 };
 
 const mpdCtrl = async (what, bobj, resp) => {
@@ -576,8 +545,16 @@ const filemanAction = (parms, resp) => {
 		webRadio(parms.what, parms.bobj??'', resp);
 		return;
 		break;
+	case 'calm':
+		calmRadio(parms.what, parms.bobj??'', resp);
+		return;
+		break;
 	case 'pandora':
 		webPandora(parms.what, parms.bobj??'', resp);
+		return;
+		break;
+	case 'ytextr':
+		webYtextr(parms.what, parms.bobj??'', resp);
 		return;
 		break;
 	case 'mpd':
@@ -718,12 +695,12 @@ const serveFile = (filePath, response, url, pdata) => {
 
 	if (contentType.indexOf('/zip')>0) {
 		progv = 'Scanning playlist ...';
-		sendzip(filePath, response);
+		ytextract.sendzip(filePath, response);
 		return;
 	}
 
 	if (contentType.indexOf('mp4')>0) {
-		sendExtraction('video.mp4');
+		ytextract.sendExtraction('video.mp4');
 		return;
 	}
 
@@ -778,13 +755,14 @@ const serveFile = (filePath, response, url, pdata) => {
 	});
 };
 
-// merge settings
-try {
-	Object.assign(settings, JSON.parse(fs.readFileSync(settingsFile,{encoding:'utf8'})));
-	console.log(settings);
-} catch (err) {
-	console.error('no settings file merged');
-}
+
+console.log(cntrlr.getSettings());
+// some things have to be fully initialized ahead
+const pre_init = async () => {
+	mympd = await MyMPD.init();
+};
+pre_init();
+
 
 // Web server
 http.createServer(function (request, response) {
@@ -856,11 +834,11 @@ http.createServer(function (request, response) {
 		return;
 	}
 	if (url.startsWith('/?axtr')) {
-		audioExtract(parse(url.substring(2)), response);
+		ytextract.audioExtract(parse(url.substring(2)), response);
 		return;
 	}
 	if (url.startsWith('/?vxtr')) {
-		videoExtract(parse(url.substring(2)), response);
+		ytextract.videoExtract(parse(url.substring(2)), response);
 		return;
 	}
 	if (url.startsWith('/?sndf')) {
@@ -869,7 +847,7 @@ http.createServer(function (request, response) {
 	}
 	if (url.startsWith('/?pxtr')) {
 		progv = 'Scanning playlist ...';
-		getPlaylist(parse(url.substring(2)), response);
+		ytextract.getPlaylist(parse(url.substring(2)), response);
 		response.writeHead(200, {'Content-Type': 'text/html'});
 	//	response.end();
 		return;
@@ -882,7 +860,7 @@ http.createServer(function (request, response) {
 	}
 	if (url.startsWith('/?strms')) {
 		response.writeHead(200, {'Content-Type': 'text/plain'});
-		getStreams(parse(url.substring(2)), response);
+		ytextract.getStreams(parse(url.substring(2)), response);
 	//	response.end(JSON.stringify(strms));
 		return;
 	}
@@ -914,7 +892,7 @@ http.createServer(function (request, response) {
 	// serve the file
 	serveFile(filePath.split('?').shift(), response, url, pdata);
 
-}).listen(settings.port, hostname, () => {
-	console.log(`YT Audio Extraction Server (http://${hostname}:${settings.port}) started`);
+}).listen(config.port, hostname, () => {
+	console.log(`YT Audio Extraction Server (http://${hostname}:${config.port}) started`);
 });
 

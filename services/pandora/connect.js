@@ -12,17 +12,18 @@ module.exports = class Connect {
 	static path = '/services/json/';
 
 	constructor (username, password, partnerInfo) {
-		this.username = username;
-		this.password = password;
+	//	this.username = username;
+	//	this.password = password;
 		this.partnerInfo = _.extend(partnerInfo, {version: '5'});
 		this.authData = null;
 		this.cryptiv = new Buffer.alloc(0);
 	}
 
-	login (callback) {
+	login (username, password, callback) {
 		this._partnerLogin(this.partnerInfo, (err, partner) => {
 			if (err) return callback(err);
-			this._userLogin(this.partnerInfo.encryptPassword, partner, this.username, this.password, (err, user) => {
+		//	this._userLogin(this.partnerInfo.encryptPassword, partner, this.username, this.password, (err, user) => {
+			this._userLogin(this.partnerInfo.encryptPassword, partner, username, password, (err, user) => {
 				if (err) return callback(err);
 				this.authData = {
 					userAuthToken: user.userAuthToken,

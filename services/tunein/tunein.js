@@ -2,15 +2,24 @@
 const http = require('http');
 const https = require('https');
 const { XMLParser } = require('fast-xml-parser');
-//const mpd22 = require('mpd2');
+const WebSocket = require('ws');
 
 const baseUrl = 'http://opml.radiotime.com/';
-const mpdConnOpts = {path: '/run/mpd/socket'};
 
 module.exports = class TuneIn {
 
 	constructor (mympd) {
 		this.mpdc = mympd;
+//		this.ws = new WebSocket.Server({port:6682});
+//		this.ws.on('connection', (sc) => {
+//			sc.on('error', console.error);
+//			sc.on('message', (data) => {
+//				console.log('received: %s', data);
+//				this._socketRequest(data)
+//				.then(reply => sc.send(reply));
+//			});
+//		});
+//		this._streamSocket();
 	}
 
 	action (what, bobj, resp) {
@@ -75,20 +84,6 @@ module.exports = class TuneIn {
 
 	startRadio (surl) {
 		try {
-		//	if (!this.mpdc) {
-		//		let mop = mpdConnOpts;
-		//		//mop = {port:6600, host: 'localhost'};
-		//		this.mpdc = await mpd22.connect(mop);
-		//	}
-
-		//	this.mpdc.on('close', () => console.log('client connection closed'));
-		//	this.mpdc.on('system', name => console.log('on system event: %s', name));
-		//	this.mpdc.on('system-player', (a,b) => console.log('on system player event',a,b));
-
-		//	console.log('get mpd status');
-		//	const status = await this.mpdc.sendCommand('status').then(mpd22.parseObject)
-		//	console.log(status)
-
 			this.mpdc.sendCommand('clear');
 			this.mpdc.sendCommand('add '+surl);
 			this.mpdc.sendCommand('play');
@@ -124,21 +119,6 @@ module.exports = class TuneIn {
 			});
 		}).end();
 	}
-
-/*
-	async clear () {
-		try {
-			if (!this.mpdc) {
-				let mop = mpdConnOpts;
-				//mop = {port:6600, host: 'localhost'};
-				this.mpdc = await mpd22.connect(mop);
-			}
-			const r0 = await this.mpdc.sendCommand('clear');
-		} catch (error) {
-			console.error(error);
-		}
-	}
-*/
 
 // @@@@@ private methods
 	_radioParse (data, resp) {
@@ -180,5 +160,37 @@ module.exports = class TuneIn {
 		}
 	}
 
-	_connect 
+/*
+	_sendWebClients (data) {
+		this.ws.clients.forEach((client) => {
+			if (client.readyState === WebSocket.OPEN) {
+				client.send(data);
+			}
+		});
+	}
+
+	async _socketRequest (msg) {
+		this.mpdc.sendCommand('playlistinfo')
+		.then((resp) => {
+			console.log('@tunein@\n', resp);
+			const info = this.mpdc.parseData(resp);
+			return info ? info.title : '?-?-?';
+		});
+	}
+
+	_streamSocket () {
+		this.mpdc.mpdc.on('system', name => {
+			console.log('system stream event ', name);
+			if (name=='playlist') {
+				this.mpdc.sendCommand('playlistinfo')
+				.then((resp) => {
+					console.log('@tunein@\n', resp);
+					const info = this.mpdc.parseData(resp);
+					if (info) this._sendWebClients(info.title);
+				});
+			}
+		});
+	}
+*/
+
 };

@@ -1,0 +1,11 @@
+<style>
+.calmlogin {display:inline-block}
+.calmlogin * {float:right}
+.calmlogin input {margin-left:.5em}
+</style>
+<h3>You may login to your Calm Radio account</h3>
+<form class="calmlogin" onsubmit="return false">
+<label>User <input type="text" name="user" required></label><br>
+<label>Password<input type="password" name="pass" required></label><br>
+<button type="submit" onclick="calmLogin(event)">Submit</buttom>
+</form>

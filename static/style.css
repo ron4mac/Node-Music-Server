@@ -1,10 +1,25 @@
 body {
 	background-color: #E0F0F0;
 	position: relative;
-	line-height: 2rem;
-	margin: 2rem;
+/*	line-height: 2rem;
+	margin: 2rem;*/
 /*	width: fit-content;*/
 }
+
+/* overall layout */
+.content {
+	line-height: 1.5rem;
+	height: calc(100vh - 16px);
+	display: flex;
+	flex-direction: column;
+}
+
+/* various colorations */
+.warning {
+	color: coral;
+	font-size: large;
+}
+
 /* navigation */
 nav ul {
 	padding: 0;
@@ -77,10 +92,11 @@ form i.fa {
 #localaudio {
 	height: 30px;
 	vertical-align: middle;
+	margin-right: .5rem;
 /*	width: 100%;
 	display: none;*/
 }
-.marquis {
+.marquis, .curtrk {
 	color: maroon;
 	font-size: larger;
 	vertical-align: middle;
@@ -89,21 +105,24 @@ form i.fa {
 /* ADMIN */
 /* Style the tab */
 .tab {
-	overflow: hidden;
-	border: 1px solid #ccc;
+/*	overflow: hidden;*/
+	border-bottom: 1px solid #CCC;
 /*	background-color: #f1f1f1;*/
+	display: flex;
 }
 
 /* Style the buttons that are used to open the tab content */
 .tab button {
 	background-color: #f1f1f1;
-	float: left;
+/*	float: left;*/
 	border: none;
 	outline: none;
 	cursor: pointer;
 	padding: 14px 16px;
 	transition: 0.3s;
-	border-right: 1px solid #DDD;
+	border: 1px solid #CCC;
+	border-bottom: none;
+	margin-right: -1px;
 }
 
 /* Change background color of buttons on hover */
@@ -119,6 +138,7 @@ form i.fa {
 /* the panels enclosure*/
 .panels {
 /*	padding: .75rem;*/
+	height: 100%;
 	border: 1px solid #ccc;
 	border-top: none;
 }
@@ -186,6 +206,7 @@ form i.fa {
 }
 #radcrumbs i {
 	float: right;
+	margin-left: 1rem;
 	font-size: larger;
 	color: gray;
 	cursor: pointer;
@@ -209,11 +230,42 @@ form i.fa {
 	text-align: center;
 }
 
+/* Calm Radio */
+#calm {
+	display: flex;
+	flex-wrap: wrap;
+}
+#calm .calm-link {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+#calm .calm-play, #calm .calm-noplay {
+	position: relative;
+}
+#calm .calm-play a, #calm .calm-noplay span {
+	position: absolute;
+	left: 50%;
+	padding: 0 1rem;
+	background-color: #E0F0F0;
+	transform: translate(-50%);
+	bottom: 1rem;
+	white-space: nowrap;
+}
+#calm img {
+	width: 300px;
+	height: 300px;
+}
+#calm img.noplay {
+	opacity: 0.3;
+}
+
 /* pandora */
 #pandoraTab {
 	position: relative;
 }
 #albumart {
+	display: none;
 	position: absolute;
 	top: 0;
 	right: 0;

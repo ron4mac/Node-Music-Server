@@ -9,9 +9,12 @@ var _pp = 0,
 	tablinks,
 	plstseen = false,
 	rdioseen = false,
+	calmseen = false,
 	pdorseen = false,
 	fileseen = false,
-	mpdSocket = null;
+	ytxseen = false,
+	pdorSocket = null;
+//	radioSocket = null;
 
 YTx.fup_done = (errs) => {
 	if (!errs) {
@@ -83,6 +86,7 @@ const watchP = () => {
 const dlfile = () => {
 	document.getElementById('dnldf').src = 'video.mp4';
 };
+/*
 const streamSelect = (frm, type) => {
 	let selt = document.querySelector('#sseld table tbody');
 	if (type=='audio') {
@@ -124,7 +128,27 @@ const vrequest = (evt, frm) => {
 		if (evt.submitter.name=='ginf') getVideo(frm);
 	}
 };
+*/
 const openTab = (evt, tabName, cb) => {
+	let tab = evt.currentTarget;
+	const pnls = tab.parentElement.nextElementSibling.querySelectorAll(':scope > div.tabcontent');
+	let i;
+	for (i = 0; i < pnls.length; i++) {
+		pnls[i].style.display = 'none';
+	}
+	const tlnks = tab.parentElement.querySelectorAll('.tablinks');
+	for (i = 0; i < tlnks.length; i++) {
+		tlnks[i].classList.remove('active');
+	}
+	// hide/show MPD control as needed
+	document.getElementById('mpdcontrols').style.display = tab.classList.contains('nompd') ? 'none' : 'block';
+	// Show the current tab, and add an "active" class to the button that opened the tab
+	document.getElementById(tabName).style.display = 'block';
+	tab.classList.add('active');
+	if (typeof cb === 'function') cb();
+};
+/*
+const sv_openTab = (evt, tabName, cb) => {
 	let tab = evt.currentTarget;
 	let i;
 	for (i = 0; i < tabcontent.length; i++) {
@@ -140,6 +164,22 @@ const openTab = (evt, tabName, cb) => {
 	tab.classList.add('active');
 	if (typeof cb === 'function') cb();
 };
+const openTabXt = (evt, tabName, cb) => {
+	let tab = evt.currentTarget;
+	const tabs = document.querySelectorAll('#ytextract .panels .tabcontent');
+	let i;
+	for (i = 0; i < tabs.length; i++) {
+		tabs[i].style.display = 'none';
+	}
+	const tlnks = document.querySelectorAll('#ytextract .tablinks');
+	for (i = 0; i < tlnks.length; i++) {
+		tlnks[i].classList.remove('active');
+	}
+	// Show the current tab, and add an "active" class to the button that opened the tab
+	document.getElementById(tabName).style.display = 'block';
+	tab.classList.add('active');
+	if (typeof cb === 'function') cb();
+};*/
 const getPlaylists = () => {
 	fetch('?plstl', {method:'GET'})
 	.then((resp) => resp.text())
@@ -240,8 +280,10 @@ const doComb = (btn) => {
 
 // UI display
 const displayCurrent = (what) => {
-	//document.getElementById('marquis').innerHTML = what;
 	document.querySelectorAll('.marquis').forEach((elm)=>{elm.innerHTML = what});
+}
+const displayCurrentTrack = (what) => {
+	document.querySelectorAll('.curtrk').forEach((elm)=>{elm.innerHTML = what});
 }
 
 // LOCAL AUDIO
@@ -269,6 +311,30 @@ const mpdCmdBug = (cmd) => {
 	}, 1);
 }
 
+// service load helpers
+const load_scripts = (elmt,_cb) => {
+	if (!elmt) return;
+	const scripts = elmt.getElementsByTagName('script');
+	if (!scripts) return;
+
+	let file = null,
+		fileref = null;
+	for (let i = 0; i < scripts.length; i++) {
+		file = scripts[i].getAttribute('src');
+		if (file) {
+			fileref = document.createElement('script');
+			fileref.setAttribute('type', 'text/javascript');
+			fileref.async = true;
+			fileref.onload = _cb;
+			fileref.setAttribute('src', file);
+			document.getElementsByTagName('head').item(0).appendChild(fileref);
+		} else {
+			let jsx = scripts[i].innerText;
+			window['eval'].call(window, jsx);
+		}
+	}
+};
+
 // TuneIn radio interface
 const radioControl = (w) => {
 	let what, xtra;
@@ -276,6 +342,7 @@ const radioControl = (w) => {
 	case 'clear':
 		what = 'clear';
 		displayCurrent('');
+		displayCurrentTrack('');
 		break;
 	}
 	const parms = {act:'radio', what: what, bobj: xtra};
@@ -326,7 +393,7 @@ const radioSearch = () => {
 	}
 };
 const radioPlay = (evt) => {
-console.log(evt);
+	//console.log(evt);
 	let elm = evt.target;
 	let elmwurl = elm.closest('[data-url]');
 	if (elmwurl.parentElement.className=='rad-link') {
@@ -338,8 +405,78 @@ console.log(evt);
 	let how = elm.nodeName=='IMG' ? 'lplay' : 'play';
 	const parms = {act:'radio', what: how, bobj: bobj};
 	postAction(null, parms, (data) => {
-		console.log(data);
 		displayCurrent('Radio: '+elmwurl.querySelector('a').innerHTML);
+		if (data) {
+			console.log(data);
+			showLocalAudio(true);
+			const laudio = document.getElementById('localaudio');
+			laudio.src = data;
+			laudio.play();
+		}
+	}, 1);
+};
+/*
+const radSocket = () => {
+	if (!radioSocket) {
+		radioSocket = new WebSocket('ws://'+window.location.hostname+':6682');
+		// Connection opened
+		radioSocket.addEventListener('open', (event) => {
+			radioSocket.send('probe');
+		});
+		// Listen for messages
+		radioSocket.addEventListener('message', (event) => {
+			console.log('Radio message from server ', event.data);
+		//	let data = JSON.parse(event.data);
+		//	let aa = document.getElementById('albumart');
+		//	aa.querySelector('img').src = data.albumArtUrl ? data.albumArtUrl : 'noimage.png';
+		//	aa.querySelector('.artist').innerHTML = data.artistName;
+		//	aa.querySelector('.album').innerHTML = data.albumName;
+		//	aa.querySelector('.song').innerHTML = data.songName;
+		});
+	}
+}
+*/
+const getRadio = () => {
+	const parms = {act:'radio', what: 'home'};
+	postAction(null, parms, (data) => {
+		let elm = document.getElementById('radio');
+		elm.innerHTML = data;
+//		radSocket();
+	}, 1);
+};
+
+const calmBack = (evt) => {
+	console.log(evt);
+	calmNav(evt, evt.target);
+};
+const calmNav = (evt, elm) => {
+	evt.preventDefault();
+	let bobj = elm.closest('[data-url]').dataset.url;
+	const parms = {act:'calm', what: 'home', bobj: bobj};
+	postAction(null, parms, (data) => {
+		let el = document.getElementById('calm');
+		el.innerHTML = data;
+		let bt = elm.closest('a').innerHTML;
+		el = document.getElementById('radcrumbs');
+		if (el.innerHTML) el.innerHTML += '::';
+		el.innerHTML += '<a href="#" data-bobj="'+bobj+'">'+bt+'</a>';
+	}, 1);
+};
+const calmPlay = (evt) => {
+	console.log(evt);
+	let elm = evt.target;
+	let elmwurl = elm.closest('[data-url]');
+	if (elmwurl.parentElement.className=='calm-link') {
+		calmNav(evt, elm);
+		return;
+	}
+	evt.preventDefault();
+	let bobj = elmwurl.dataset.url;
+	let how = elm.nodeName=='IMG' ? 'lplay' : 'play';
+	const parms = {act:'calm', what: how, bobj: bobj};
+	postAction(null, parms, (data) => {
+		console.log(data);
+		displayCurrent('Calm Radio: '+elmwurl.parentElement.querySelector('a').innerHTML);
 		if (data) {
 			showLocalAudio(true);
 			const laudio = document.getElementById('localaudio');
@@ -348,10 +485,17 @@ console.log(evt);
 		}
 	}, 1);
 };
-const getRadio = () => {
-	const parms = {act:'radio', what: 'home'};
+const calmUser = () => {
+	const parms = {act:'calm', what: 'user'};
 	postAction(null, parms, (data) => {
-		let elm = document.getElementById('radio');
+		let elm = document.getElementById('calm');
+		elm.innerHTML = data;
+	}, 1);
+};
+const getCalm = () => {
+	const parms = {act:'calm', what: 'home'};
+	postAction(null, parms, (data) => {
+		let elm = document.getElementById('calm');
 		elm.innerHTML = data;
 	}, 1);
 };
@@ -369,22 +513,31 @@ const pandoraLogin = (evt) => {
 		}
 	}, 1);
 };
+const pdorUser = () => {
+	const parms = {act:'pandora', what: 'user'};
+	postAction(null, parms, (data) => {
+		let elm = document.getElementById('stations');
+		elm.innerHTML = data;
+	}, 1);
+};
 const pandoraSocket = () => {
-	if (!mpdSocket) {
-		mpdSocket = new WebSocket('ws://'+window.location.hostname+':6681');
+	if (!pdorSocket) {
+		pdorSocket = new WebSocket('ws://'+window.location.hostname+':6681');
 		// Connection opened
-		mpdSocket.addEventListener('open', (event) => {
-			mpdSocket.send('probe');
+		pdorSocket.addEventListener('open', (event) => {
+			pdorSocket.send('probe');
 		});
 		// Listen for messages
-		mpdSocket.addEventListener('message', (event) => {
+		pdorSocket.addEventListener('message', (event) => {
 			console.log('Message from server ', event.data);
 			let data = JSON.parse(event.data);
+			displayCurrentTrack(data.artistName+' - '+data.songName);
 			let aa = document.getElementById('albumart');
 			aa.querySelector('img').src = data.albumArtUrl ? data.albumArtUrl : 'noimage.png';
 			aa.querySelector('.artist').innerHTML = data.artistName;
 			aa.querySelector('.album').innerHTML = data.albumName;
 			aa.querySelector('.song').innerHTML = data.songName;
+			aa.style.display = 'block';
 		});
 	}
 }
@@ -417,7 +570,14 @@ const prevnext = (evt) => {
 	}
 };
 
-
+const getYtx = () => {
+	const parms = {act:'ytextr', what: 'load'};
+	const elm = document.getElementById('ytextract');
+	postAction(null, parms, (data) => {
+		elm.innerHTML = data;
+		load_scripts(elm);
+	}, 1);
+}
 
 
 
@@ -440,13 +600,22 @@ const bmpVolume = (amt) => {
 	}, 1);
 }
 
-const pdpop = () => {
-	if (!pdorseen) {
-		setVolSlider();
-		getPandora();
-	}
-	pdorseen = true;
-};
+const mpdSocket = () => {
+	const socket = new WebSocket('ws://'+window.location.hostname+':'+config.socket);
+	// Connection opened
+	socket.addEventListener('open', (event) => {
+		socket.send('probe');
+	});
+	// Listen for messages
+	socket.addEventListener('message', (event) => {
+		console.log('MPD message from server ', event.data);
+		//let data = JSON.parse(event.data);
+		displayCurrentTrack(event.data);
+	});
+}
+
+
+
 
 const tipop = () => {
 	if (!rdioseen) {
@@ -455,6 +624,30 @@ const tipop = () => {
 	}
 	rdioseen = true;
 };
+
+const pdpop = () => {
+	if (!pdorseen) {
+		setVolSlider();
+		getPandora();
+	}
+	pdorseen = true;
+};
+
+const crpop = () => {
+	if (!calmseen) {
+		setVolSlider();
+		getCalm();
+	}
+	calmseen = true;
+};
+
+const ytxpop = () => {
+	if (!ytxseen) {
+		getYtx();
+	}
+	ytxseen = true;
+};
+
 
 // Playlists interface
 const plpop = () => {
@@ -512,6 +705,8 @@ const fmpop = () => {
 	if (!fileseen) getDirList(curDir);
 	fileseen = true;
 };
+
+
 const doMenu = (actn, evt) => {
 	console.log(actn);
 	const slctd = document.querySelectorAll('.fsel:checked'),
