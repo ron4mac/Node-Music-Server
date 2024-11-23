@@ -1,8 +1,11 @@
-var settings = {
-  port: '6680',
-  baseDir: '/var/www/',
-  upldTmpDir: '/var/www/',
-  extr2Intrn: true
+var config = {
+	port: 6680,
+	socket: 6683,
+	pandora_socket: 6681,
+	baseDir: '/media/YTx/',
+	upldTmpDir: '/tmp/',
+	extr2Intrn: true
 }; 
-
-module.exports = settings;
+if (typeof module === 'object') {
+	module.exports = config;
+}
