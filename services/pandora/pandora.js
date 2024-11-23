@@ -27,11 +27,14 @@ module.exports = class Pandora {
 				// if message was 'probe' send albumart to this one connection
 				this.mpdc._status()
 				.then((stat) => {
+					let msg;
 					if (stat.songid) {
-						let msg = JSON.stringify(this.queue[stat.songid]);
+						msg = {...{state: stat.state}, ...this.queue[stat.songid]};
 						console.log(msg);
-						sc.send(msg);
+					} else {
+						msg = {state: stat.state};
 					}
+					sc.send(JSON.stringify(msg));
 				});
 			});
 			this._playSocket();
@@ -189,14 +192,9 @@ module.exports = class Pandora {
 				.then((stat) => {
 					//console.log(stat);
 					console.log(stat.song+'/'+stat.playlistlength);
+					let msg;
 					if (stat.songid) {
-						let msg = JSON.stringify(this.queue[stat.songid]);
-						console.log(msg);
-						this.ws.clients.forEach((client) => {
-							if (client.readyState === WebSocket.OPEN) {
-								client.send(msg);
-							}
-						});
+						msg = {...{state: stat.state}, ...this.queue[stat.songid]};
 						if (stat.playlistlength-stat.song < 2) {
 							this._getTracks();
 						}
@@ -204,7 +202,15 @@ module.exports = class Pandora {
 							this.mpdc.sendCommand('delete 0:4')
 							.then(()=>this._cleanQueue());
 						}
+					} else {
+						msg = {state: stat.state};
 					}
+					console.log(msg);
+					this.ws.clients.forEach((client) => {
+						if (client.readyState === WebSocket.OPEN) {
+							client.send(JSON.stringify(msg));
+						}
+					});
 				});
 			});
 		}

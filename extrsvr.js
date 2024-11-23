@@ -52,237 +52,7 @@ const emptyDir = (dir) => {
 		}
 	});
 }
-/*
-const getTrack = (trk, dest) => {
-	//console.log(trk.index,trk.title);
-	progv = trk.index + ' files processed';
-	getAudioStream(trk.shortUrl, pwtrk, (aud) => {
-		//console.log(aud);
-		if (aud.error) {
-			console.log(aud.error.message);
-			errs.push(aud.error);
-		} else {
-			aud.stream.pipe(fs.createWriteStream(dest+'/'+trk.title+'.'+aud.fext));
-		}
-		if (tlist.length) {
-			getTrack(tlist.shift(), dest);
-		} else {
-			if (config.extr2Intrn) {
-				progv = '.';
-			} else {
-				progv = 'Zipping Files ...';
-				require('child_process').exec('zip -r playlist playlist',{},(error, stdout, stderr)=>{
-					progv = '.';
-				});
-			}
-		}
-	});
-}
-const getPlaylist = async (parms, resp) => {
-	const ytpl = require('ytpl');
-	fs.unlink('playlist.zip', (err) => 1);
-	emptyDir(playlistDir);
-	let plurl = parms.pxtr;
-	let list;
-	try {
-		list = await ytpl(plurl, {limit:Infinity});
-		resp.end();
-	} catch (err) {
-		let msg = err.message.replace(/\"/g,'');
-		resp.end(`<script>alert("${msg}")</script>`);
-		return;
-	}
-	tlist = list.items;
-console.log(tlist.length+' tracks');
-	pwtrk = parms.wtrk;
-	let _dd = baseDir+'playlist_'+Date.now();
-	fs.mkdirSync(_dd);
-	getTrack(tlist.shift(), _dd);
-}
 
-
-const sendExtraction = (filePath) => {
-	//console.log('[Info] Sending audio track');
-	let stats = fs.statSync(filePath);
-	gresp.setHeader('Content-Type', 'application/octet-stream');
-	gresp.setHeader('Content-Length', stats.size);
-	gresp.setHeader('Content-Disposition', 'attachment; filename="audio.m4a"');
-	let stream = fs.createReadStream(filePath);
-	stream.on("open", () => {
-		//gresp.set("Content-Type","video/mp4");
-		//gresp.writeHead(200, {'Content-Type':'video/mp4','Content-Length':stats.size});
-		stream.pipe(gresp);
-	});
-	stream.on("error", () => {
-		gresp.set("Content-Type","text/plain");
-		gresp.status(404).end("Not found");
-	});
-};
-
-const sendzip = (filePath, resp) => {
-	//console.log('[Info] Sending zip file');
-	let stats = fs.statSync(filePath);
-	resp.setHeader('Content-Type', 'application/zip');
-	resp.setHeader('Content-Length', stats.size);
-	resp.setHeader('Content-Disposition', 'attachment; filename="playlist.zip"');
-	let stream = fs.createReadStream(filePath);
-	stream.on('open', () => {
-		stream.pipe(resp);
-	});
-	stream.on("error", () => {
-		resp.set("Content-Type","text/plain");
-		resp.status(404).end("Not found");
-	});
-};
-
-
-const fmtSearch = (cntnr, fmts) => {
-	let ix = 0;
-	do {
-		if (fmts[ix].container == cntnr) return ix;
-		++ix;
-	} while (ix < fmts.length);
-	return 0;
-}
-
-const getAudioStream = (yturl, which, cb) => {
-	let rslt = {};
-	let fext = 'mp4';
-	ytdl.getInfo(yturl, {quality: 'highestaudio'})
-	.then(info => {
-		let audioFormats = ytdl.filterFormats(info.formats, 'audioonly');
-		let tfmt = null;
-		switch (which) {
-			case '4':
-				tfmt = audioFormats[fmtSearch('mp4', audioFormats)];
-				fext = 'm4a';
-				break;
-			case 'w':
-				tfmt = audioFormats[fmtSearch('webm', audioFormats)];
-				fext = 'webm';
-				break;
-			default:
-				if (which.startsWith('s')) {
-					let itag = which.split('.')[1];
-					tfmt = ytdl.chooseFormat(info.formats, {quality: itag});
-				} else {
-					tfmt = audioFormats[0];
-				}
-				fext = tfmt.container;
-		}
-		rslt.fext = fext;
-		rslt.mimeType = tfmt.mimeType;
-		rslt.contentLength = tfmt.contentLength;
-		rslt.stream = ytdl(yturl,{format: tfmt});
-		cb(rslt);
-	})
-	.catch((error) => {
-		cb({error});
-	});
-}
-
-const audioExtract = (parms, resp) => {
-	//console.log(parms);
-	let yturl = parms.axtr;
-	getAudioStream(parms.axtr, parms.wtrk, (aud) => {
-		//console.log(aud);
-		if (aud.error) {
-			let msg = aud.error.message.replace(/\"/g,'');
-			resp.end(`<script>parent.extrFini("sgl","${msg}")</script>`);
-		} else if (config.extr2Intrn) {
-			let ws = fs.createWriteStream(baseDir+parms.tnam+'.'+aud.fext);
-			ws.on('finish', () => {
-				console.log('ws-end');
-				resp.end(`<script>parent.extrFini("sgl","Audio extracted as '${parms.tnam}.${aud.fext}'")</script>`);
-			});
-			aud.stream.pipe(ws);
-		//	resp.end(`<script>alert("Audio extracted as '${parms.tnam}.${aud.fext}'")</script>`);
-		} else {
-			resp.writeHead(200, {'Content-Type': aud.mimeType, 'Content-Length': aud.contentLength, 'Content-Disposition': `attachment; filename="${parms.tnam}.${aud.fext}"`});
-			aud.stream.pipe(resp);
-		}
-	});
-};
-
-const getVideo = (yturl, which, vida, cb) => {
-	let rslt = {};
-	let fext = 'mp4';
-	let filter = vida == 'a' ? 'videoandaudio' : 'video';
-	ytdl.getInfo(yturl, {})
-	.then(info => {
-		console.log(info.formats);
-		let videoFormats = ytdl.filterFormats(info.formats, filter);	//console.log(videoFormats);
-		let tfmt = null;
-		switch (which) {
-			case '4':
-				tfmt = videoFormats[fmtSearch('mp4', videoFormats)];
-				fext = 'mp4';
-				break;
-			case 'w':
-				tfmt = videoFormats[fmtSearch('webm', videoFormats)];
-				fext = 'webm';
-				break;
-			default:
-				if (which.startsWith('s')) {
-					let itag = which.split('.')[1];
-					tfmt = ytdl.chooseFormat(info.formats, {quality: itag});
-				} else {
-					tfmt = videoFormats[0];
-				}
-				fext = tfmt.container;
-		}
-		rslt.fext = fext;
-		rslt.mimeType = tfmt.mimeType;
-		rslt.contentLength = tfmt.contentLength;
-		rslt.stream = ytdl(yturl,{format: tfmt});
-		cb(rslt);
-	})
-	.catch((error) => {
-		cb({error});
-	});
-}
-
-const videoExtract = (parms, resp) => {
-	//console.log(parms);
-	let yturl = parms.vxtr;
-	getVideo(parms.vxtr, parms.wtrk, parms.vida, (vid) => {
-		//console.log(vid);
-		if (vid.error) {
-			let msg = vid.error.message.replace(/\"/g,'');
-			resp.end(`<script>parent.extrFini("sgl","${msg}")</script>`);
-		} else if (config.extr2Intrn) {
-			let ws = fs.createWriteStream(baseDir+parms.tnam+'.'+vid.fext);
-			ws.on('finish', () => {
-				console.log('ws-end');
-				resp.end(`<script>parent.extrFini("vid","Video extracted as '${parms.tnam}.${vid.fext}'")</script>`);
-			});
-			vid.stream.pipe(ws);
-		//	resp.end(`<script>alert("Video extracted as '${parms.tnam}.${vid.fext}'")</script>`);
-		} else {
-			resp.writeHead(200, {'Content-Type': vid.mimeType, 'Content-Length': vid.contentLength, 'Content-Disposition': `attachment; filename="${parms.tnam}.${vid.fext}"`});
-			vid.stream.pipe(resp);
-		}
-	});
-};
-
-const getStreams = (parms, resp) => {
-	console.log(parms);
-	let yturl = parms.strms;
-	let whch = parms.whch;
-	ytdl.getInfo(yturl)
-	.then(info => {
-		let fmts = ytdl.filterFormats(info.formats, whch);
-		let strms = [];
-		if (whch=='audio') {
-			fmts.forEach(f => strms.push({itag: f.itag, mime: f.mimeType, audbr: f.audioBitrate, audsr: f.audioSampleRate}));
-		} else {
-			fmts.forEach(f => strms.push({itag: f.itag, mime: f.mimeType, size: f.width+'x'+f.height, reso: f.quality, audio: f.hasAudio}));
-		}
-		resp.end(JSON.stringify(strms));
-	});
-//	return strms;
-};
-*/
 const getNavMenu = (dir, resp) => {
 	let nav = '<div class="fmnav">';
 	let _D = '';
@@ -344,11 +114,24 @@ const playlistMenu = (resp) => {
 	});
 }
 
+const formatNumber = (num) => {
+	if (num < 1024) {
+		return num.toString();
+	} else if (num < 1048576) {
+		return (num / 1024).toFixed(1) + 'K';
+	} else if (num < 1073741824) {
+		return (num / 1048576).toFixed(1) + 'M';
+	} else {
+		return (num / 1073741824).toFixed(1) + 'G';
+	}
+}
+
 const baseDir = config.baseDir;
 const getDirList = (dir, resp) => {
+	const idtf = new Intl.DateTimeFormat('en-US',{year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hour12:false,timeZoneName:'short'});
 	fs.readdir(baseDir+dir, {withFileTypes: true}, (err, files) => {
 		if (err) throw err;
-		let rows = [];
+		let rows = ['<thead><td></td><th>Name</th><th>Size</th><th>Date</th></thead>'];
 		let pdir = dir == '' ? dir : (dir+'/');
 		for (const file of files) {
 			let fcl, icn, lnk='';
@@ -367,8 +150,11 @@ const getDirList = (dir, resp) => {
 			//	}
 				lnk += lnk2;
 			}
-			rows.push('<td><input type="checkbox" class="fsel" name="files[]" value="'+/*path.join(dir, */file.name/*)*/+'"></td>'
-				+'<td class="'+fcl+'">'+icn+file.name+lnk+'</td>');
+			const fstat = fs.statSync(baseDir+dir+'/'+file.name);
+			rows.push('<td><input type="checkbox" class="fsel" name="files[]" value="'+file.name+'"></td>'
+				+'<td class="'+fcl+'">'+icn+file.name+lnk+'</td>'
+				+'<td>'+formatNumber(fstat.size)+'</td>'
+				+'<td>'+idtf.format(fstat.mtimeMs)+'</td>');
 		}
 		resp.write('<table><tr>'+rows.join('</tr><tr>')+'</tr></table>');
 		resp.end();
@@ -799,30 +585,15 @@ http.createServer(function (request, response) {
 				receiveUpload(request, response);
 				return;
 			}
-			//performAction(JSON.parse(body));
-			//performAction(body);
-		//	console.log(body);
-		//	pdata = body;
-		//	console.log(pdata);
-			
-//		});
-
-
-
-	let filePath = parse(url.substring(1));
-
-	// Correct root path
-	if (filePath === '/') {
-		filePath = documentRoot + '/index.html';
-	} else {
-		filePath = documentRoot + (enableUrlDecoding === true ? decodeURI(url) : url);
-	}
-
-	// serve the file
-	serveFile(filePath.split('?').shift(), response, url, pdata);
-
-
-
+			let filePath = parse(url.substring(1));
+			// Correct root path
+			if (filePath === '/') {
+				filePath = documentRoot + '/index.html';
+			} else {
+				filePath = documentRoot + (enableUrlDecoding === true ? decodeURI(url) : url);
+			}
+			// serve the file
+			serveFile(filePath.split('?').shift(), response, url, pdata);
 		});
 		return;
 	}

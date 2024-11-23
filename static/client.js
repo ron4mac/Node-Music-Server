@@ -86,49 +86,8 @@ const watchP = () => {
 const dlfile = () => {
 	document.getElementById('dnldf').src = 'video.mp4';
 };
-/*
-const streamSelect = (frm, type) => {
-	let selt = document.querySelector('#sseld table tbody');
-	if (type=='audio') {
-		selt.innerHTML = '<tr><td></td><th>MIME</th><th>BITS</th><th>SAMPLE</th></tr>';
-	} else {
-		selt.innerHTML = '<tr><td></td><th>Mime</th><th>Size</th><th>Resolution</th><th>Has&nbsp;Audio</th></tr>';
-	}
-	document.querySelector('#sseld button').setAttribute('stype',type);
-	document.getElementById('sseld').style.display = 'block';
-	let yturl = encodeURIComponent(frm.yturl.value.trim());
-	fetch(`?strms=${yturl}&whch=${type}`, {method:'GET'})
-	.then((resp) => resp.json())
-	.then(data => {
-		console.log(data);
-		if (type=='audio') {
-			data.forEach(td => selt.innerHTML += `<tr><td><input type="radio" name="itag" value="${td.itag}"></td><td>${td.mime}</td><td>${td.audbr}</td><td>${td.audsr}</td></tr>`);
-		} else {
-			data.forEach(td => selt.innerHTML += `<tr><td><input type="radio" name="itag" value="${td.itag}"></td><td>${td.mime}</td><td>${td.size}</td><td>${td.reso}</td><td>${td.audio}</td></tr>`);
-		}
-	});
-};
-const frequest = (evt, frm) => {
-	evt.preventDefault();
-	if (frm.wtrk.value=='s') {
-		streamSelect(frm, 'audio');
-	} else {
-		if (evt.submitter.name=='ginf') getVinfo(frm);
-	}
-};
-const prequest = (evt, frm) => {
-	evt.preventDefault();
-	if (evt.submitter.name=='ginf') getPlaylist(frm);
-};
-const vrequest = (evt, frm) => {
-	evt.preventDefault();
-	if (frm.wtrk.value=='s') {
-		streamSelect(frm, 'video');
-	} else {
-		if (evt.submitter.name=='ginf') getVideo(frm);
-	}
-};
-*/
+
+
 const openTab = (evt, tabName, cb) => {
 	let tab = evt.currentTarget;
 	const pnls = tab.parentElement.nextElementSibling.querySelectorAll(':scope > div.tabcontent');
@@ -147,39 +106,7 @@ const openTab = (evt, tabName, cb) => {
 	tab.classList.add('active');
 	if (typeof cb === 'function') cb();
 };
-/*
-const sv_openTab = (evt, tabName, cb) => {
-	let tab = evt.currentTarget;
-	let i;
-	for (i = 0; i < tabcontent.length; i++) {
-		tabcontent[i].style.display = 'none';
-	}
-	for (i = 0; i < tablinks.length; i++) {
-		tablinks[i].classList.remove('active');
-	}
-	// hide/show MPD control as needed
-	document.getElementById('mpdcontrols').style.display = tab.classList.contains('nompd') ? 'none' : 'block';
-	// Show the current tab, and add an "active" class to the button that opened the tab
-	document.getElementById(tabName).style.display = 'block';
-	tab.classList.add('active');
-	if (typeof cb === 'function') cb();
-};
-const openTabXt = (evt, tabName, cb) => {
-	let tab = evt.currentTarget;
-	const tabs = document.querySelectorAll('#ytextract .panels .tabcontent');
-	let i;
-	for (i = 0; i < tabs.length; i++) {
-		tabs[i].style.display = 'none';
-	}
-	const tlnks = document.querySelectorAll('#ytextract .tablinks');
-	for (i = 0; i < tlnks.length; i++) {
-		tlnks[i].classList.remove('active');
-	}
-	// Show the current tab, and add an "active" class to the button that opened the tab
-	document.getElementById(tabName).style.display = 'block';
-	tab.classList.add('active');
-	if (typeof cb === 'function') cb();
-};*/
+
 const getPlaylists = () => {
 	fetch('?plstl', {method:'GET'})
 	.then((resp) => resp.text())
@@ -341,8 +268,8 @@ const radioControl = (w) => {
 	switch (w) {
 	case 'clear':
 		what = 'clear';
-		displayCurrent('');
-		displayCurrentTrack('');
+	//	displayCurrent('');
+	//	displayCurrentTrack('');
 		break;
 	}
 	const parms = {act:'radio', what: what, bobj: xtra};
@@ -415,27 +342,6 @@ const radioPlay = (evt) => {
 		}
 	}, 1);
 };
-/*
-const radSocket = () => {
-	if (!radioSocket) {
-		radioSocket = new WebSocket('ws://'+window.location.hostname+':6682');
-		// Connection opened
-		radioSocket.addEventListener('open', (event) => {
-			radioSocket.send('probe');
-		});
-		// Listen for messages
-		radioSocket.addEventListener('message', (event) => {
-			console.log('Radio message from server ', event.data);
-		//	let data = JSON.parse(event.data);
-		//	let aa = document.getElementById('albumart');
-		//	aa.querySelector('img').src = data.albumArtUrl ? data.albumArtUrl : 'noimage.png';
-		//	aa.querySelector('.artist').innerHTML = data.artistName;
-		//	aa.querySelector('.album').innerHTML = data.albumName;
-		//	aa.querySelector('.song').innerHTML = data.songName;
-		});
-	}
-}
-*/
 const getRadio = () => {
 	const parms = {act:'radio', what: 'home'};
 	postAction(null, parms, (data) => {
@@ -530,14 +436,19 @@ const pandoraSocket = () => {
 		// Listen for messages
 		pdorSocket.addEventListener('message', (event) => {
 			console.log('Message from server ', event.data);
-			let data = JSON.parse(event.data);
-			displayCurrentTrack(data.artistName+' - '+data.songName);
 			let aa = document.getElementById('albumart');
-			aa.querySelector('img').src = data.albumArtUrl ? data.albumArtUrl : 'noimage.png';
-			aa.querySelector('.artist').innerHTML = data.artistName;
-			aa.querySelector('.album').innerHTML = data.albumName;
-			aa.querySelector('.song').innerHTML = data.songName;
-			aa.style.display = 'block';
+			let data = JSON.parse(event.data);
+			if (data.state=='play') {
+				displayCurrentTrack(data.artistName+' - '+data.songName);
+				aa.querySelector('img').src = data.albumArtUrl ? data.albumArtUrl : 'noimage.png';
+				aa.querySelector('.artist').innerHTML = data.artistName;
+				aa.querySelector('.album').innerHTML = data.albumName;
+				aa.querySelector('.song').innerHTML = data.songName;
+				aa.style.display = 'block';
+			} else {
+			//	displayCurrentTrack('');
+				aa.style.display = 'none';
+			}
 		});
 	}
 }
@@ -609,8 +520,14 @@ const mpdSocket = () => {
 	// Listen for messages
 	socket.addEventListener('message', (event) => {
 		console.log('MPD message from server ', event.data);
-		//let data = JSON.parse(event.data);
-		displayCurrentTrack(event.data);
+		let data = JSON.parse(event.data);
+		if (data.track) {
+			displayCurrentTrack(data.track);
+		}
+		if (data.state=='stop') {
+			displayCurrent('');
+			displayCurrentTrack('');
+		}
 	});
 }
 

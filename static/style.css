@@ -249,8 +249,8 @@ form i.fa {
 	padding: 0 1rem;
 	background-color: #E0F0F0;
 	transform: translate(-50%);
-	bottom: 1rem;
-	white-space: nowrap;
+	bottom: .75rem;
+/*	white-space: nowrap;*/
 }
 #calm img {
 	width: 300px;
@@ -321,6 +321,12 @@ table {
 }
 table .fa {
 	width: 1.7rem;
+}
+#fileman tbody>tr>:nth-child(3) {
+	text-align: right;
+}
+#fileman tbody>tr>:nth-child(4) {
+	text-align: right;
 }
 .isdir, .isfil {
 	cursor: pointer;

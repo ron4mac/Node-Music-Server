@@ -10,7 +10,7 @@ module.exports = class MyMPD {
 		this.mpdc = mpdc;
 		this.mstatus = status;
 		if (full) {
-			// create a socket on top of the server port
+			// create a socket
 			this.ws = new WebSocket.Server({port: cntrlr.config.socket});
 			this.ws.on('connection', (sc) => {
 				sc.on('error', console.error);
@@ -19,7 +19,7 @@ module.exports = class MyMPD {
 					this._socketRequest(data)
 					.then(reply => {
 						console.log('reply ',reply);
-						sc.send(reply);
+						sc.send(JSON.stringify({state: this.mstatus.state, track: reply}));
 					});
 				});
 			});
@@ -30,9 +30,15 @@ module.exports = class MyMPD {
 //			});
 			this.mpdc.on('system', name => {
 				console.log('on system event: %s', name);
-				if (name=='playlist') {
-					this._broadcastTrack();
-				}
+				this._status()
+				.then((s)=> {
+					console.log('*mpd* ', s);
+					if (name=='playlist') {
+						this._broadcastTrack();
+					} else {
+						this._broadcastState();
+					}
+				});
 			});
 			this.clients = [];
 		}
@@ -139,14 +145,21 @@ module.exports = class MyMPD {
 			console.log('@mpd@\n', resp);
 			const info = MPD.parseObject(resp);
 			if (info && info.title) {
-				this.ws.clients.forEach((client) => {
-					if (client.readyState === WebSocket.OPEN) {
-						client.send(info.title);
-					}
-				});
+				this._broadcast({state: this.mstatus.state, track: info.title});
 			}
 		});
 	}
 
+	_broadcastState () {
+		this._broadcast({state: this.mstatus.state});
+	}
+
+	_broadcast (msg) {
+		this.ws.clients.forEach((client) => {
+			if (client.readyState === WebSocket.OPEN) {
+				client.send(JSON.stringify(msg));
+			}
+		});
+	}
 
 }
