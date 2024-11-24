@@ -3,9 +3,16 @@
 .pdorlogin * {float:right}
 .pdorlogin input {margin-left:.5em}
 </style>
+<dialog id="pdor-user-dialog">
+<div class="closex" onclick="this.parentElement.close()">
+	<i class="fa fa-times" aria-hidden="true"></i>
+</div>
 <h3>Please login to your Pandora account</h3>
 <form class="pdorlogin" onsubmit="return false">
 <label>User (email)<input type="text" name="user" required></label><br>
 <label>Password<input type="password" name="pass" required></label><br>
-<button type="submit" onclick="pandoraLogin(event)">Submit</buttom>
+<div class="btns">
+	<button type="submit" onclick="Pand.login(event,this)">Submit</button>
+</div>
 </form>
+</dialog>

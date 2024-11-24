@@ -50,26 +50,23 @@
 				<div id="radio" onclick="radioPlay(event)"></div>
 			</div>
 			<div id="calmradioTab" class="tabcontent">
-				<div id="calmcrumbs" onclick="calmBack(event)">
+				<div id="calmradio"></div>
+<!--				<div id="calmcrumbs" onclick="calmBack(event)">
 					<a href="#" data-url="">Home</a>
 					<i class="fa fa-user" aria-hidden="true" onclick="calmUser()"></i>
 					<i class="fa fa-search" aria-hidden="true" onclick="calmSearch()"></i>
 				</div>
-				<div id="calm" onclick="calmPlay(event)"></div>
+				<div id="calm_user" class="hidden"></div>
+				<div id="calm" onclick="calmPlay(event)"></div> -->
 			</div>
 			<div id="pandoraTab" class="tabcontent">
-				<div id="pdorcrumbs" noonclick="pdorBack(event)">
+				<div id="pandora"></div>
+<!--				<div id="pdorcrumbs" noonclick="pdorBack(event)">
 					<a href="#" data-bobj="">Home</a>
 					<i class="fa fa-user" aria-hidden="true" onclick="pdorUser()"></i>
 					<i class="fa fa-search" aria-hidden="true" onclick="pdorSearch()"></i>
 				</div>
-				<!-- ><nav class="plmnu">
-					<ul>
-						<li><a href="#" data-menu="plply">Play</a></li>
-						<li><a href="#" data-menu="pldel">Delete</a></li>
-						<li><a href="#" data-menu="plvue">View</a></li>
-					</ul>
-				</nav> -->
+				<div id="pdor_user" class="hidden"></div>
 				<div id="stations"></div>
 				<div id="albumart">
 					<div class="prevnext" onclick="prevnext(event)">
@@ -84,7 +81,7 @@
 						<dt>Song: </dt><dd class="song"></dd>
 						</dl>
 					</div>
-				</div>
+				</div> -->
 			</div>
 			<div id="plstsTab" class="tabcontent">
 				<nav class="plmnu">
@@ -115,50 +112,6 @@
 			<div id="ytxTab" class="tabcontent">
 				<div id="ytextract"></div>
 			</div>
-<!--		<div id="xxsglTab" class="tabcontent">
-				<form action="#" name="sglform" method="post" onsubmit="frequest(event, this)">
-					<div>
-						<input class="yturl" type="text" name="yturl" placeholder="YT URL" value="" spellcheck="false" autocomplete="off" required><br>
-						<span>as: </span> <input class="tname" type="text" name="tname" value="" spellcheck="false" autocomplete="off"><br>
-						<label><input type="radio" name="wtrk" value="h" checked>Highest Quality &nbsp;</label>
-						<label><input type="radio" name="wtrk" value="4">MP4(M4A) &nbsp;</label>
-						<label><input type="radio" name="wtrk" value="w">WEBM &nbsp;</label>
-						<label><input type="radio" name="wtrk" value="s">Specific Stream</label><br>
-						<input type="submit" name="ginf" value="Get Audio Track">
-						<i class="fa fa-spinner fa-pulse fa-lg"></i>
-					</div>
-				</form>
-				<div id="xxvinfo"></div>
-			</div>
-			<div id="xxlstTab" class="tabcontent">
-				<form action="#" name="lstForm" method="post" onsubmit="prequest(event, this)">
-					<div>
-						<input class="yturl" type="text" name="yturl" placeholder="YT Playlist URL" value="" spellcheck="false" autocomplete="off" required><br>
-						<label><input type="radio" name="wtrk" value="h" checked>Highest Quality &nbsp;</label>
-						<label><input type="radio" name="wtrk" value="4">MP4(M4A) &nbsp;</label>
-						<label><input type="radio" name="wtrk" value="w">WEBM</label><br>
-						<div id="xxprog"></div>
-						<input type="submit" name="ginf" value="Get Playlist Audio Tracks">
-					</div>
-				</form>
-			</div>
-			<div id="xxvidTab" class="tabcontent">
-				<form action="#" name="vidform" method="post" onsubmit="vrequest(event, this)">
-					<div>
-						<input class="yturl" type="text" name="yturl" placeholder="YT URL" value="" spellcheck="false" autocomplete="off" required><br>
-						<span>as: </span> <input class="tname" type="text" name="tname" value="" spellcheck="false" autocomplete="off"><br>
-						<label><input type="radio" name="wtrk" value="h" checked>Highest Quality &nbsp;</label>
-						<label><input type="radio" name="wtrk" value="4">MP4 &nbsp;</label>
-						<label><input type="radio" name="wtrk" value="w">WEBM &nbsp;</label>
-						<label><input type="radio" name="wtrk" value="s">Specific Stream</label><br>
-						<label><input type="radio" name="vida" value="a" checked>Video that has audio (may be lower resolution) &nbsp;</label>
-						<label><input type="radio" name="vida" value="v">Highest resolution video only</label><br>
-						<input type="submit" name="ginf" value="Get Video">
-						<i class="fa fa-spinner fa-pulse fa-lg"></i>
-					</div>
-				</form>
-				<div id="xxvinfov"></div>
-			</div> -->
 		</div>
 	</div>
 	<div id="fvewd" style="display:none">
@@ -210,9 +163,9 @@
 	_pb = document.getElementById('prog');
 	_fm = document.getElementById('fileman');
 	// Get all elements with class="tabcontent" and hide them
-	tabcontent = document.getElementsByClassName('tabcontent');
+	//tabcontent = document.getElementsByClassName('tabcontent');
 	// Get all elements with class="tablinks" and remove the class "active"
-	tablinks = document.getElementsByClassName('tablinks');
+	//tablinks = document.getElementsByClassName('tablinks');
 	// setup fm menu
 	document.querySelectorAll('.fmenu a').forEach(elm => {
 		elm.addEventListener('click', (evt) => {

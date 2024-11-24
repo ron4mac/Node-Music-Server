@@ -5,15 +5,15 @@ var _pp = 0,
 	_pb,
 	_fm,
 	curDir = '',
-	tabcontent,
-	tablinks,
+//	tabcontent,
+//	tablinks,
 	plstseen = false,
 	rdioseen = false,
 	calmseen = false,
 	pdorseen = false,
 	fileseen = false,
-	ytxseen = false,
-	pdorSocket = null;
+	ytxseen = false;
+//	pdorSocket = null;
 //	radioSocket = null;
 
 YTx.fup_done = (errs) => {
@@ -342,144 +342,36 @@ const radioPlay = (evt) => {
 		}
 	}, 1);
 };
+
+
+
+
+
 const getRadio = () => {
 	const parms = {act:'radio', what: 'home'};
 	postAction(null, parms, (data) => {
 		let elm = document.getElementById('radio');
 		elm.innerHTML = data;
-//		radSocket();
 	}, 1);
 };
 
-const calmBack = (evt) => {
-	console.log(evt);
-	calmNav(evt, evt.target);
-};
-const calmNav = (evt, elm) => {
-	evt.preventDefault();
-	let bobj = elm.closest('[data-url]').dataset.url;
-	const parms = {act:'calm', what: 'home', bobj: bobj};
-	postAction(null, parms, (data) => {
-		let el = document.getElementById('calm');
-		el.innerHTML = data;
-		let bt = elm.closest('a').innerHTML;
-		el = document.getElementById('radcrumbs');
-		if (el.innerHTML) el.innerHTML += '::';
-		el.innerHTML += '<a href="#" data-bobj="'+bobj+'">'+bt+'</a>';
-	}, 1);
-};
-const calmPlay = (evt) => {
-	console.log(evt);
-	let elm = evt.target;
-	let elmwurl = elm.closest('[data-url]');
-	if (elmwurl.parentElement.className=='calm-link') {
-		calmNav(evt, elm);
-		return;
-	}
-	evt.preventDefault();
-	let bobj = elmwurl.dataset.url;
-	let how = elm.nodeName=='IMG' ? 'lplay' : 'play';
-	const parms = {act:'calm', what: how, bobj: bobj};
-	postAction(null, parms, (data) => {
-		console.log(data);
-		displayCurrent('Calm Radio: '+elmwurl.parentElement.querySelector('a').innerHTML);
-		if (data) {
-			showLocalAudio(true);
-			const laudio = document.getElementById('localaudio');
-			laudio.src = data;
-			laudio.play();
-		}
-	}, 1);
-};
-const calmUser = () => {
-	const parms = {act:'calm', what: 'user'};
-	postAction(null, parms, (data) => {
-		let elm = document.getElementById('calm');
-		elm.innerHTML = data;
-	}, 1);
-};
 const getCalm = () => {
-	const parms = {act:'calm', what: 'home'};
+	const parms = {act:'calm', what: 'load'};
 	postAction(null, parms, (data) => {
-		let elm = document.getElementById('calm');
+		let elm = document.getElementById('calmradio');
 		elm.innerHTML = data;
+		load_scripts(elm, (evt)=>Calm.get());
 	}, 1);
 };
 
-
-const pandoraLogin = (evt) => {
-	console.log(evt);
-	let frm = evt.target.form;
-	const parms = {act:'pandora', what: 'login', bobj:{user:frm.user.value, pass:frm.pass.value}};
+const getPand = () => {
+	const parms = {act:'pandora', what: 'load'};
+	const elm = document.getElementById('pandora');
 	postAction(null, parms, (data) => {
-		if (data) {
-			alert(data);
-		} else {
-			getPandora();
-		}
-	}, 1);
-};
-const pdorUser = () => {
-	const parms = {act:'pandora', what: 'user'};
-	postAction(null, parms, (data) => {
-		let elm = document.getElementById('stations');
 		elm.innerHTML = data;
+		load_scripts(elm, (evt)=>Pand.get());
 	}, 1);
-};
-const pandoraSocket = () => {
-	if (!pdorSocket) {
-		pdorSocket = new WebSocket('ws://'+window.location.hostname+':6681');
-		// Connection opened
-		pdorSocket.addEventListener('open', (event) => {
-			pdorSocket.send('probe');
-		});
-		// Listen for messages
-		pdorSocket.addEventListener('message', (event) => {
-			console.log('Message from server ', event.data);
-			let aa = document.getElementById('albumart');
-			let data = JSON.parse(event.data);
-			if (data.state=='play') {
-				displayCurrentTrack(data.artistName+' - '+data.songName);
-				aa.querySelector('img').src = data.albumArtUrl ? data.albumArtUrl : 'noimage.png';
-				aa.querySelector('.artist').innerHTML = data.artistName;
-				aa.querySelector('.album').innerHTML = data.albumName;
-				aa.querySelector('.song').innerHTML = data.songName;
-				aa.style.display = 'block';
-			} else {
-			//	displayCurrentTrack('');
-				aa.style.display = 'none';
-			}
-		});
-	}
 }
-const getPandora = () => {
-	const parms = {act:'pandora', what: 'home'};
-	const elm = document.getElementById('stations');
-	elm.innerHTML = '<i class="fa fa-spinner fa-pulse fa-lg"></i>';
-	postAction(null, parms, (data) => {
-		elm.innerHTML = data;
-		pandoraSocket();
-	}, 1);
-};
-const pandoraPlay = (evt) => {
-	evt.preventDefault();
-	let bobj = evt.target.closest('[data-sid]').dataset.sid;
-	const parms = {act:'pandora', what: 'play', bobj: bobj};
-	postAction(null, parms, (data) => {
-		console.log('PPlay',data);
-		displayCurrent('Pandora: '+evt.target.closest('[data-sid]').innerHTML);
-	}, 1);
-};
-const prevnext = (evt) => {
-	let t = evt.target;
-	if (t.nodeName=='I') {
-		let act = t.classList.contains('left') ? 'previous' : 'next';
-		const parms = {act:'mpd', what: 'cmd', bobj: act};
-		postAction(null, parms, (data) => {
-			if (data) alert(data);
-		}, 1);
-	}
-};
 
 const getYtx = () => {
 	const parms = {act:'ytextr', what: 'load'};
@@ -491,7 +383,16 @@ const getYtx = () => {
 }
 
 
-
+const prevnext = (evt) => {
+	let t = evt.target;
+	if (t.nodeName=='I') {
+		let act = t.classList.contains('left') ? 'previous' : 'next';
+		const parms = {act:'mpd', what: 'cmd', bobj: act};
+		postAction(null, parms, (data) => {
+			if (data) alert(data);
+		}, 1);
+	}
+};
 const setVolSlider = () => {
 	const parms = {act:'mpd',what:'getVolume',bobj:'getVolume'};
 	postAction(null, parms, (data) => {
@@ -533,7 +434,7 @@ const mpdSocket = () => {
 
 
 
-
+// radio (TuneIn) interface
 const tipop = () => {
 	if (!rdioseen) {
 		setVolSlider();
@@ -541,15 +442,15 @@ const tipop = () => {
 	}
 	rdioseen = true;
 };
-
+// Pandora interface
 const pdpop = () => {
 	if (!pdorseen) {
 		setVolSlider();
-		getPandora();
+		getPand();
 	}
 	pdorseen = true;
 };
-
+// Calm Radio interface
 const crpop = () => {
 	if (!calmseen) {
 		setVolSlider();
@@ -557,15 +458,13 @@ const crpop = () => {
 	}
 	calmseen = true;
 };
-
+// YouTube extraction interface
 const ytxpop = () => {
 	if (!ytxseen) {
 		getYtx();
 	}
 	ytxseen = true;
 };
-
-
 // Playlists interface
 const plpop = () => {
 	if (!plstseen) {
@@ -574,6 +473,13 @@ const plpop = () => {
 	}
 	plstseen = true;
 };
+// file manager interface
+const fmpop = () => {
+	if (!fileseen) getDirList(curDir);
+	fileseen = true;
+};
+
+
 const doPlMenu = (actn, evt) => {
 	console.log(actn);
 	const slctd = document.querySelectorAll('.plsel:checked'),
@@ -615,12 +521,6 @@ const doPlMenu = (actn, evt) => {
 		}
 		break;
 	}
-};
-
-
-const fmpop = () => {
-	if (!fileseen) getDirList(curDir);
-	fileseen = true;
 };
 
 

@@ -1,6 +1,8 @@
 'use strict';
 const cntrlr = require('../../controller');
 const https = require('https');
+const qs = require('querystring');
+
 //const fs = require('fs');
 
 const CRURLS = {
@@ -19,16 +21,12 @@ module.exports = class CalmRadio {
 	constructor (mympd) {
 		this.mpdc = mympd;
 		this.authenticated = true;
+		this.user = cntrlr.getSetting('calmradio_user', '');
 		this.userToken = cntrlr.getSetting('calmradio_token', '');
 	}
 
 	action (what, bobj, resp) {
 		switch (what) {
-		case 'user':
-			const htm = this.userToken ? 'user.html': 'login.html';
-			resp.write(cntrlr.readFile('services/calmradio/'+htm, 'FAILED TO READ'));
-			resp.end();
-			break;
 		case 'home':
 			const b = (bobj!=='undefined') ? bobj : '';
 			this.browse(b, resp);
@@ -45,6 +43,43 @@ module.exports = class CalmRadio {
 		case 'clear':
 			this.mpdc.clear();
 			resp.end();
+			break;
+		case 'user':
+			const htm = this.userToken ? 'user.html': 'login.html';
+			resp.write(cntrlr.readFile('services/calmradio/'+htm, 'FAILED TO READ'));
+			resp.end();
+			break;
+		case 'login':
+			https.get(CRURLS.token+'/?'+qs.stringify(bobj), (r) => {
+				let dat = '';
+				r.on('data', (chunk) => {
+					dat += chunk;
+				}).on('end', () => {
+					const rslt = JSON.parse(dat);
+					if (rslt.membership=='active') {
+						this.user = bobj.user;
+						this.userToken = rslt.token;
+						cntrlr.setSettings({calmradio_user: bobj.user, calmradio_token: this.userToken});
+						resp.end();
+					} else {
+						resp.end('Failed to authenticate');
+					}
+				});
+			}).end();
+			//resp.end();
+			break;
+		case 'logout':
+			this.user = '';
+			this.userToken = '';
+			cntrlr.deleteSetting('calmradio_user');
+			cntrlr.deleteSetting('calmradio_token');
+			resp.end();
+			break;
+		case 'load':
+				resp.end(cntrlr.readFile('services/calmradio/calmradio.html', 'FAILED TO READ'));
+			break;
+		default:
+			resp.end('Unknown webCalmradio: '+what);
 			break;
 		}
 	}
@@ -71,13 +106,23 @@ module.exports = class CalmRadio {
 	}
 
 	play (which, resp) {
+
 		this._getChanData()
 		.then(() => {
 			const chan = this.chns[which];
-			const stream = chan.free[0].streams[128];	console.log(stream);
+			let stream;
+			if (this.userToken) {
+				const cred = '?' + qs.stringify({user: this.user, pass: this.userToken});
+				const rate = cntrlr.getSetting('calmradio_bitrate', 192);
+				stream = chan.vip[0].streams[rate] + cred;
+				console.log(stream);
+			} else {
+				stream = chan.free[0].streams[128];
+				console.log(stream);
+			}
 			try {
 				this.mpdc.sendCommand('clear');
-				this.mpdc.sendCommand('add '+stream);
+				this.mpdc.sendCommand('add "'+stream+'"');
 				this.mpdc.sendCommand('play');
 			} catch (error) {
 				console.error(error);
@@ -110,7 +155,7 @@ module.exports = class CalmRadio {
 		const chs = this.cats[which].channels;
 		chs.forEach((c) => {
 			const g = this.chns[c];
-			if (!this.logged && !g.free[0]) {
+			if (!this.userToken && !g.free[0]) {
 				resp.write('<div class="calm-noplay"><img src="'+CRURLS.arts+g.img+'" class="noplay"><span>'+g.title+'</span></div>');
 			} else {
 				resp.write('<div class="calm-play"><img src="'+CRURLS.arts+g.img+'"><a href="#..'+c+'" data-url="'+c+'">'+g.title+'</a></div>');
@@ -152,7 +197,7 @@ module.exports = class CalmRadio {
 			let achn = []
 			achn['title'] = this._camel(chn['title'])
 			achn['desc'] = chn['md_description'] || chn['description']
-			achn['img'] = chn['tiny_square_art_url'] || chn['square_art_url'] || chn['hd_square_art_url']
+			achn['img'] = chn['square_art_url'] || chn['hd_square_art_url'] || chn['tiny_square_art_url']
 			achn['story'] = chn['story']
 			achn['cat'] = chn['category'] || 999
 			achn['vip'] = chn['vip']
@@ -166,8 +211,8 @@ module.exports = class CalmRadio {
 		return new Promise((resolve, reject) => {
 			if (this.grps) resolve();
 			try {
-				let dat = '';
 				https.get(CRURLS.categories, (r) => {
+					let dat = '';
 					r.on('data', (chunk) => {
 						dat += chunk;
 					}).on('end', () => {
@@ -187,8 +232,8 @@ module.exports = class CalmRadio {
 		return new Promise((resolve, reject) => {
 			if (this.chns) resolve();
 			try {
-				let dat = '';
 				https.get(CRURLS.channels, (r) => {
+					let dat = '';
 					r.on('data', (chunk) => {
 						dat += chunk;
 					}).on('end', () => {

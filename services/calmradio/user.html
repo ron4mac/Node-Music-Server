@@ -1,9 +1,20 @@
-<style>
-.calmlogin {display:inline-block}
-.calmlogin * {float:right}
-.calmlogin input {margin-left:.5em}
-</style>
+<dialog id="calm-user-dialog">
+<div class="closex" onclick="this.parentElement.close()">
+	<i class="fa fa-times" aria-hidden="true"></i>
+</div>
 <h3>Settings for Calm Radio</h3>
 <form class="calmlogin" onsubmit="return false">
-<button type="submit" onclick="calmLogout(event)">Log Out</buttom>
+	<label>
+		Stream Bitrate Preference: 
+		<select>
+		<option value="64">64</option>
+		<option value="192">192</option>
+		<option value="320">320</option>
+		</select>
+	</label>
+	<div class="btns">
+		<button type="submit" onclick="calmLogout(event,this)">Log Out</button>
+		<button type="submit" onclick="calmSave(event,this)">Save Settings</button>
+	</div>
 </form>
+</dialog>

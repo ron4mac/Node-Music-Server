@@ -1,48 +1,77 @@
 <script src="services/ytextract/script.js"></script>
+<style>
+.tabcontent.ytx form {
+	max-width: 660px;
+}
+.tabcontent.ytx form>div {
+	display: flex;
+    flex-direction: column;
+    row-gap: 6px;
+    max-width: 600px;
+}
+.tabcontent.ytx .asfile {
+	display: flex;
+}
+.tabcontent.ytx .asfile input {
+	flex-grow: 1;
+}
+.tabcontent.ytx label {
+	white-space: nowrap;
+}
+
+</style>
 <div class="tab">
-	<button class="tablinks nompd" onclick="openTab(event, 'sglTab')">Extract Audio from a Single File</button>
+	<button class="tablinks active nompd" onclick="openTab(event, 'sglTab')">Extract Audio from a Single File</button>
 	<button class="tablinks nompd" onclick="openTab(event, 'lstTab')">Extract Audio from an Entire Playlist</button>
 	<button class="tablinks nompd" onclick="openTab(event, 'vidTab')">Get YT Video</button>
 </div>
 <div class="panels">
-	<div id="sglTab" class="tabcontent">
+	<div id="sglTab" class="tabcontent ytx" style="display:block">
 		<form action="#" name="sglform" method="post" onsubmit="YTx.frequest(event, this)">
 			<div>
-				<input class="yturl" type="text" name="yturl" placeholder="YT URL" value="" spellcheck="false" autocomplete="off" required><br>
-				<span>as: </span> <input class="tname" type="text" name="tname" value="" spellcheck="false" autocomplete="off"><br>
+				<input class="yturl" type="text" name="yturl" placeholder="YT URL" value="" spellcheck="false" autocomplete="off" required>
+				<div class="asfile"><span>as:&nbsp;</span><input class="tname" type="text" name="tname" value="" spellcheck="false" autocomplete="off"></div>
+				<div>
 				<label><input type="radio" name="wtrk" value="h" checked>Highest Quality &nbsp;</label>
 				<label><input type="radio" name="wtrk" value="4">MP4(M4A) &nbsp;</label>
 				<label><input type="radio" name="wtrk" value="w">WEBM &nbsp;</label>
-				<label><input type="radio" name="wtrk" value="s">Specific Stream</label><br>
+				<label><input type="radio" name="wtrk" value="s">Specific Stream</label>
+				</div>
 				<input type="submit" name="ginf" value="Get Audio Track">
 				<i class="fa fa-spinner fa-pulse fa-lg"></i>
 			</div>
 		</form>
 		<div id="vinfo"></div>
 	</div>
-	<div id="lstTab" class="tabcontent">
+	<div id="lstTab" class="tabcontent ytx">
 		<form action="#" name="lstForm" method="post" onsubmit="YTx.prequest(event, this)">
 			<div>
-				<input class="yturl" type="text" name="yturl" placeholder="YT Playlist URL" value="" spellcheck="false" autocomplete="off" required><br>
+				<input class="yturl" type="text" name="yturl" placeholder="YT Playlist URL" value="" spellcheck="false" autocomplete="off" required>
+				<div>
 				<label><input type="radio" name="wtrk" value="h" checked>Highest Quality &nbsp;</label>
 				<label><input type="radio" name="wtrk" value="4">MP4(M4A) &nbsp;</label>
-				<label><input type="radio" name="wtrk" value="w">WEBM</label><br>
+				<label><input type="radio" name="wtrk" value="w">WEBM</label>
+				</div>
 				<div id="prog"></div>
 				<input type="submit" name="ginf" value="Get Playlist Audio Tracks">
 			</div>
 		</form>
 	</div>
-	<div id="vidTab" class="tabcontent">
+	<div id="vidTab" class="tabcontent ytx">
 		<form action="#" name="vidform" method="post" onsubmit="YTx.vrequest(event, this)">
 			<div>
-				<input class="yturl" type="text" name="yturl" placeholder="YT URL" value="" spellcheck="false" autocomplete="off" required><br>
-				<span>as: </span> <input class="tname" type="text" name="tname" value="" spellcheck="false" autocomplete="off"><br>
+				<input class="yturl" type="text" name="yturl" placeholder="YT URL" value="" spellcheck="false" autocomplete="off" required>
+				<div class="asfile"><span>as:&nbsp;</span><input class="tname" type="text" name="tname" value="" spellcheck="false" autocomplete="off"></div>
+				<div>
 				<label><input type="radio" name="wtrk" value="h" checked>Highest Quality &nbsp;</label>
 				<label><input type="radio" name="wtrk" value="4">MP4 &nbsp;</label>
 				<label><input type="radio" name="wtrk" value="w">WEBM &nbsp;</label>
-				<label><input type="radio" name="wtrk" value="s">Specific Stream</label><br>
+				<label><input type="radio" name="wtrk" value="s">Specific Stream</label>
+				</div>
+				<div>
 				<label><input type="radio" name="vida" value="a" checked>Video that has audio (may be lower resolution) &nbsp;</label>
-				<label><input type="radio" name="vida" value="v">Highest resolution video only</label><br>
+				<label><input type="radio" name="vida" value="v">Highest resolution video only</label>
+				</div>
 				<input type="submit" name="ginf" value="Get Video">
 				<i class="fa fa-spinner fa-pulse fa-lg"></i>
 			</div>

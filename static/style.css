@@ -33,7 +33,44 @@ nav ul {
 	color: green;
 }
 
+/* dialogs */
+dialog {
+	margin-top: 8em;
+	line-height: 2rem;
+	background-color: aliceblue;
+	padding: 1rem 1.5rem;
+	border: 1px solid #888;
+	border-radius: 5px;
+	box-shadow: 2px 2px 8px #BBB;
+}
+dialog[open]::backdrop {
+	background-color: rgba(120,120,120,0.4);
+	@starting-style {
+		background-color: rgba(255,255,255,0);
+	}
+}
+dialog .closex {
+	width: 20px;
+	height: 20px;
+	text-align: center;
+	line-height: 1;
+	position: absolute;
+	top: 2px;
+	right: 2px;
+	cursor: pointer;
+	color: #888;
+}
+dialog .closex i {
+	vertical-align: middle;
+}
+dialog h3 {margin-top:0}
+dialog .btns {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 1rem;
+}
 
+/*===========*/
 input, label, span {
 	font-size: large;
 }
@@ -45,12 +82,14 @@ form [type="checkbox"], form [type="radio"] {
 form i.fa {
 	display: none;
 }
+/*
 .yturl {
 	width: 50rem;
 }
 .tname {
 	width: 48rem;
 }
+*/
 
 #hdr {
 	font-size: xx-large;

@@ -18,7 +18,7 @@ module.exports = class Pandora {
 		this.mpdc = mpdc;
 		this.queue = {};
 		if (full) {
-			this.ws = new WebSocket.Server({port:6681});
+			this.ws = new WebSocket.Server({port:cntrlr.config.pandora_socket});
 			this.ws.on('connection', (sc) => {
 				sc.on('error', console.error);
 				sc.on('message', (data) => {
@@ -28,11 +28,11 @@ module.exports = class Pandora {
 				this.mpdc._status()
 				.then((stat) => {
 					let msg;
-					if (stat.songid) {
+					if (stat.songid && this.queue[stat.songid]) {
 						msg = {...{state: stat.state}, ...this.queue[stat.songid]};
 						console.log(msg);
 					} else {
-						msg = {state: stat.state};
+						return;		//msg = {state: stat.state};
 					}
 					sc.send(JSON.stringify(msg));
 				});
@@ -91,6 +91,12 @@ module.exports = class Pandora {
 			const htm = this.client.authData ? 'user.html' : 'login.html';
 			resp.end(cntrlr.readFile('services/pandora/'+htm+'', 'FAILED TO READ'));
 			break;
+		case 'load':
+			this.authenticated()
+			.then(() => {
+				resp.end(cntrlr.readFile('services/pandora/pandora.html', 'FAILED TO READ'));
+			});
+			break;
 		default:
 			resp.end('Unknown webPandora: '+what);
 			break;
@@ -140,7 +146,7 @@ module.exports = class Pandora {
 		if (!list) return 'NOT YET RESOLVED';
 		let htm = '';
 		for (const s of list) {
-			htm += '<div><a href="#" data-sid="'+s.stationId+'" onclick="pandoraPlay(event)">'+s.stationName+'</a></div>'
+			htm += '<div><a href="#" data-sid="'+s.stationId+'" onclick="Pand.play(event)">'+s.stationName+'</a></div>'
 		}
 		return htm;
 	}
@@ -193,7 +199,7 @@ module.exports = class Pandora {
 					//console.log(stat);
 					console.log(stat.song+'/'+stat.playlistlength);
 					let msg;
-					if (stat.songid) {
+					if (stat.songid && this.queue[stat.songid]) {
 						msg = {...{state: stat.state}, ...this.queue[stat.songid]};
 						if (stat.playlistlength-stat.song < 2) {
 							this._getTracks();
@@ -203,7 +209,7 @@ module.exports = class Pandora {
 							.then(()=>this._cleanQueue());
 						}
 					} else {
-						msg = {state: stat.state};
+						msg = {state: 'stop'};
 					}
 					console.log(msg);
 					this.ws.clients.forEach((client) => {

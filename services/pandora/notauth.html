@@ -1,0 +1,24 @@
+<script src="services/pandora/script.js"></script>
+<div id="pdorcrumbs" noonclick="pdorBack(event)">
+	<a href="#" data-bobj="">Home</a>
+	<i class="fa fa-user" aria-hidden="true" onclick="pdorUser()"></i>
+	<i class="fa fa-search" aria-hidden="true" onclick="pdorSearch()"></i>
+</div>
+<div id="pdor_user" class="hidden"></div>
+<div id="stations">
+	<span class="warning">You are not authenticated with Pandora. Please login to Pandora (upper-right user icon)</span>
+</div>
+<div id="albumart">
+	<div class="prevnext" onclick="prevnext(event)">
+		<i class="fa fa-arrow-circle-left left" aria-hidden="true"></i>
+		<i class="fa fa-arrow-circle-right right" aria-hidden="true"></i>
+	</div>
+	<img src="">
+	<div>
+		<dl>
+		<dt>Artist: </dt><dd class="artist"></dd>
+		<dt>Album: </dt><dd class="album"></dd>
+		<dt>Song: </dt><dd class="song"></dd>
+		</dl>
+	</div>
+</div>
