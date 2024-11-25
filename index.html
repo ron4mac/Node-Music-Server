@@ -23,7 +23,7 @@
 			<button class="tablinks" onclick="openTab(event, 'pandoraTab', pdpop)">Pandora</button>
 			<button class="tablinks" onclick="openTab(event, 'plstsTab', plpop)">Playlists</button>
 			<button class="tablinks nompd" onclick="openTab(event, 'filemanTab', fmpop)">Manage File Storage</button>
-			<button class="tablinks nompd" onclick="openTab(event, 'ytxTab', ytxpop)">Youtube Extraction</button>
+			<button class="tablinks nompd" onclick="openTab(event, 'ytxTab', ytxpop)">YouTube Extraction</button>
 			<!-- ><button class="tablinks nompd" onclick="openTab(event, 'sglTab')">Extract Audio from a Single File</button>
 			<button class="tablinks nompd" onclick="openTab(event, 'lstTab')">Extract Audio from an Entire Playlist</button>
 			<button class="tablinks nompd" onclick="openTab(event, 'vidTab')">Get YT Video</button> -->
@@ -51,37 +51,9 @@
 			</div>
 			<div id="calmradioTab" class="tabcontent">
 				<div id="calmradio"></div>
-<!--				<div id="calmcrumbs" onclick="calmBack(event)">
-					<a href="#" data-url="">Home</a>
-					<i class="fa fa-user" aria-hidden="true" onclick="calmUser()"></i>
-					<i class="fa fa-search" aria-hidden="true" onclick="calmSearch()"></i>
-				</div>
-				<div id="calm_user" class="hidden"></div>
-				<div id="calm" onclick="calmPlay(event)"></div> -->
 			</div>
 			<div id="pandoraTab" class="tabcontent">
 				<div id="pandora"></div>
-<!--				<div id="pdorcrumbs" noonclick="pdorBack(event)">
-					<a href="#" data-bobj="">Home</a>
-					<i class="fa fa-user" aria-hidden="true" onclick="pdorUser()"></i>
-					<i class="fa fa-search" aria-hidden="true" onclick="pdorSearch()"></i>
-				</div>
-				<div id="pdor_user" class="hidden"></div>
-				<div id="stations"></div>
-				<div id="albumart">
-					<div class="prevnext" onclick="prevnext(event)">
-						<i class="fa fa-arrow-circle-left left" aria-hidden="true"></i>
-						<i class="fa fa-arrow-circle-right right" aria-hidden="true"></i>
-					</div>
-					<img src="">
-					<div>
-						<dl>
-						<dt>Artist: </dt><dd class="artist"></dd>
-						<dt>Album: </dt><dd class="album"></dd>
-						<dt>Song: </dt><dd class="song"></dd>
-						</dl>
-					</div>
-				</div> -->
 			</div>
 			<div id="plstsTab" class="tabcontent">
 				<nav class="plmnu">
@@ -162,10 +134,6 @@
 	var xtrLocal='XTRLOCALV';
 	_pb = document.getElementById('prog');
 	_fm = document.getElementById('fileman');
-	// Get all elements with class="tabcontent" and hide them
-	//tabcontent = document.getElementsByClassName('tabcontent');
-	// Get all elements with class="tablinks" and remove the class "active"
-	//tablinks = document.getElementsByClassName('tablinks');
 	// setup fm menu
 	document.querySelectorAll('.fmenu a').forEach(elm => {
 		elm.addEventListener('click', (evt) => {

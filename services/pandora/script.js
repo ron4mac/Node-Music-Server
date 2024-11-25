@@ -78,6 +78,57 @@
 		}, 1);
 	};
 
+	Pand.search = () => {
+		const sterm = prompt('Search stations ...');
+		if (!sterm) return;
+		const parms = {act:'pandora', what: 'search', bobj: sterm};
+		postAction(null, parms, (data) => {
+			if (!data) return;
+			const dlg = document.getElementById('pand-search');
+			dlg.querySelector('.results').innerHTML = data;
+			dlg.showModal();
+		}, 1);
+	};
+
+	Pand.add = (evt, mtyp) => {
+		evt.preventDefault();
+		let mtkn = evt.target.closest('[data-mtkn]').dataset.mtkn;
+		const parms = {act:'pandora', what: 'add', bobj: {musicToken:mtkn, musicType: mtyp}};
+		postAction(null, parms, (data) => {
+			if (data) {
+				alert(data);
+				Pand.get();
+			} else {
+				Pand.get();
+			}
+		}, 1);
+	};
+
+	Pand.delete = (evt) => {
+		evt.preventDefault();
+		if (!confirm('Are you sure that you want to delete this station?')) return;
+		let sid = evt.target.closest('[data-sid]').dataset.sid;
+		const parms = {act:'pandora', what: 'delete', bobj: sid};
+		postAction(null, parms, (data) => {
+			if (data) {
+				alert(data);
+			} else {
+				evt.target.closest('dialog').close();
+				Pand.get();
+			}
+		}, 1);
+	};
+
+	Pand.more = (evt) => {
+		evt.preventDefault();
+		let sid = evt.target.closest('[data-sid]').dataset.sid;
+		const dlg = document.getElementById('pand-more');
+		dlg.setAttribute('data-sid',sid);
+		let name = evt.target.nextElementSibling.innerHTML;
+		dlg.querySelector('h3').innerHTML = name;
+		dlg.showModal();
+	};
+
 	Pand.play = (evt) => {
 		evt.preventDefault();
 		let bobj = evt.target.closest('[data-sid]').dataset.sid;

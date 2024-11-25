@@ -1,8 +1,20 @@
 <script src="services/pandora/script.js"></script>
+<style>
+#stations i {font-size:small;color:#888}
+#pand-search {height:50vh;max-width:75%}
+#pand-search .results {color:blue;line-height:1.4rem;height:calc(100% - 32px);overflow-y:auto}
+#pand-search .subs {
+	color: white;
+	padding: 2px 0;
+	background-color: cornflowerblue;
+	text-align: center;
+}
+#pand-search h4 {margin:0; height:32px}
+</style>
 <div id="pdorcrumbs" noonclick="pdorBack(event)">
 	<a href="#" data-bobj="">Home</a>
 	<i class="fa fa-user" aria-hidden="true" onclick="Pand.user()"></i>
-	<i class="fa fa-search" aria-hidden="true" onclick="pdorSearch()"></i>
+	<i class="fa fa-search" aria-hidden="true" onclick="Pand.search()"></i>
 </div>
 <div id="pdor_user" class="hidden"></div>
 <div id="stations"></div>
@@ -20,3 +32,17 @@
 		</dl>
 	</div>
 </div>
+<dialog id="pand-more">
+<div class="closex" onclick="this.parentElement.close()">
+	<i class="fa fa-times" aria-hidden="true"></i>
+</div>
+<h3>Station Name</h3>
+<div><button onclick="Pand.delete(event)">Delete this station</button></div>
+</dialog>
+<dialog id="pand-search">
+<div class="closex" onclick="this.parentElement.close()">
+	<i class="fa fa-times" aria-hidden="true"></i>
+</div>
+<h4>Search results:</h4>
+<div class="results"></div>
+</dialog>

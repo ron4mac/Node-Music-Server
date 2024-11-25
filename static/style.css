@@ -378,8 +378,9 @@ table .fa {
 	position: absolute;
 	/*width: 480px;
 	height: 294px;*/
-	min-width: 700px;
-	height: 100%;
+	min-width: 600px;
+	width: 90%;
+	height: 90%;
 	top: 0;
 	left: 50%;
 	transform: translate(-50%, 0);

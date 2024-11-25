@@ -97,6 +97,37 @@ module.exports = class Pandora {
 				resp.end(cntrlr.readFile('services/pandora/pandora.html', 'FAILED TO READ'));
 			});
 			break;
+		case 'delete':
+			if (this.client.authData) {
+				this.client.request('station.deleteStation', {stationToken: bobj}, (err, nada) => {
+					resp.end();
+				});
+			} else {
+				resp.end('Not Authorized');
+			}
+			break;
+		case 'search':
+			if (this.client.authData) {
+				this.client.request('music.search', {searchText: bobj, includeNearMatches: true, includeGenreStations: true}, (err, data) => {
+				//	console.log(data);
+					resp.write(this._parseSearch(data));
+					resp.end();
+				});
+			} else {
+				resp.end('Not Authorized');
+			}
+			break;
+		case 'add':
+			if (this.client.authData) {
+				this.client.request('station.createStation', bobj, (err, data) => {
+					//console.log(data);
+					let msg = data.stationName ? ('Created Station "'+data.stationName+'"') : 'FAILED TO CREATE STATION';
+					resp.end(msg);
+				});
+			} else {
+				resp.end('Not Authorized');
+			}
+			break;
 		default:
 			resp.end('Unknown webPandora: '+what);
 			break;
@@ -141,12 +172,36 @@ module.exports = class Pandora {
 		return yn;
 	}
 
+
 	// private methods
 	_parseStations (list) {
 		if (!list) return 'NOT YET RESOLVED';
 		let htm = '';
 		for (const s of list) {
-			htm += '<div><a href="#" data-sid="'+s.stationId+'" onclick="Pand.play(event)">'+s.stationName+'</a></div>'
+			htm += '<div data-sid="'+s.stationId+'"><i class="fa fa-bars" aria-hidden="true" onclick="Pand.more(event)"></i> <a href="#" onclick="Pand.play(event)">'+s.stationName+'</a></div>'
+		}
+		return htm;
+	}
+
+	_parseSearch (rslt) {
+		let htm = '';
+		if (rslt.songs && rslt.songs.length) {
+			htm += '<div class="subs">By Songs</div>';
+			rslt.songs.forEach((s)=>{
+				htm += '<div data-mtkn="'+s.musicToken+'"><i class="fa fa-plus-square-o" aria-hidden="true" onclick="Pand.add(event,\'song\')"></i>'+s.artistName+' :: '+s.songName+'</div>';
+			});
+		}
+		if (rslt.artists && rslt.artists.length) {
+			htm += '<div class="subs">By Artists</div>';
+			rslt.artists.forEach((a)=>{
+				htm += '<div data-mtkn="'+a.musicToken+'"><i class="fa fa-plus-square-o" aria-hidden="true" onclick="Pand.add(event,\'artist\')"></i>'+a.artistName+'</div>';
+			});
+		}
+		if (rslt.genreStations && rslt.genreStations.length) {
+			htm += '<div class="subs">By Genres</div>';
+			rslt.genreStations.forEach((g)=>{
+				htm += '<div data-mtkn="'+g.musicToken+'"><i class="fa fa-plus-square-o" aria-hidden="true" onclick="Pand.add(event,\'song\')"></i>'+g.stationName+'</div>';
+			});
 		}
 		return htm;
 	}
