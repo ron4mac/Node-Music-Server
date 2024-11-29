@@ -8,10 +8,11 @@ const fs = require('fs');
 const path = require('path');
 //const ytdl = require('@distube/ytdl-core');
 const MyMPD = require('./mpd.js');
-const TuneIn = require('./services/tunein/tunein.js');
-const CalmRadio = require('./services/calmradio/calmradio.js');
-const Pandora = require('./services/pandora/pandora.js');
-const YTExtract = require('./services/ytextract/ytextract.js');
+//const Favorites = require('./services/favorites/favorites.js');
+//const TuneIn = require('./services/tunein/tunein.js');
+//const CalmRadio = require('./services/calmradio/calmradio.js');
+//const Pandora = require('./services/pandora/pandora.js');
+//const YTExtract = require('./services/ytextract/ytextract.js');
 
 const formidable = require('formidable');	//, {errors as formidableErrors} from 'formidable';
 const formidableErrors = formidable.errors;		//require('formidable:errors');
@@ -36,6 +37,7 @@ var tlist = [];
 var pwtrk = '';
 var errs = [];
 var mympd = null;
+var favorites = null;
 var tunein = null;
 var calmradio = null;
 var pandora = null;
@@ -199,12 +201,22 @@ const receiveUpload = async (req, res) => {
 	});
 };
 
+const webFavorites = async (what, bobj, resp) => {
+	if (!favorites) {
+		if (!mympd) {
+			mympd = await MyMPD.init();
+		}
+		favorites = new (require('./services/favorites/favorites'))(mympd);		//Favorites(mympd);
+	}
+	favorites.action(what, bobj, resp);
+};
+
 const webRadio = async (what, bobj, resp) => {
 	if (!tunein) {
 		if (!mympd) {
 			mympd = await MyMPD.init();
 		}
-		tunein = new TuneIn(mympd);
+		tunein = new (require('./services/tunein/tunein'))(mympd);		//TuneIn(mympd);
 	}
 	tunein.action(what, bobj, resp);
 };
@@ -214,7 +226,7 @@ const calmRadio = async (what, bobj, resp) => {
 		if (!mympd) {
 			mympd = await MyMPD.init();
 		}
-		calmradio = new CalmRadio(mympd);
+		calmradio = new (require('./services/calmradio/calmradio'))(mympd);		//CalmRadio(mympd);
 	}
 	calmradio.action(what, bobj, resp);
 };
@@ -224,14 +236,14 @@ const webPandora = async (what, bobj, resp) => {
 		if (!mympd) {
 			mympd = await MyMPD.init();
 		}
-		pandora = await Pandora.init(mympd, settings);
+		pandora = await (require('./services/pandora/pandora')).init(mympd, settings);		//Pandora.init(mympd, settings);
 	}
 	pandora.action(what, bobj, resp);
 };
 
 const webYtextr = async (what, bobj, resp) => {
 	if (!ytextract) {
-		ytextract = new YTExtract();
+		ytextract = new (require('./services/ytextract/ytextract'))();		//YTExtract();
 	}
 	ytextract.action(what, bobj, resp);
 };
@@ -277,6 +289,20 @@ const mpdCtrl = async (what, bobj, resp) => {
 		break;
 	}
 };
+
+const f_commands = {
+	fa: webFavorites,
+	ti: webRadio,
+	cr: calmRadio,
+	pd: webPandora,
+	yt: webYtextr
+};
+
+
+const router = (service, parms, resp) => {
+	f_commands[service](parms.what, parms.bobj??'', resp);
+}
+
 
 const filemanAction = (parms, resp) => {
 	console.log(parms);
@@ -327,22 +353,27 @@ const filemanAction = (parms, resp) => {
 	case 'plvue':
 		rmsg = JSON.stringify({err:'', pl:fs.readFileSync(playlistDir+'/'+parms.file,{encoding:'utf8'})});
 		break;
-	case 'radio':
-		webRadio(parms.what, parms.bobj??'', resp);
-		return;
-		break;
-	case 'calm':
-		calmRadio(parms.what, parms.bobj??'', resp);
-		return;
-		break;
-	case 'pandora':
-		webPandora(parms.what, parms.bobj??'', resp);
-		return;
-		break;
-	case 'ytextr':
-		webYtextr(parms.what, parms.bobj??'', resp);
-		return;
-		break;
+//	case 'favorites':
+//		webFavorites(parms.what, parms.bobj??'', resp);
+//		//f_commands['webFavorites'](parms.what, parms.bobj??'', resp);
+//		return;
+//		break;
+//	case 'radio':
+//		webRadio(parms.what, parms.bobj??'', resp);
+//		return;
+//		break;
+//	case 'calm':
+//		calmRadio(parms.what, parms.bobj??'', resp);
+//		return;
+//		break;
+//	case 'pandora':
+//		webPandora(parms.what, parms.bobj??'', resp);
+//		return;
+//		break;
+//	case 'ytextr':
+//		webYtextr(parms.what, parms.bobj??'', resp);
+//		return;
+//		break;
 	case 'mpd':
 		mpdCtrl(parms.what, parms.bobj??'', resp);
 		return;
@@ -513,7 +544,8 @@ const serveFile = (filePath, response, url, pdata) => {
 				fs.readFile(filePath+'/index.html', function(error, content) {
 					if (error) { console.error(error); }
 					else {
-						response.setHeader('Cache-Control', ['no-cache','max-age=0']);
+						response.setHeader('Cache-Control', ['no-cache','no-store','must-revalidate']);
+						response.setHeader('Pragma', 'no-cache');
 						response.writeHead(200, { 'Content-Type':'text/html' });
 						response.end(content, 'utf-8');
 						// log served page
@@ -581,10 +613,15 @@ http.createServer(function (request, response) {
 				filemanAction(rdata, response);
 				return;
 			}
-			if (url.startsWith('/?upld')) {
-				receiveUpload(request, response);
+			if (url.startsWith('/_')) {
+				let rdata = request.headers['content-type'] == 'application/json' ? JSON.parse(body) : parse(body);
+				router(url.substr(2), rdata, response);
 				return;
 			}
+//			if (url.startsWith('/?upld')) {
+//				receiveUpload(request, response);
+//				return;
+//			}
 			let filePath = parse(url.substring(1));
 			// Correct root path
 			if (filePath === '/') {

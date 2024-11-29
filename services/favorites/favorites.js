@@ -1,28 +1,35 @@
 'use strict';
 const cntrlr = require('../../controller');
-const http = require('http');
+//const http = require('http');
 //const https = require('https');
-const { XMLParser } = require('fast-xml-parser');
 
-const baseUrl = 'http://opml.radiotime.com/';
-
-module.exports = class TuneIn {
+module.exports = class Favorites {
 
 	constructor (mympd) {
 		this.mpdc = mympd;
+		this.faves = [];
 	}
 
 	action (what, bobj, resp) {
 		switch (what) {
 		case 'home':
-			let b = (bobj!=='undefined') ? atob(bobj) : '';
-			this.browse(b, resp);
+			this.faves = JSON.parse(cntrlr.readFile('services/favorites/favorites.json', '[]'));
+			if (this.faves.length) {
+				this.faves.forEach((fave, index) => {
+					resp.write(`<div class="${fave.how}" data-fid="${index}">`);
+					resp.write(`<i class="fa fa-bars" aria-hidden="true"></i>`);
+					resp.write(`<a href="#F${index}">${fave.name}</a></div>`);
+				});
+				resp.end();
+			} else {
+				resp.end('THERE ARE NO FAVORITES YET');
+			}
 			break;
-		case 'search':
-			this.search(bobj, resp);
+		case 'add':
+			this.add(bobj /*{...{what: bobj}, ...cntrlr.currentPlaying}*/, resp);
 			break;
 		case 'play':
-			this.play(bobj, resp);
+			resp.end(JSON.stringify(this.faves[bobj]));
 			break;
 		case 'lplay':
 			this.lplay(bobj, resp);
@@ -32,7 +39,7 @@ module.exports = class TuneIn {
 			resp.end();
 			break;
 		case 'load':
-			resp.end(cntrlr.readFile('services/tunein/tunein.html', 'FAILED TO READ'));
+			resp.end(cntrlr.readFile('services/favorites/favorites.html', 'FAILED TO READ'));
 			break;
 		}
 	}
@@ -56,23 +63,10 @@ module.exports = class TuneIn {
 		}).end();
 	}
 
-	search (sexp, resp) {
-		let dat = '';
-		http.get(baseUrl+'Search.ashx?query='+encodeURIComponent(sexp), (r) => {
-			r.on('data', (chunk) => {
-				dat += chunk;
-			}).on('end', () => {
-				const parser = new XMLParser({ignoreAttributes: false, attributeNamePrefix: ''});
-				const jdat = parser.parse(dat);
-				if (Array.isArray(jdat.opml.body.outline)) {
-					this._radioParse(jdat.opml.body.outline, resp);
-				} else {
-					this._radioParse([jdat.opml.body.outline], resp);
-				}
-				//}
-				resp.end()
-			});
-		}).end();
+	add (fave, resp) {
+		this.faves.push(fave);
+		let rslt = cntrlr.writeFile('services/favorites/favorites.json', JSON.stringify(this.faves, null, "\t"));
+		resp.end(rslt ? rslt : 'Added to favorites');
 	}
 
 	startRadio (surl) {
@@ -86,6 +80,8 @@ module.exports = class TuneIn {
 	}
 
 	play (url, resp) {
+		resp.end(JSON.stringify(this.faves[url]));
+		return;
 		let dat = '';
 		http.get(url, (r) => {
 			r.on('data', (chunk) => {
@@ -94,7 +90,6 @@ module.exports = class TuneIn {
 				// drove me CRAZY discovering that linefeeds at the end caused things to hang!
 				let surl = dat.replace(/[\r\n]+/gm, '');
 				this.startRadio(surl);
-				cntrlr.currentPlaying = {lr: 'remote', f:'webRadio', a:'play', p:url};
 				resp.end();
 			});
 		}).end();
@@ -109,7 +104,6 @@ module.exports = class TuneIn {
 				// drove me CRAZY discovering that linefeeds at the end caused things to hang!
 				let surl = dat.replace(/[\r\n]+/gm, '');
 				//this.startRadio(surl);
-				cntrlr.currentPlaying = {lr: 'local', f:'webRadio', a:'lplay', p:url};
 				resp.end(surl);
 			});
 		}).end();

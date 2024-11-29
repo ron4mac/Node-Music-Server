@@ -5,14 +5,18 @@ var _pp = 0,
 	_pb,
 	_fm,
 	curDir = '',
+	currentStream = '',
+	nowPlaying = {},
 //	tabcontent,
 //	tablinks,
+	faveseen = false,
 	plstseen = false,
 	rdioseen = false,
 	calmseen = false,
 	pdorseen = false,
 	fileseen = false,
 	ytxseen = false;
+
 //	pdorSocket = null;
 //	radioSocket = null;
 
@@ -207,7 +211,7 @@ const doComb = (btn) => {
 
 // UI display
 const displayCurrent = (what) => {
-	document.querySelectorAll('.marquis').forEach((elm)=>{elm.innerHTML = what});
+	document.querySelectorAll('.curstrm').forEach((elm)=>{elm.innerHTML = what});
 }
 const displayCurrentTrack = (what) => {
 	document.querySelectorAll('.curtrk').forEach((elm)=>{elm.innerHTML = what});
@@ -277,6 +281,7 @@ const radioControl = (w) => {
 		if (data) alert(data);
 	}, 1);
 };
+/*
 const radioBack = (evt) => {
 	console.log(evt);
 	evt.preventDefault();
@@ -342,22 +347,32 @@ const radioPlay = (evt) => {
 		}
 	}, 1);
 };
+*/
 
 
 
 
+const getFavorites = () => {
+	const parms = {act:'favorites', what: 'load'};
+	postAction('fa', parms, (data) => {
+		let elm = document.getElementById('favorites');
+		elm.innerHTML = data;
+		load_scripts(elm, (evt)=>Favorites.get());
+	}, 1);
+};
 
 const getRadio = () => {
-	const parms = {act:'radio', what: 'home'};
-	postAction(null, parms, (data) => {
-		let elm = document.getElementById('radio');
+	const parms = {act:'radio', what: 'load'};
+	postAction('ti', parms, (data) => {
+		let elm = document.getElementById('tunein');
 		elm.innerHTML = data;
+		load_scripts(elm, (evt)=>Tunein.get());
 	}, 1);
 };
 
 const getCalm = () => {
 	const parms = {act:'calm', what: 'load'};
-	postAction(null, parms, (data) => {
+	postAction('cr', parms, (data) => {
 		let elm = document.getElementById('calmradio');
 		elm.innerHTML = data;
 		load_scripts(elm, (evt)=>Calm.get());
@@ -367,7 +382,7 @@ const getCalm = () => {
 const getPand = () => {
 	const parms = {act:'pandora', what: 'load'};
 	const elm = document.getElementById('pandora');
-	postAction(null, parms, (data) => {
+	postAction('pd', parms, (data) => {
 		elm.innerHTML = data;
 		load_scripts(elm, (evt)=>Pand.get());
 	}, 1);
@@ -376,7 +391,7 @@ const getPand = () => {
 const getYtx = () => {
 	const parms = {act:'ytextr', what: 'load'};
 	const elm = document.getElementById('ytextract');
-	postAction(null, parms, (data) => {
+	postAction('yt', parms, (data) => {
 		elm.innerHTML = data;
 		load_scripts(elm);
 	}, 1);
@@ -422,6 +437,7 @@ const mpdSocket = () => {
 	socket.addEventListener('message', (event) => {
 		console.log('MPD message from server ', event.data);
 		let data = JSON.parse(event.data);
+		document.dispatchEvent(new CustomEvent('mpdchg', {bubbles: true, detail: data}));
 		if (data.track) {
 			displayCurrentTrack(data.track);
 		}
@@ -433,22 +449,22 @@ const mpdSocket = () => {
 }
 
 
-
-// radio (TuneIn) interface
+/* FUNCTIONS TO INITIALIZE SERVICE PANELS WHEN SELECTED */
+// Favorites interface
+const fapop = () => {
+	if (!faveseen) {
+		setVolSlider();
+		getFavorites();
+	}
+	faveseen = true;
+};
+// Radio (TuneIn) interface
 const tipop = () => {
 	if (!rdioseen) {
 		setVolSlider();
 		getRadio();
 	}
 	rdioseen = true;
-};
-// Pandora interface
-const pdpop = () => {
-	if (!pdorseen) {
-		setVolSlider();
-		getPand();
-	}
-	pdorseen = true;
 };
 // Calm Radio interface
 const crpop = () => {
@@ -458,12 +474,13 @@ const crpop = () => {
 	}
 	calmseen = true;
 };
-// YouTube extraction interface
-const ytxpop = () => {
-	if (!ytxseen) {
-		getYtx();
+// Pandora interface
+const pdpop = () => {
+	if (!pdorseen) {
+		setVolSlider();
+		getPand();
 	}
-	ytxseen = true;
+	pdorseen = true;
 };
 // Playlists interface
 const plpop = () => {
@@ -473,11 +490,20 @@ const plpop = () => {
 	}
 	plstseen = true;
 };
-// file manager interface
+// File manager interface
 const fmpop = () => {
 	if (!fileseen) getDirList(curDir);
 	fileseen = true;
 };
+// YouTube extraction interface
+const ytpop = () => {
+	if (!ytxseen) {
+		getYtx();
+	}
+	ytxseen = true;
+};
+
+
 
 
 const doPlMenu = (actn, evt) => {
@@ -499,6 +525,7 @@ const doPlMenu = (actn, evt) => {
 			const files = Array.from(slctd).map(el => el.value);
 			console.log(files);
 			//postAndRefreshPL({act:'plply','files':files}, 1);
+			document.addEventListener('mpdchg', (e) => console.log('mpdchg',e.detail));
 			const parms = {act:'plply',files:files};
 			postAction(null, parms, (data) => {
 				if (data) alert(data);
@@ -677,7 +704,7 @@ const toFormData = (obj) => {
 };
 
 // json 1 to send, 2 to send and receive
-const postAction = (act, parms={}, cb=()=>{}, json=false) => {
+const postAction = (tos, parms={}, cb=()=>{}, json=false) => {
 	let hdrs = {};
 	if (typeof parms === 'object') {
 		if (json) {
@@ -689,9 +716,10 @@ const postAction = (act, parms={}, cb=()=>{}, json=false) => {
 		if (!json) parms = new URLSearchParams(parms);
 	}
 	if (json) hdrs['Content-Type'] = 'application/json';
-	if (act) parms.set('act', act);
+	const url = tos ? ('/_'+tos) : '?_FM'
+//	if (act) parms.set('act', act);
 
-	fetch('?_FM', {method:'POST', headers:hdrs, body:parms})
+	fetch(url, {method:'POST', headers:hdrs, body:parms})
 	.then(resp => { if (!resp.ok) throw new Error('Network response was not OK'); if (json==2) return resp.json(); else return resp.text() })
 	.then(data => cb(data))
 	.catch(err => alert(err));

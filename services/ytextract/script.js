@@ -2,6 +2,8 @@
 
 (function(YTx) {
 
+	const sr = 'yt';	// service route
+
 	const streamSelect = (frm, type) => {
 		let selt = document.querySelector('#sseld table tbody');
 		if (type=='audio') {

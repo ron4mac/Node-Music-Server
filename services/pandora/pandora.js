@@ -2,14 +2,6 @@
 const cntrlr = require('../../controller');
 const Connect = require('./connect');
 const WebSocket = require('ws');
-const iOSpartnerInfo = {
-		username: 'iphone',
-		password: 'P2E4FC0EAD3*878N92B2CDp34I0B1@388137C',
-		deviceModel: 'IP01',
-		decryptPassword: '20zE1E47BE57$51',
-		encryptPassword: '721^26xE22776'
-	};
-
 
 module.exports = class Pandora {
 
@@ -29,7 +21,7 @@ module.exports = class Pandora {
 				.then((stat) => {
 					let msg;
 					if (stat.songid && this.queue[stat.songid]) {
-						msg = {...{state: stat.state}, ...this.queue[stat.songid]};
+						msg = {...{state: stat.state}, ...{snam: this.stationName}, ...this.queue[stat.songid]};
 						console.log(msg);
 					} else {
 						return;		//msg = {state: stat.state};
@@ -42,7 +34,7 @@ module.exports = class Pandora {
 	}
 
 	static async init (mpdc, settings) {
-		const client = new Connect(settings.pandora_user, settings.pandora_pass, iOSpartnerInfo);
+		const client = new Connect(settings.pandora_user, settings.pandora_pass);
 		let rslt = false;	//await this._login(client);
 		return rslt ? null : new Pandora(client, mpdc, true);
 	}
@@ -75,17 +67,6 @@ module.exports = class Pandora {
 		case 'clear':
 			this.mpdc.clear();
 			resp.end();
-			break;
-		case 'login':
-			this._login(this.client, bobj.user, bobj.pass)
-			.then(()=>{
-				if (this.client.authData) {
-					cntrlr.setSettings({pandora_user: bobj.user, pandora_pass: bobj.pass});
-					resp.end();
-				} else {
-					resp.end('FAILED TO AUTHENTICATE');
-				}
-			});
 			break;
 		case 'user':
 			const htm = this.client.authData ? 'user.html' : 'login.html';
@@ -128,6 +109,34 @@ module.exports = class Pandora {
 				resp.end('Not Authorized');
 			}
 			break;
+		case 'login':
+			this._login(this.client, bobj.user, bobj.pass)
+			.then(()=>{
+				if (this.client.authData) {
+					cntrlr.setSettings({pandora_user: bobj.user, pandora_pass: bobj.pass});
+					resp.end();
+				} else {
+					resp.end('FAILED TO AUTHENTICATE');
+				}
+			});
+			break;
+		case 'reauth':
+			this.client.authData = null;
+			this._login(this.client, cntrlr.settings.pandora_user, cntrlr.settings.pandora_pass)
+			.then(()=>{
+				if (this.client.authData) {
+					resp.end();
+				} else {
+					resp.end('FAILED TO AUTHENTICATE');
+				}
+			});
+			break;
+		case 'logout':
+			this.client.authData = null;
+			cntrlr.deleteSettings(['pandora_user','pandora_pass']);
+			this._login(this.client, bobj.user, bobj.pass)
+			resp.end();
+			break;
 		default:
 			resp.end('Unknown webPandora: '+what);
 			break;
@@ -136,14 +145,15 @@ module.exports = class Pandora {
 
 	browse (surl, resp) {
 		if (this.client.authData) {
-			this.client.request('user.getStationList', (err, stationList) => {
-			//	console.log(stationList);
+			// can get image sizes .. 90,130,250,500,640,1080
+			this.client.request('user.getStationList', {includeStationArtUrl: true, stationArtSize: 'W250H250'}, (err, stationList) => {
+				console.log(stationList);
 				if (stationList) {
 					resp.write(this._parseStations(stationList.stations));
 					resp.end();
 				} else {
 					console.log(err);
-					resp.end('-- nope --');
+					resp.end('-- Failed connection to Pandora ... may need to refresh authorization --');
 				}
 			});
 		} else {
@@ -151,9 +161,10 @@ module.exports = class Pandora {
 		}
 	}
 
-	play (stationid, resp) {
+	play (station, resp) {
 		this.mpdc.sendCommand('clear');
-		this.stationid = stationid;
+		this.stationid = station.sid;
+		this.stationName = station.snam;
 		this._getTracks();
 		resp.end();
 	}
@@ -178,7 +189,8 @@ module.exports = class Pandora {
 		if (!list) return 'NOT YET RESOLVED';
 		let htm = '';
 		for (const s of list) {
-			htm += '<div data-sid="'+s.stationId+'"><i class="fa fa-bars" aria-hidden="true" onclick="Pand.more(event)"></i> <a href="#" onclick="Pand.play(event)">'+s.stationName+'</a></div>'
+			htm += '<div data-sid="'+s.stationId+'"><i class="fa fa-bars" aria-hidden="true" onclick="Pand.more(event)"></i>';
+			htm += '<a href="#" onclick="Pand.play(event)">'+s.stationName+'</a></div>'
 		}
 		return htm;
 	}
@@ -213,6 +225,7 @@ module.exports = class Pandora {
 				console.error(err);
 				setTimeout(()=>this._getTracks, 15000);
 			} else {
+		//	console.log(playlist);
 				if (playlist) this._queueTracks(playlist.items);
 			}
 		});
@@ -255,7 +268,7 @@ module.exports = class Pandora {
 					console.log(stat.song+'/'+stat.playlistlength);
 					let msg;
 					if (stat.songid && this.queue[stat.songid]) {
-						msg = {...{state: stat.state}, ...this.queue[stat.songid]};
+						msg = {...{state: stat.state}, ...{snam: this.stationName}, ...this.queue[stat.songid]};
 						if (stat.playlistlength-stat.song < 2) {
 							this._getTracks();
 						}

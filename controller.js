@@ -11,6 +11,7 @@ class Controller {
 	constructor () {
 		this.config = config;
 		this.settings = this._readSettings();
+//		this.currentPlaying = null;
 	}
 
 	getSettings () {
@@ -31,6 +32,13 @@ class Controller {
 		this._saveSettings();
 	}
 
+	deleteSettings (which) {
+		for (const w of which) {
+			delete this.settings[w];
+		}
+		this._saveSettings();
+	}
+
 	// read a file (sync) or return default data
 	readFile (path, dflt) {
 		try {
@@ -38,6 +46,16 @@ class Controller {
 		} catch (err) {
 			console.error(err);
 			return dflt;
+		}
+	}
+
+	// write a file (sync)
+	writeFile (path, data) {
+		try {
+			return fs.writeFileSync(path, data);
+		} catch (err) {
+			console.error(err);
+			return err;
 		}
 	}
 

@@ -2,13 +2,63 @@
 
 (function(Pand) {
 
+	const sr = 'pd';	// service route
+
 	let socket = null;
+
+	const startPlay = (how, url) => {
+		const parms = {act:'pandora', what: how, bobj: url};
+		postAction(sr, parms, (data) => {
+			displayCurrent(currentStream);
+			if (data) {
+				showLocalAudio(true);
+				const laudio = document.getElementById('localaudio');
+				laudio.src = data;
+				laudio.play();
+			}
+		}, 1);
+	}
+
+	Pand.play = (evt) => {
+		evt.preventDefault();
+		let elm = evt.target.closest('[data-sid]');
+		const sid = elm.dataset.sid;
+		const chnam = elm.querySelector('a').innerHTML;
+		let bobj = {sid: sid, snam: chnam};
+		currentStream = 'Pandora: '+chnam;
+		const parms = {act:'pandora', what: 'play', bobj: bobj};
+		postAction(sr, parms, (data) => {
+			//console.log('PPlay',data);
+			//displayCurrent('Pandora: '+evt.target.closest('[data-sid]').querySelector('a').innerHTML);
+		}, 1);
+		nowPlaying = {name: currentStream, what:'Pand', how: 'play', url: bobj};
+	};
+
+	Pand.fave = (how, url) => {
+		// make sure websocket is running
+		Pand.socket();
+		// play the saved favorite
+		startPlay(how, url);
+	}
 
 	Pand.login = (evt,elm) => {
 		console.log(evt);
 		let frm = evt.target.form;
 		const parms = {act:'pandora', what: 'login', bobj:{user:frm.user.value, pass:frm.pass.value}};
-		postAction(null, parms, (data) => {
+		postAction(sr, parms, (data) => {
+			if (data) {
+				alert(data);
+			} else {
+				elm.closest('dialog').close();
+				Pand.get();
+			}
+		}, 1);
+	};
+
+	Pand.reauth = (evt,elm) => {
+		console.log(evt);
+		const parms = {act:'pandora', what: 'reauth'};
+		postAction(sr, parms, (data) => {
 			if (data) {
 				alert(data);
 			} else {
@@ -22,10 +72,11 @@
 		console.log(evt);
 		if (!confirm('Are you sure you want to logout?')) return;
 		const parms = {act:'pandora', what: 'logout'};
-		postAction(null, parms, (data) => {
+		postAction(sr, parms, (data) => {
 			if (data) {
 				alert(data);
 			} else {
+				alert('You have been logged out from Pandora');
 				elm.closest('dialog').close();
 				Pand.get();
 			}
@@ -34,7 +85,7 @@
 
 	Pand.user = () => {
 		const parms = {act:'pandora', what: 'user'};
-		postAction(null, parms, (data) => {
+		postAction(sr, parms, (data) => {
 			let elm = document.getElementById('pdor_user');
 			elm.innerHTML = data;
 			elm.querySelector('dialog').showModal();
@@ -54,6 +105,7 @@
 				let aa = document.getElementById('albumart');
 				let data = JSON.parse(event.data);
 				if (data.state=='play') {
+					displayCurrent('Pandora: '+data.snam);
 					displayCurrentTrack(data.artistName+' - '+data.songName);
 					aa.querySelector('img').src = data.albumArtUrl ? data.albumArtUrl : 'noimage.png';
 					aa.querySelector('.artist').innerHTML = data.artistName;
@@ -72,17 +124,17 @@
 		const parms = {act:'pandora', what: 'home'};
 		const elm = document.getElementById('stations');
 		elm.innerHTML = '<i class="fa fa-spinner fa-pulse fa-lg"></i>';
-		postAction(null, parms, (data) => {
+		postAction(sr, parms, (data) => {
 			elm.innerHTML = data;
 			Pand.socket();
 		}, 1);
 	};
 
 	Pand.search = () => {
-		const sterm = prompt('Search stations ...');
+		const sterm = prompt('Search Pandora stations ...');
 		if (!sterm) return;
 		const parms = {act:'pandora', what: 'search', bobj: sterm};
-		postAction(null, parms, (data) => {
+		postAction(sr, parms, (data) => {
 			if (!data) return;
 			const dlg = document.getElementById('pand-search');
 			dlg.querySelector('.results').innerHTML = data;
@@ -94,7 +146,7 @@
 		evt.preventDefault();
 		let mtkn = evt.target.closest('[data-mtkn]').dataset.mtkn;
 		const parms = {act:'pandora', what: 'add', bobj: {musicToken:mtkn, musicType: mtyp}};
-		postAction(null, parms, (data) => {
+		postAction(sr, parms, (data) => {
 			if (data) {
 				alert(data);
 				Pand.get();
@@ -109,7 +161,7 @@
 		if (!confirm('Are you sure that you want to delete this station?')) return;
 		let sid = evt.target.closest('[data-sid]').dataset.sid;
 		const parms = {act:'pandora', what: 'delete', bobj: sid};
-		postAction(null, parms, (data) => {
+		postAction(sr, parms, (data) => {
 			if (data) {
 				alert(data);
 			} else {
@@ -127,16 +179,6 @@
 		let name = evt.target.nextElementSibling.innerHTML;
 		dlg.querySelector('h3').innerHTML = name;
 		dlg.showModal();
-	};
-
-	Pand.play = (evt) => {
-		evt.preventDefault();
-		let bobj = evt.target.closest('[data-sid]').dataset.sid;
-		const parms = {act:'pandora', what: 'play', bobj: bobj};
-		postAction(null, parms, (data) => {
-			console.log('PPlay',data);
-			displayCurrent('Pandora: '+evt.target.closest('[data-sid]').innerHTML);
-		}, 1);
 	};
 
 })(window.Pand = window.Pand || {});

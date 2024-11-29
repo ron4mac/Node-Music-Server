@@ -1,6 +1,6 @@
 <script src="services/pandora/script.js"></script>
 <style>
-#stations i {font-size:small;color:#888}
+#stations i {font-size:small;color:#888;margin-right:5px;}
 #pand-search {height:50vh;max-width:75%}
 #pand-search .results {color:blue;line-height:1.4rem;height:calc(100% - 32px);overflow-y:auto}
 #pand-search .subs {
@@ -10,26 +10,37 @@
 	text-align: center;
 }
 #pand-search h4 {margin:0; height:32px}
+#pand-search i {margin-right:.4rem;color:darkorchid;}
+.pdor-sna {
+	display: flex;
+	justify-content: space-between;
+}
 </style>
-<div id="pdorcrumbs" noonclick="pdorBack(event)">
-	<a href="#" data-bobj="">Home</a>
-	<i class="fa fa-user" aria-hidden="true" onclick="Pand.user()"></i>
-	<i class="fa fa-search" aria-hidden="true" onclick="Pand.search()"></i>
+<div class="service">
+	<div class="service-l">
+		<div id="pdorcrumbs" noonclick="pdorBack(event)"><a href="#" data-bobj="">Home</a></div>
+	</div>
+	<div class="service-r">
+		<i class="fa fa-user" aria-hidden="true" onclick="Pand.user()"></i>
+		<i class="fa fa-search" aria-hidden="true" onclick="Pand.search()"></i>
+	</div>
 </div>
 <div id="pdor_user" class="hidden"></div>
-<div id="stations"></div>
-<div id="albumart">
-	<div class="prevnext" onclick="prevnext(event)">
-		<i class="fa fa-arrow-circle-left left" aria-hidden="true"></i>
-		<i class="fa fa-arrow-circle-right right" aria-hidden="true"></i>
-	</div>
-	<img src="">
-	<div>
-		<dl>
-		<dt>Artist: </dt><dd class="artist"></dd>
-		<dt>Album: </dt><dd class="album"></dd>
-		<dt>Song: </dt><dd class="song"></dd>
-		</dl>
+<div class="pdor-sna">
+	<div id="stations"></div>
+	<div id="albumart">
+		<div class="prevnext" onclick="prevnext(event)">
+			<i class="fa fa-arrow-circle-left left" aria-hidden="true"></i>
+			<i class="fa fa-arrow-circle-right right" aria-hidden="true"></i>
+		</div>
+		<img src="">
+		<div>
+			<dl>
+			<dt>Artist: </dt><dd class="artist"></dd>
+			<dt>Album: </dt><dd class="album"></dd>
+			<dt>Song: </dt><dd class="song"></dd>
+			</dl>
+		</div>
 	</div>
 </div>
 <dialog id="pand-more">

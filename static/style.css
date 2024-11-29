@@ -67,6 +67,7 @@ dialog h3 {margin-top:0}
 dialog .btns {
 	display: flex;
 	justify-content: space-between;
+	gap: .5rem;
 	margin-top: 1rem;
 }
 
@@ -135,16 +136,12 @@ form i.fa {
 /*	width: 100%;
 	display: none;*/
 }
-.marquis, .curtrk {
-	color: maroon;
-	font-size: larger;
-	vertical-align: middle;
-}
 
 /* ADMIN */
 /* Style the tab */
 .tab {
-/*	overflow: hidden;*/
+/*	overflow: hidden;
+	overflow-x: scroll;*/
 	border-bottom: 1px solid #CCC;
 /*	background-color: #f1f1f1;*/
 	display: flex;
@@ -221,9 +218,6 @@ form i.fa {
 	margin-right: .5rem;
 	cursor: pointer;
 }
-#marquis {
-	color: maroon;
-}
 #mpdvolume {
 	height: 4px;
 	width: 80px;
@@ -237,8 +231,37 @@ form i.fa {
 	margin-right: 0;
 }
 
+/* Marquis of current stream and track*/
+.marquis {
+	padding: 0 .75rem;
+	background-color: lavender;
+	border-bottom: 1px solid #CCC;
+}
+.curstrm, .curtrk {
+	color: maroon;
+	font-size: larger;
+	vertical-align: middle;
+}
+
+/* Service bar */
+.service {
+	display: flex;
+	justify-content: space-between;
+	background-color: #CCC;
+	padding: 1px 4px;
+	margin: 0 -4px 2px -4px;
+}
+.service-l {
+}
+.service-r {
+}
+.service-r i:hover {
+	color: sienna;;
+}
+
 
 /* Web Radio */
+/*
 #radcrumbs {
 	border-bottom: 1px solid #555;
 	padding-bottom: .5rem;
@@ -253,6 +276,7 @@ form i.fa {
 #radcrumbs i:hover {
 	color: magenta;
 }
+*/
 .rad-link {
 	line-height: 1.5rem;
 }
@@ -305,10 +329,11 @@ form i.fa {
 }
 #albumart {
 	display: none;
-	position: absolute;
+/*	position: absolute;
 	top: 0;
-	right: 0;
+	right: 0;*/
 	width: 50%;
+	height: fit-content;
 	padding: .5em;
 	background-color: aliceblue;
 }

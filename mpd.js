@@ -32,7 +32,7 @@ module.exports = class MyMPD {
 				console.log('on system event: %s', name);
 				this._status()
 				.then((s)=> {
-					console.log('*mpd* ', s);
+				//	console.log('*mpd* ', s);
 					if (name=='playlist') {
 						this._broadcastTrack();
 					} else {
@@ -135,7 +135,7 @@ module.exports = class MyMPD {
 
 	async _socketRequest (msg) {
 		const info = await this.mpdc.sendCommand('playlistinfo').then(MPD.parseObject);
-		console.log('@mpd.@\n', info)
+	//	console.log('@mpd.@\n', info)
 		return info ? (info.title ? info.title : 'NYET') : '?-?-?';
 	}
 

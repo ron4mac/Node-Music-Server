@@ -1,8 +1,12 @@
 <script src="services/calmradio/script.js"></script>
-<div id="calmcrumbs" onclick="Calm.back(event)">
-	<a href="#" data-url="">Home</a>
-	<i class="fa fa-user" aria-hidden="true" onclick="Calm.user()"></i>
-	<i class="fa fa-search" aria-hidden="true" onclick="Calm.search()"></i>
+<div class="service">
+	<div class="service-l">
+		<div id="calmcrumbs" onclick="Calm.back(event)"><a href="#" data-url="">Home</a></div>
+	</div>
+	<div class="service-r">
+		<i class="fa fa-user" aria-hidden="true" onclick="Calm.user()"></i>
+		<i class="fa fa-search" aria-hidden="true" onclick="Calm.search()"></i>
+	</div>
 </div>
 <div id="calm_user" class="hidden"></div>
 <div id="calm" onclick="Calm.play(event)"></div>

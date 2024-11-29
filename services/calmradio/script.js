@@ -2,6 +2,21 @@
 
 (function(Calm) {
 
+	const sr = 'cr';	// service route
+
+	const startPlay = (how, url) => {
+		const parms = {act:'calm', what: how, bobj: url};
+		postAction(sr, parms, (data) => {
+			displayCurrent(currentStream);
+			if (data) {
+				showLocalAudio(true);
+				const laudio = document.getElementById('localaudio');
+				laudio.src = data;
+				laudio.play();
+			}
+		}, 1);
+	}
+
 	Calm.back = (evt) => {
 		console.log(evt);
 		Calm.nav(evt, evt.target);
@@ -11,18 +26,19 @@
 		evt.preventDefault();
 		let bobj = elm.closest('[data-url]').dataset.url;
 		const parms = {act:'calm', what: 'home', bobj: bobj};
-		postAction(null, parms, (data) => {
+		postAction(sr, parms, (data) => {
 			let el = document.getElementById('calm');
 			el.innerHTML = data;
-			let bt = elm.closest('a').innerHTML;
-			el = document.getElementById('radcrumbs');
-			if (el.innerHTML) el.innerHTML += '::';
-			el.innerHTML += '<a href="#" data-bobj="'+bobj+'">'+bt+'</a>';
+			//let bt = elm.closest('a').innerHTML;
+			//el = document.getElementById('radcrumbs');
+			//if (el.innerHTML) el.innerHTML += '::';
+			//el.innerHTML += '<a href="#" data-bobj="'+bobj+'">'+bt+'</a>';
 		}, 1);
 	};
 
 	Calm.play = (evt) => {
 		console.log(evt);
+		evt.preventDefault();
 		let elm = evt.target;
 		let elmwurl = elm.closest('[data-url]');
 		if (elmwurl.parentElement.className=='calm-link') {
@@ -30,24 +46,33 @@
 			return;
 		}
 		evt.preventDefault();
-		let bobj = elmwurl.dataset.url;
+		let url = elmwurl.dataset.url;
 		let how = elm.nodeName=='IMG' ? 'lplay' : 'play';
-		const parms = {act:'calm', what: how, bobj: bobj};
-		postAction(null, parms, (data) => {
-			console.log(data);
-			displayCurrent('Calm Radio: '+elmwurl.parentElement.querySelector('a').innerHTML);
-			if (data) {
-				showLocalAudio(true);
-				const laudio = document.getElementById('localaudio');
-				laudio.src = data;
-				laudio.play();
-			}
-		}, 1);
+		currentStream = 'Calm Radio: '+elmwurl.parentElement.querySelector('a').innerHTML;
+		startPlay(how, url);
+		//const parms = {act:'calm', what: how, bobj: bobj};
+		//postAction(null, parms, (data) => {
+		//	console.log(data);
+		//	displayCurrent(currentStream);
+		//	if (data) {
+		//		showLocalAudio(true);
+		//		const laudio = document.getElementById('localaudio');
+		//		laudio.src = data;
+		//		laudio.play();
+		//	}
+		//}, 1);
+		// save now playing info for favorites generation
+		nowPlaying = {name: currentStream, what:'Calm', how: how, url: url};
+
 	};
+
+	Calm.fave = (how, url) => {
+		startPlay(how, url);
+	}
 
 	Calm.user = () => {
 		const parms = {act:'calm', what: 'user'};
-		postAction(null, parms, (data) => {
+		postAction(sr, parms, (data) => {
 			let elm = document.getElementById('calm_user');
 			elm.innerHTML = data;
 			document.getElementById('calm-user-dialog').showModal();
@@ -58,7 +83,7 @@
 		console.log(evt);
 		let frm = evt.target.form;
 		const parms = {act:'calm', what: 'login', bobj:{user:frm.user.value, pass:frm.pass.value}};
-		postAction(null, parms, (data) => {
+		postAction(sr, parms, (data) => {
 			if (data) {
 				alert(data);
 			} else {
@@ -72,7 +97,7 @@
 		console.log(evt);
 		if (!confirm('Are you sure you want to logout?')) return;
 		const parms = {act:'calm', what: 'logout'};
-		postAction(null, parms, (data) => {
+		postAction(sr, parms, (data) => {
 			if (data) {
 				alert(data);
 			} else {
@@ -84,7 +109,7 @@
 
 	Calm.get = () => {
 		const parms = {act:'calm', what: 'home'};
-		postAction(null, parms, (data) => {
+		postAction(sr, parms, (data) => {
 			let elm = document.getElementById('calm');
 			elm.innerHTML = data;
 		}, 1);

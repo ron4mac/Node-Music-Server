@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta http-equiv="Cache-Control" content="no-cache">
-<meta http-equiv="Cache-Control" content="max-age=0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>YT Audio Extract</title>
 <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -18,12 +16,13 @@
 	<div class="content">
 		<!-- Tab links -->
 		<div class="tab">
-			<button class="tablinks" onclick="openTab(event, 'tuninTab', tipop)" id="defaultOpen">Internet Radio</button>
+			<button class="tablinks" onclick="openTab(event, 'favesTab', fapop)" id="defaultOpen">Favorites</button>
+			<button class="tablinks" onclick="openTab(event, 'tuninTab', tipop)">Internet Radio</button>
 			<button class="tablinks" onclick="openTab(event, 'calmradioTab', crpop)">Calm Radio</button>
 			<button class="tablinks" onclick="openTab(event, 'pandoraTab', pdpop)">Pandora</button>
 			<button class="tablinks" onclick="openTab(event, 'plstsTab', plpop)">Playlists</button>
 			<button class="tablinks nompd" onclick="openTab(event, 'filemanTab', fmpop)">Manage File Storage</button>
-			<button class="tablinks nompd" onclick="openTab(event, 'ytxTab', ytxpop)">YouTube Extraction</button>
+			<button class="tablinks nompd" onclick="openTab(event, 'ytxTab', ytpop)">YouTube Extraction</button>
 			<!-- ><button class="tablinks nompd" onclick="openTab(event, 'sglTab')">Extract Audio from a Single File</button>
 			<button class="tablinks nompd" onclick="openTab(event, 'lstTab')">Extract Audio from an Entire Playlist</button>
 			<button class="tablinks nompd" onclick="openTab(event, 'vidTab')">Get YT Video</button> -->
@@ -34,20 +33,26 @@
 				<i class="fa fa-pause" aria-hidden="true" onclick="mpdCmd('pause 1')"></i>
 				<i class="fa fa-play" aria-hidden="true" onclick="mpdCmd('pause 0')"></i>
 				<i class="fa fa-bug" aria-hidden="true" onclick="mpdCmdBug()"></i>
-				<span class="marquis"></span> :: <span class="curtrk"></span>
 				<div class="volume-control">
 				<i class="fa fa-volume-down" aria-hidden="true" onclick="bmpVolume('-5')"></i>
-				<input type="range" id="mpdvolume" name="mpdvolume" oninput="chgVolume(this)" min="0" max="100" step="5" />
+				<input type="range" id="mpdvolume" name="mpdvolume" oninput="chgVolume(this)" min="0" max="100" step="5">
 				<i class="fa fa-volume-up" aria-hidden="true" onclick="bmpVolume('+5')"></i>
 				</div>
 			</div>
+			<div id="marquis" class="marquis">
+				<span class="curstrm"></span> :: <span class="curtrk"></span>
+				<i class="fa fa-heart" aria-hidden="true" onclick="Favorites.add()"></i>
+			</div>
 			<div id="localAudio">
 				<audio id ="localaudio" controls>Your browser does not support the audio element.</audio>
-				<span class="marquis"></span>
+				<span class="curstrm"></span>
+				<i class="fa fa-heart" aria-hidden="true" onclick="Favorites.add()"></i>
+			</div>
+			<div id="favesTab" class="tabcontent">
+				<div id="favorites"></div>
 			</div>
 			<div id="tuninTab" class="tabcontent">
-				<div id="radcrumbs" onclick="radioBack(event)"><a href="#" data-bobj="">Home</a><i class="fa fa-search" aria-hidden="true" onclick="radioSearch()"></i></div>
-				<div id="radio" onclick="radioPlay(event)"></div>
+				<div id="tunein"></div>
 			</div>
 			<div id="calmradioTab" class="tabcontent">
 				<div id="calmradio"></div>

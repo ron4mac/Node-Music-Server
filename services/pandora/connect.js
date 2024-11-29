@@ -5,16 +5,24 @@ const https = require('https');
 const querystring = require('querystring');
 const _ = require('underscore');
 const crypto = require('crypto');
+const iOSpartnerInfo = {
+		username: 'iphone',
+		password: 'P2E4FC0EAD3*878N92B2CDp34I0B1@388137C',
+		deviceModel: 'IP01',
+		decryptPassword: '20zE1E47BE57$51',
+		encryptPassword: '721^26xE22776',
+		version: '5'
+	};
 
 module.exports = class Connect {
 
-	static hostname = 'tuner.pandora.com';
+	static hostname = 'ios-tuner.pandora.com';
 	static path = '/services/json/';
 
-	constructor (username, password, partnerInfo) {
+	constructor (username, password) {
 	//	this.username = username;
 	//	this.password = password;
-		this.partnerInfo = _.extend(partnerInfo, {version: '5'});
+		this.partnerInfo = iOSpartnerInfo;
 		this.authData = null;
 		this.cryptiv = new Buffer.alloc(0);
 	}
@@ -25,6 +33,7 @@ module.exports = class Connect {
 		//	this._userLogin(this.partnerInfo.encryptPassword, partner, this.username, this.password, (err, user) => {
 			this._userLogin(this.partnerInfo.encryptPassword, partner, username, password, (err, user) => {
 				if (err) return callback(err);
+				console.log(user);
 				this.authData = {
 					userAuthToken: user.userAuthToken,
 					partnerId: partner.partnerId,
@@ -118,7 +127,8 @@ module.exports = class Connect {
 				username: username,
 				password: password,
 				partnerAuthToken: partnerData.partnerAuthToken,
-				syncTime: partnerData.syncTimeOffset + this._seconds()
+			//	syncTime: partnerData.syncTimeOffset + this._seconds()
+				syncTime: this._seconds()
 			})).toString('hex').toLowerCase()
 		}, this._unwrap(callback));
 	}
