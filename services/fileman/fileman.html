@@ -1,3 +1,4 @@
+<script src="services/fileman/upload.js"></script>
 <script src="services/fileman/script.js"></script>
 <div class="fmenu">
 	<a href="#" data-menu="fcomb">Combine</a>
@@ -13,3 +14,32 @@
 	<a href="#" data-menu="plmnu">Add To Playlist</a>
 </div>
 <div id="fileman"></div>
+<div class="dlogs">
+	<div id="filupld" class="uplddlog modl">
+		<input type="file" id="upload_field" name="upld" multiple="multiple" style="display:none">
+		<div id="dropArea" onclick="YTx._Id('upload_field').click()" style="display: block;">Drop files here to upload<br>(or click to select)</div>
+		<div id="result"></div>
+		<div class="prgwrp"><div id="totprogress"></div></div>
+		<div id="fprogress"></div>
+		<hr>
+		<button onclick="modal(this.parentElement, false)">Close</button>
+	</div>
+	<div id="comb" class="modl">
+		<h4>Combine/convert as file:</h4>
+		<input type="text" placeholder="file name with extension" spellcheck="false" autocomplete="off"><br>
+		<hr>
+		<button onclick="Fileman.doComb(this)">Submit</button>
+		<button onclick="modal(this.parentElement, false)">Cancel</button>
+		<i class="fa fa-spinner fa-pulse fa-lg"></i>
+	</div>
+</div>
+<iframe id="dnldf" style="display:none"></iframe>
+<script>
+	_fm = document.getElementById('fileman');
+	document.querySelectorAll('.fmenu a').forEach(elm => {
+		elm.addEventListener('click', (evt) => {
+			evt.preventDefault();	console.log(evt);
+			Fileman.menu(evt.target.closest('[data-menu]').dataset.menu, evt);
+		});
+	});
+</script>

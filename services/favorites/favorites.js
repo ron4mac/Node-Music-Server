@@ -66,7 +66,7 @@ module.exports = class Favorites {
 	add (fave, resp) {
 		this.faves.push(fave);
 		let rslt = cntrlr.writeFile('services/favorites/favorites.json', JSON.stringify(this.faves, null, "\t"));
-		resp.end(rslt ? rslt : 'Added to favorites');
+		resp.end(rslt ? ('Error: '+rslt) : 'Added to favorites');
 	}
 
 	startRadio (surl) {

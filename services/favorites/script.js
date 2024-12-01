@@ -9,13 +9,13 @@
 		return new Promise((resolve, reject) => {
 			switch (what) {
 			case 'Tunein':
-				tipop();
+				svcPop('ti');
 				break;
 			case 'Pand':
-				pdpop();
+				svcPop('pd');
 				break;
 			case 'Calm':
-				crpop();
+				svcPop('cr');
 				break;
 			}
 			const wait = setInterval(() => {
@@ -33,7 +33,7 @@
 		const welm = evt.target.nodeName;
 		if (welm!='A') return;
 		let fid = evt.target.closest('[data-fid]').dataset.fid;
-		const parms = {act:'favorites', what: 'play', bobj: fid};
+		const parms = {what: 'play', bobj: fid};
 		postAction(sr, parms, (data) => {
 			if (data) {
 				console.log(data);
@@ -47,15 +47,15 @@
 	};
 
 	Favorites.add = () => {
-		const parms = {act:'favorites', what: 'add', bobj: nowPlaying};
+		const parms = {what: 'add', bobj: nowPlaying};
 		postAction(sr, parms, (data) => {
 			if (data) alert(data);
-			faveseen = false;
+			services[sr].seen = false;
 		}, 1);
 	};
 
 	Favorites.get = () => {
-		const parms = {act:'favorites', what: 'home'};
+		const parms = {what: 'home'};
 		postAction(sr, parms, (data) => {
 			let elm = document.getElementById('faves');
 			elm.innerHTML = data;

@@ -20,7 +20,7 @@
 	Tunein.play = (evt) => {
 		//console.log(evt);
 		let elm = evt.target;
-		if (!['A','IMG'].includes(elm.nodeName)) return;
+		if (!['A','I'].includes(elm.nodeName)) return;
 		let elmwurl = elm.closest('[data-url]');
 		if (elmwurl.parentElement.className=='rad-link') {
 			Tunein.nav(evt, elm);
@@ -28,7 +28,7 @@
 		}
 		evt.preventDefault();
 		let url = elmwurl.dataset.url;
-		let how = elm.nodeName=='IMG' ? 'lplay' : 'play';
+		let how = elm.nodeName=='I' ? 'lplay' : 'play';
 		currentStream = 'Radio: '+elmwurl.querySelector('a').innerHTML;
 		startPlay(how, url);
 		//displayCurrent(currentStream);

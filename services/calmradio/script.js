@@ -5,7 +5,7 @@
 	const sr = 'cr';	// service route
 
 	const startPlay = (how, url) => {
-		const parms = {act:'calm', what: how, bobj: url};
+		const parms = {what: how, bobj: url};
 		postAction(sr, parms, (data) => {
 			displayCurrent(currentStream);
 			if (data) {
@@ -25,7 +25,7 @@
 	Calm.nav = (evt, elm) => {
 		evt.preventDefault();
 		let bobj = elm.closest('[data-url]').dataset.url;
-		const parms = {act:'calm', what: 'home', bobj: bobj};
+		const parms = {what: 'home', bobj: bobj};
 		postAction(sr, parms, (data) => {
 			let el = document.getElementById('calm');
 			el.innerHTML = data;
@@ -41,13 +41,13 @@
 		evt.preventDefault();
 		let elm = evt.target;
 		let elmwurl = elm.closest('[data-url]');
-		if (elmwurl.parentElement.className=='calm-link') {
+		if (elmwurl.className=='calm-link') {
 			Calm.nav(evt, elm);
 			return;
 		}
 		evt.preventDefault();
 		let url = elmwurl.dataset.url;
-		let how = elm.nodeName=='IMG' ? 'lplay' : 'play';
+		let how = elm.nodeName=='I' ? 'lplay' : 'play';
 		currentStream = 'Calm Radio: '+elmwurl.parentElement.querySelector('a').innerHTML;
 		startPlay(how, url);
 		//const parms = {act:'calm', what: how, bobj: bobj};
@@ -71,7 +71,7 @@
 	}
 
 	Calm.user = () => {
-		const parms = {act:'calm', what: 'user'};
+		const parms = {what: 'user'};
 		postAction(sr, parms, (data) => {
 			let elm = document.getElementById('calm_user');
 			elm.innerHTML = data;
@@ -82,7 +82,7 @@
 	Calm.login = (evt,elm) => {
 		console.log(evt);
 		let frm = evt.target.form;
-		const parms = {act:'calm', what: 'login', bobj:{user:frm.user.value, pass:frm.pass.value}};
+		const parms = {what: 'login', bobj:{user:frm.user.value, pass:frm.pass.value}};
 		postAction(sr, parms, (data) => {
 			if (data) {
 				alert(data);
@@ -96,7 +96,7 @@
 	Calm.logout = (evt,elm) => {
 		console.log(evt);
 		if (!confirm('Are you sure you want to logout?')) return;
-		const parms = {act:'calm', what: 'logout'};
+		const parms = {what: 'logout'};
 		postAction(sr, parms, (data) => {
 			if (data) {
 				alert(data);
@@ -108,7 +108,7 @@
 	};
 
 	Calm.get = () => {
-		const parms = {act:'calm', what: 'home'};
+		const parms = {what: 'home'};
 		postAction(sr, parms, (data) => {
 			let elm = document.getElementById('calm');
 			elm.innerHTML = data;

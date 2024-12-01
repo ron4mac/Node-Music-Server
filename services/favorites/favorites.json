@@ -19,5 +19,11 @@
 			"sid": "4620379311818668517",
 			"snam": "Coffeehouse Covers Radio"
 		}
+	},
+	{
+		"name": "Radio: Peaceful Currents Radio",
+		"what": "Tunein",
+		"how": "lplay",
+		"url": "http://opml.radiotime.com/Tune.ashx?id=s237812"
 	}
 ]

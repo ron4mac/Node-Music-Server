@@ -106,7 +106,6 @@ module.exports = class CalmRadio {
 	}
 
 	play (which, resp) {
-
 		this._getChanData()
 		.then(() => {
 			const chan = this.chns[which];
@@ -131,13 +130,32 @@ module.exports = class CalmRadio {
 		resp.end();
 	}
 
+	lplay (which, resp) {
+		this._getChanData()
+		.then(() => {
+			const chan = this.chns[which];
+			let stream;
+			if (this.userToken) {
+				const cred = '?' + qs.stringify({user: this.user, pass: this.userToken});
+				const rate = cntrlr.getSetting('calmradio_bitrate', 192);
+				stream = chan.vip[0].streams[rate] + cred;
+				console.log(stream);
+			} else {
+				stream = chan.free[0].streams[128];
+				console.log(stream);
+			}
+			resp.end(stream);
+		});
+		//resp.end();
+	}
+
 	/* PRIVATE METHODS BELOW HERE */
 
 	_displayGroups (resp) {
 		for (const id in this.grps) {
 			const g = this.grps[id];
 			const art = g.art ? CRURLS.arts+g.art : '/services/calmradio/calmradioicon.png';
-			resp.write('<div class="calm-link"><img src="'+art+'"><a href="#'+g.id+'" data-url="'+g.id+'">'+g.title+'</a></div>');
+			resp.write('<div class="calm-link" data-url="'+g.id+'"><img src="'+art+'"><a href="#'+g.id+'">'+g.title+'</a></div>');
 		}
 		resp.end();
 	}
@@ -146,7 +164,8 @@ module.exports = class CalmRadio {
 		const cats = this.grps[which].cats;
 		cats.forEach((cn) => {
 			const g = this.cats[cn];
-			resp.write('<div class="calm-link"><img src="'+CRURLS.arts+g.img+'"><a href="#.'+g.id+'" data-url=".'+g.id+'">'+g.title+'</a></div>');
+			resp.write('<div class="calm-link" data-url=".'+g.id+'"><img src="'+CRURLS.arts+g.img+'">');
+			resp.write('<a href="#.'+g.id+'">'+g.title+'</a></div>');
 		});
 		resp.end();
 	}
@@ -158,7 +177,8 @@ module.exports = class CalmRadio {
 			if (!this.userToken && !g.free[0]) {
 				resp.write('<div class="calm-noplay"><img src="'+CRURLS.arts+g.img+'" class="noplay"><span>'+g.title+'</span></div>');
 			} else {
-				resp.write('<div class="calm-play"><img src="'+CRURLS.arts+g.img+'"><a href="#..'+c+'" data-url="'+c+'">'+g.title+'</a></div>');
+				resp.write('<div class="calm-play" data-url="'+c+'"><img src="'+CRURLS.arts+g.img+'">');
+				resp.write('<a href="#..'+c+'">'+g.title+'</a> <i class="fa fa-headphones lplay"></i></div>');
 			}
 		});
 		resp.end();

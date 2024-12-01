@@ -7,7 +7,7 @@
 	let socket = null;
 
 	const startPlay = (how, url) => {
-		const parms = {act:'pandora', what: how, bobj: url};
+		const parms = {what: how, bobj: url};
 		postAction(sr, parms, (data) => {
 			displayCurrent(currentStream);
 			if (data) {
@@ -26,7 +26,7 @@
 		const chnam = elm.querySelector('a').innerHTML;
 		let bobj = {sid: sid, snam: chnam};
 		currentStream = 'Pandora: '+chnam;
-		const parms = {act:'pandora', what: 'play', bobj: bobj};
+		const parms = {what: 'play', bobj: bobj};
 		postAction(sr, parms, (data) => {
 			//console.log('PPlay',data);
 			//displayCurrent('Pandora: '+evt.target.closest('[data-sid]').querySelector('a').innerHTML);
@@ -44,7 +44,7 @@
 	Pand.login = (evt,elm) => {
 		console.log(evt);
 		let frm = evt.target.form;
-		const parms = {act:'pandora', what: 'login', bobj:{user:frm.user.value, pass:frm.pass.value}};
+		const parms = {what: 'login', bobj:{user:frm.user.value, pass:frm.pass.value}};
 		postAction(sr, parms, (data) => {
 			if (data) {
 				alert(data);
@@ -57,7 +57,7 @@
 
 	Pand.reauth = (evt,elm) => {
 		console.log(evt);
-		const parms = {act:'pandora', what: 'reauth'};
+		const parms = {what: 'reauth'};
 		postAction(sr, parms, (data) => {
 			if (data) {
 				alert(data);
@@ -71,7 +71,7 @@
 	Pand.logout = (evt,elm) => {
 		console.log(evt);
 		if (!confirm('Are you sure you want to logout?')) return;
-		const parms = {act:'pandora', what: 'logout'};
+		const parms = {what: 'logout'};
 		postAction(sr, parms, (data) => {
 			if (data) {
 				alert(data);
@@ -84,7 +84,7 @@
 	};
 
 	Pand.user = () => {
-		const parms = {act:'pandora', what: 'user'};
+		const parms = {what: 'user'};
 		postAction(sr, parms, (data) => {
 			let elm = document.getElementById('pdor_user');
 			elm.innerHTML = data;
@@ -121,7 +121,7 @@
 	}
 
 	Pand.get = () => {
-		const parms = {act:'pandora', what: 'home'};
+		const parms = {what: 'home'};
 		const elm = document.getElementById('stations');
 		elm.innerHTML = '<i class="fa fa-spinner fa-pulse fa-lg"></i>';
 		postAction(sr, parms, (data) => {
@@ -133,7 +133,7 @@
 	Pand.search = () => {
 		const sterm = prompt('Search Pandora stations ...');
 		if (!sterm) return;
-		const parms = {act:'pandora', what: 'search', bobj: sterm};
+		const parms = {what: 'search', bobj: sterm};
 		postAction(sr, parms, (data) => {
 			if (!data) return;
 			const dlg = document.getElementById('pand-search');
@@ -145,7 +145,7 @@
 	Pand.add = (evt, mtyp) => {
 		evt.preventDefault();
 		let mtkn = evt.target.closest('[data-mtkn]').dataset.mtkn;
-		const parms = {act:'pandora', what: 'add', bobj: {musicToken:mtkn, musicType: mtyp}};
+		const parms = {what: 'add', bobj: {musicToken:mtkn, musicType: mtyp}};
 		postAction(sr, parms, (data) => {
 			if (data) {
 				alert(data);
@@ -160,7 +160,7 @@
 		evt.preventDefault();
 		if (!confirm('Are you sure that you want to delete this station?')) return;
 		let sid = evt.target.closest('[data-sid]').dataset.sid;
-		const parms = {act:'pandora', what: 'delete', bobj: sid};
+		const parms = {what: 'delete', bobj: sid};
 		postAction(sr, parms, (data) => {
 			if (data) {
 				alert(data);

@@ -94,7 +94,7 @@ module.exports = class TuneIn {
 				// drove me CRAZY discovering that linefeeds at the end caused things to hang!
 				let surl = dat.replace(/[\r\n]+/gm, '');
 				this.startRadio(surl);
-				cntrlr.currentPlaying = {lr: 'remote', f:'webRadio', a:'play', p:url};
+			//	cntrlr.currentPlaying = {lr: 'remote', f:'webRadio', a:'play', p:url};
 				resp.end();
 			});
 		}).end();
@@ -109,7 +109,7 @@ module.exports = class TuneIn {
 				// drove me CRAZY discovering that linefeeds at the end caused things to hang!
 				let surl = dat.replace(/[\r\n]+/gm, '');
 				//this.startRadio(surl);
-				cntrlr.currentPlaying = {lr: 'local', f:'webRadio', a:'lplay', p:url};
+			//	cntrlr.currentPlaying = {lr: 'local', f:'webRadio', a:'lplay', p:url};
 				resp.end(surl);
 			});
 		}).end();
@@ -141,7 +141,8 @@ module.exports = class TuneIn {
 					if (itm.children) webRadioParse(itm.children, resp);
 					break;
 				case 'audio':
-					resp.write('<div class="rad-station" data-url="'+itm.URL+'"><img src="'+itm.image+'"><a href="#'+itm.guide_id+'">'+txt+'</a></div>');
+					resp.write('<div class="rad-station" data-url="'+itm.URL+'"><img src="'+itm.image+'">');
+					resp.write('<a href="#'+itm.guide_id+'">'+txt+'</a> <i class="fa fa-headphones lplay"></i></div>');
 				//	resp.write('<div class="rad-station">'+txt+'</div>');
 					break;
 				case 'text':

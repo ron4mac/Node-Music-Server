@@ -2,19 +2,21 @@
 const cntrlr = require('../../controller');
 //const config = require('../../config');
 const fs = require('fs');
+const path = require('path');
 
 module.exports = class Fileman {
 
 	constructor () {
+		this.debug = true;
 	}
 
-	action (parms, resp) {
-		console.log(parms);
+	action (what, parms, resp) {
+		console.log(what,parms);
 		const baseDir = cntrlr.config.baseDir;
 		let rmsg = 'NOT YET IMPLEMENTED';
 		resp.writeHead(200, {'Content-Type': 'text/plain'});
 		let pbase, fpath, stats;
-		switch (parms.act) {
+		switch (what) {
 		case 'fcomb':
 			if (!fs.existsSync('/usr/bin/ffmpeg') && !fs.existsSync('/usr/local/bin/ffmpeg')) {
 				rmsg = 'Required ffmpeg is not present';
@@ -37,36 +39,6 @@ module.exports = class Fileman {
 				});
 			return;
 			rmsg = null;
-			break;
-		case 'plply':
-			queMPD(parms.files);
-			rmsg = null;
-			break;
-		case 'pldel':
-			for (const file of parms.files) {
-				fpath = playlistDir+'/'+file;
-				fs.unlinkSync(fpath);
-			}
-			rmsg = null;
-			break;
-		case 'plvue':
-			rmsg = JSON.stringify({err:'', pl:fs.readFileSync(playlistDir+'/'+parms.file,{encoding:'utf8'})});
-			break;
-		case 'radio':
-			webRadio(parms.what, parms.bobj??'', resp);
-			return;
-			break;
-		case 'calm':
-			calmRadio(parms.what, parms.bobj??'', resp);
-			return;
-			break;
-		case 'pandora':
-			webPandora(parms.what, parms.bobj??'', resp);
-			return;
-			break;
-		case 'mpd':
-			mpdCtrl(parms.what, parms.bobj??'', resp);
-			return;
 			break;
 		case 'fdele':
 			pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
@@ -148,6 +120,10 @@ module.exports = class Fileman {
 		case 'splay':
 			fpath = baseDir+parms.fpath;
 			rmsg = JSON.stringify({err: 'NOT YET IMPLEMENTED', f64: btoa(fpath)});
+			break;
+		case 'load':
+			resp.end(cntrlr.readFile('services/fileman/fileman.html', 'FAILED TO READ'));
+			return;
 			break;
 		}
 		resp.end(rmsg);

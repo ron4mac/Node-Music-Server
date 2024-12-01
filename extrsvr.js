@@ -8,14 +8,11 @@ const fs = require('fs');
 const path = require('path');
 //const ytdl = require('@distube/ytdl-core');
 const MyMPD = require('./mpd.js');
-//const Favorites = require('./services/favorites/favorites.js');
-//const TuneIn = require('./services/tunein/tunein.js');
-//const CalmRadio = require('./services/calmradio/calmradio.js');
-//const Pandora = require('./services/pandora/pandora.js');
-//const YTExtract = require('./services/ytextract/ytextract.js');
 
 const formidable = require('formidable');	//, {errors as formidableErrors} from 'formidable';
 const formidableErrors = formidable.errors;		//require('formidable:errors');
+
+//const mime = require('mime/lite');
 
 const hostname = process.env.NODE_WEB_HOST || '0.0.0.0';
 const debugMode = false;
@@ -37,12 +34,15 @@ var tlist = [];
 var pwtrk = '';
 var errs = [];
 var mympd = null;
-var favorites = null;
-var tunein = null;
-var calmradio = null;
-var pandora = null;
-var ytextract = null;
-var plogdin = false;		// may be later expendable
+
+// class instances for services
+var favorites = null,
+	tunein = null,
+	calmradio = null,
+	pandora = null,
+	playlists = null,
+	fileman = null,
+	ytextract = null;
 
 const emptyDir = (dir) => {
 	fs.readdir(dir, (err, files) => {
@@ -163,13 +163,14 @@ const getDirList = (dir, resp) => {
 	});
 }
 
-const sendFile = (parms, fname, resp) => {
+const sendFile = (parms, resp) => {
 	//console.log('[Info] Sending zip file');
 	let filePath = atob(parms.sndf);
 	let stats = fs.statSync(filePath);
 	resp.setHeader('Content-Length', stats.size);
 	if (parms.v) {
-		resp.setHeader('Content-Type', 'audio/mp4');
+		const mtyp = cntrlr.mimeType(filePath) || 'audio/mp4';
+		resp.setHeader('Content-Type', mtyp);
 	} else {
 		resp.setHeader('Content-Type', 'application/octet-stream');
 		resp.setHeader('Content-Disposition', 'attachment; filename="'+path.basename(filePath)+'"');
@@ -241,6 +242,13 @@ const webPandora = async (what, bobj, resp) => {
 	pandora.action(what, bobj, resp);
 };
 
+const webFileman = async (what, bobj, resp) => {
+	if (!fileman) {
+		fileman = new (require('./services/fileman/fileman'))();
+	}
+	fileman.action(what, bobj, resp);
+};
+
 const webYtextr = async (what, bobj, resp) => {
 	if (!ytextract) {
 		ytextract = new (require('./services/ytextract/ytextract'))();		//YTExtract();
@@ -295,22 +303,24 @@ const f_commands = {
 	ti: webRadio,
 	cr: calmRadio,
 	pd: webPandora,
+	fm: webFileman,
 	yt: webYtextr
 };
 
 
 const router = (service, parms, resp) => {
+	console.log(service, parms);
 	f_commands[service](parms.what, parms.bobj??'', resp);
 }
 
 
 const filemanAction = (parms, resp) => {
 	console.log(parms);
-	let rmsg = 'NOT YET IMPLEMENTED';
+	let rmsg = 'NOT YET IMPLEMENTED (FMA)';
 	resp.writeHead(200, {'Content-Type': 'text/plain'});
 	let pbase, fpath, stats;
 	switch (parms.act) {
-	case 'fcomb':
+/*	case 'fcomb':
 		if (!fs.existsSync('/usr/bin/ffmpeg') && !fs.existsSync('/usr/local/bin/ffmpeg')) {
 			rmsg = 'Required ffmpeg is not present';
 			break;
@@ -333,7 +343,7 @@ const filemanAction = (parms, resp) => {
 			});
 		return;
 		rmsg = null;
-		break;
+		break;*/
 	case 'plply':
 		queMPD(parms.files);
 	//	let plst = '';
@@ -353,32 +363,11 @@ const filemanAction = (parms, resp) => {
 	case 'plvue':
 		rmsg = JSON.stringify({err:'', pl:fs.readFileSync(playlistDir+'/'+parms.file,{encoding:'utf8'})});
 		break;
-//	case 'favorites':
-//		webFavorites(parms.what, parms.bobj??'', resp);
-//		//f_commands['webFavorites'](parms.what, parms.bobj??'', resp);
-//		return;
-//		break;
-//	case 'radio':
-//		webRadio(parms.what, parms.bobj??'', resp);
-//		return;
-//		break;
-//	case 'calm':
-//		calmRadio(parms.what, parms.bobj??'', resp);
-//		return;
-//		break;
-//	case 'pandora':
-//		webPandora(parms.what, parms.bobj??'', resp);
-//		return;
-//		break;
-//	case 'ytextr':
-//		webYtextr(parms.what, parms.bobj??'', resp);
-//		return;
-//		break;
 	case 'mpd':
 		mpdCtrl(parms.what, parms.bobj??'', resp);
 		return;
 		break;
-	case 'fdele':
+/*	case 'fdele':
 		pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
 		for (const file of parms.files) {
 			fpath = pbase+file;
@@ -458,7 +447,7 @@ const filemanAction = (parms, resp) => {
 	case 'splay':
 		fpath = baseDir+parms.fpath;
 		rmsg = JSON.stringify({err: 'NOT YET IMPLEMENTED', f64: btoa(fpath)});
-		break;
+		break;*/
 	}
 	resp.end(rmsg);
 }
@@ -650,7 +639,7 @@ http.createServer(function (request, response) {
 		return;
 	}
 	if (url.startsWith('/?sndf')) {
-		sendFile(parse(url.substring(2)), 'testing.txt', response);
+		sendFile(parse(url.substring(2)), response);
 		return;
 	}
 	if (url.startsWith('/?pxtr')) {

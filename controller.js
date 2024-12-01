@@ -4,6 +4,8 @@ const https = require('https');
 const http = require('http');
 const fs = require('fs');
 
+//const mime = require('mime-lite');
+
 const settingsFile = 'settings.json';
 
 class Controller {
@@ -55,10 +57,13 @@ class Controller {
 			return fs.writeFileSync(path, data);
 		} catch (err) {
 			console.error(err);
-			return err;
+			return err.code;
 		}
 	}
 
+	mimeType (path) {
+		return (require('mime-lite')).getType(path);
+	}
 
 	/* PRIVATE METHODS */
 
