@@ -15,3 +15,10 @@
 }
 </style>
 <div id="faves" onclick="Favorites.play(event)"></div>
+<dialog id="fave-more">
+<div class="closex" onclick="this.parentElement.close()">
+	<i class="fa fa-times" aria-hidden="true"></i>
+</div>
+<h3>Favoritee</h3>
+<div><button onclick="Favorites.delete(event)">Delete this Favorite</button></div>
+</dialog>

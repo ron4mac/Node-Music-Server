@@ -35,10 +35,13 @@ module.exports = class Connect {
 				if (err) return callback(err);
 				console.log(user);
 				this.authData = {
+					username: username,
 					userAuthToken: user.userAuthToken,
 					partnerId: partner.partnerId,
 					userId: user.userId,
-					syncTimeOffset: partner.syncTimeOffset
+					syncTimeOffset: partner.syncTimeOffset,
+					timeoutMinutes: user.listeningTimeoutMinutes,
+					startTime: Date.now()
 				};
 				callback(null);
 			});

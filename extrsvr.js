@@ -9,11 +9,6 @@ const path = require('path');
 //const ytdl = require('@distube/ytdl-core');
 const MyMPD = require('./mpd.js');
 
-const formidable = require('formidable');	//, {errors as formidableErrors} from 'formidable';
-const formidableErrors = formidable.errors;		//require('formidable:errors');
-
-//const mime = require('mime/lite');
-
 const hostname = process.env.NODE_WEB_HOST || '0.0.0.0';
 const debugMode = false;
 
@@ -28,10 +23,6 @@ if (typeof btoa === 'undefined') global.btoa = (str) => Buffer.from(str, 'binary
 if (typeof atob === 'undefined') global.atob = (b64) => Buffer.from(b64, 'base64').toString('binary');
 
 //var gresp = null;	// global response
-var progv = 'Scanning playlist ...';
-
-var tlist = [];
-var pwtrk = '';
 var errs = [];
 var mympd = null;
 
@@ -43,39 +34,6 @@ var favorites = null,
 	playlists = null,
 	fileman = null,
 	ytextract = null;
-
-const emptyDir = (dir) => {
-	fs.readdir(dir, (err, files) => {
-		if (err) throw err;
-		for (const file of files) {
-			fs.unlink(path.join(dir, file), (err) => {
-				if (err) throw err;
-			});
-		}
-	});
-}
-
-const getNavMenu = (dir, resp) => {
-	let nav = '<div class="fmnav">';
-	let _D = '';
-	let parts = dir.split('/');
-	if (parts[0]) {
-		nav += '<span class="isdir" data-dpath=""><i class="fa fa-home" aria-hidden="true"></i></span> / ';
-	} else {
-		nav += '<span><i class="fa fa-home" aria-hidden="true"></i></span>';
-	}
-	do {
-		let _d = parts.shift();
-		let _dd = _d;
-		if (parts.length) {
-			_D += _d + (parts.length>1 ? '/' : '');
-			nav += `<span class="isdir" data-dpath="${_D}">${_dd}</span> / `;
-		} else {
-			nav += `<span>${_d}</span>`;
-		}
-	} while (parts.length);
-	resp.write(nav+'</div>');
-};
 
 const queMPD = (files) => {
 	const writeStream = fs.createWriteStream('/var/lib/mpd/playlists/ytextrsvr.m3u');
@@ -94,7 +52,7 @@ const queMPD = (files) => {
 	});
 };
 
-const playlistList = (resp) => {
+const xxxplaylistList = (resp) => {
 	resp.write('<section>');
 	fs.readdir(playlistDir, (err, files) => {
 		if (err) throw err;
@@ -116,98 +74,14 @@ const playlistMenu = (resp) => {
 	});
 }
 
-const formatNumber = (num) => {
-	if (num < 1024) {
-		return num.toString();
-	} else if (num < 1048576) {
-		return (num / 1024).toFixed(1) + 'K';
-	} else if (num < 1073741824) {
-		return (num / 1048576).toFixed(1) + 'M';
-	} else {
-		return (num / 1073741824).toFixed(1) + 'G';
-	}
-}
 
-const baseDir = config.baseDir;
-const getDirList = (dir, resp) => {
-	const idtf = new Intl.DateTimeFormat('en-US',{year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hour12:false,timeZoneName:'short'});
-	fs.readdir(baseDir+dir, {withFileTypes: true}, (err, files) => {
-		if (err) throw err;
-		let rows = ['<thead><td></td><th>Name</th><th>Size</th><th>Date</th></thead>'];
-		let pdir = dir == '' ? dir : (dir+'/');
-		for (const file of files) {
-			let fcl, icn, lnk='';
-			if (file.isDirectory()) {
-				icn = '<i class="fa fa-folder fa-fw d-icn" aria-hidden="true"></i>';
-				fcl = 'isdir" data-dpath="'+pdir+file.name;
-			} else {
-				icn = '<i class="fa fa-file-o fa-fw" aria-hidden="true"></i>';
-				fcl = 'isfil" data-fpath="'+file.name;
-			}
-			if (file.isSymbolicLink()) {
-				lnk = ' <i class="fa fa-arrow-right fa-fw" aria-hidden="true"></i>';
-				let lnk2 = fs.readlinkSync(baseDir+dir+'/'+file.name);
-			//	if (fs.statSync(lnk2).isDirectory()) {
-			//		fcl = 'isdir" data-dpath="'+lnk2;
-			//	}
-				lnk += lnk2;
-			}
-			const fstat = fs.statSync(baseDir+dir+'/'+file.name);
-			rows.push('<td><input type="checkbox" class="fsel" name="files[]" value="'+file.name+'"></td>'
-				+'<td class="'+fcl+'">'+icn+file.name+lnk+'</td>'
-				+'<td>'+formatNumber(fstat.size)+'</td>'
-				+'<td>'+idtf.format(fstat.mtimeMs)+'</td>');
-		}
-		resp.write('<table><tr>'+rows.join('</tr><tr>')+'</tr></table>');
-		resp.end();
-	});
-}
-
-const sendFile = (parms, resp) => {
-	//console.log('[Info] Sending zip file');
-	let filePath = atob(parms.sndf);
-	let stats = fs.statSync(filePath);
-	resp.setHeader('Content-Length', stats.size);
-	if (parms.v) {
-		const mtyp = cntrlr.mimeType(filePath) || 'audio/mp4';
-		resp.setHeader('Content-Type', mtyp);
-	} else {
-		resp.setHeader('Content-Type', 'application/octet-stream');
-		resp.setHeader('Content-Disposition', 'attachment; filename="'+path.basename(filePath)+'"');
-	}
-	let stream = fs.createReadStream(filePath);
-	stream.on('open', () => {
-		stream.pipe(resp);
-	});
-	stream.on('error', () => {
-		resp.setHeader('Content-Type','text/plain');
-		resp.status(404).end('Not found');
-	});
-};
-
-const receiveUpload = async (req, res) => {
-	const form = new formidable.IncomingForm({uploadDir: config.upldTmpDir, maxFileSize: 2147483648});	// formidable({});
-	//let fields;
-	//let files;
-	form.parse(req, function(err, fields, files) {
-		if (err) {
-			console.error(err);
-			res.writeHead(err.httpCode || 400, {'Content-Type': 'text/plain'});
-			res.end(String(err));
-		} else {
-			fs.renameSync(files.upld.filepath, path.join(baseDir+fields.dir, files.upld.originalFilename));
-			res.writeHead(200, {'Content-Type': 'text/plain'});
-			res.end(JSON.stringify({ fields, files }, null, 2));
-		}
-	});
-};
-
+/* initiations for the various services */
 const webFavorites = async (what, bobj, resp) => {
 	if (!favorites) {
 		if (!mympd) {
 			mympd = await MyMPD.init();
 		}
-		favorites = new (require('./services/favorites/favorites'))(mympd);		//Favorites(mympd);
+		favorites = new (require('./services/favorites/favorites'))(mympd);
 	}
 	favorites.action(what, bobj, resp);
 };
@@ -217,17 +91,17 @@ const webRadio = async (what, bobj, resp) => {
 		if (!mympd) {
 			mympd = await MyMPD.init();
 		}
-		tunein = new (require('./services/tunein/tunein'))(mympd);		//TuneIn(mympd);
+		tunein = new (require('./services/tunein/tunein'))(mympd);
 	}
 	tunein.action(what, bobj, resp);
 };
 
-const calmRadio = async (what, bobj, resp) => {
+const webCalm = async (what, bobj, resp) => {
 	if (!calmradio) {
 		if (!mympd) {
 			mympd = await MyMPD.init();
 		}
-		calmradio = new (require('./services/calmradio/calmradio'))(mympd);		//CalmRadio(mympd);
+		calmradio = new (require('./services/calmradio/calmradio'))(mympd);
 	}
 	calmradio.action(what, bobj, resp);
 };
@@ -237,7 +111,7 @@ const webPandora = async (what, bobj, resp) => {
 		if (!mympd) {
 			mympd = await MyMPD.init();
 		}
-		pandora = await (require('./services/pandora/pandora')).init(mympd, settings);		//Pandora.init(mympd, settings);
+		pandora = await (require('./services/pandora/pandora')).init(mympd, settings);
 	}
 	pandora.action(what, bobj, resp);
 };
@@ -251,11 +125,42 @@ const webFileman = async (what, bobj, resp) => {
 
 const webYtextr = async (what, bobj, resp) => {
 	if (!ytextract) {
-		ytextract = new (require('./services/ytextract/ytextract'))();		//YTExtract();
+		ytextract = new (require('./services/ytextract/ytextract'))();
 	}
 	ytextract.action(what, bobj, resp);
 };
 
+const webLists = async (what, bobj, resp) => {
+	if (!playlists) {
+		playlists = new (require('./services/playlists/playlists'))();
+	}
+	playlists.action(what, bobj, resp);
+};
+
+
+/* route requests to the targeted service */
+const f_commands = {
+	fa: webFavorites,
+	ti: webRadio,
+	cr: webCalm,
+	pd: webPandora,
+	fm: webFileman,
+	yt: webYtextr,
+	pl: webLists
+};
+
+const p_router = (service, parms, resp) => {
+	console.log(service, parms);
+	f_commands[service](parms.what, parms.bobj??'', resp);
+}
+
+const g_router = (parms, resp) => {
+	console.log(parms);
+	f_commands[parms._](parms.act, parms, resp);
+}
+
+
+/* MPD control actions */
 const mpdCtrl = async (what, bobj, resp) => {
 	if (!mympd) {
 		mympd = await MyMPD.init();
@@ -298,52 +203,13 @@ const mpdCtrl = async (what, bobj, resp) => {
 	}
 };
 
-const f_commands = {
-	fa: webFavorites,
-	ti: webRadio,
-	cr: calmRadio,
-	pd: webPandora,
-	fm: webFileman,
-	yt: webYtextr
-};
 
-
-const router = (service, parms, resp) => {
-	console.log(service, parms);
-	f_commands[service](parms.what, parms.bobj??'', resp);
-}
-
-
-const filemanAction = (parms, resp) => {
+const reqAction = (parms, resp) => {
 	console.log(parms);
 	let rmsg = 'NOT YET IMPLEMENTED (FMA)';
 	resp.writeHead(200, {'Content-Type': 'text/plain'});
 	let pbase, fpath, stats;
 	switch (parms.act) {
-/*	case 'fcomb':
-		if (!fs.existsSync('/usr/bin/ffmpeg') && !fs.existsSync('/usr/local/bin/ffmpeg')) {
-			rmsg = 'Required ffmpeg is not present';
-			break;
-		}
-		pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
-		let eprms = '';
-		for (const file of parms.files) {
-			fpath = pbase+file;
-			eprms += ` -i "${fpath}"`;
-			stats = fs.statSync(fpath);
-		}
-		if (parms.files.length > 1) eprms += ' -codec copy';
-		eprms += ` "${pbase+parms.asfile}"`;
-		console.log(eprms);
-		require('child_process').exec('ffmpeg -loglevel 16 -n'+eprms,{},(error, stdout, stderr)=>{
-				console.log(error);
-				rmsg = error ? String(error) : null;
-			//	rmsg += stderr ? ('@@@@@@'+String(stderr)) : null;
-				resp.end(rmsg);
-			});
-		return;
-		rmsg = null;
-		break;*/
 	case 'plply':
 		queMPD(parms.files);
 	//	let plst = '';
@@ -367,98 +233,14 @@ const filemanAction = (parms, resp) => {
 		mpdCtrl(parms.what, parms.bobj??'', resp);
 		return;
 		break;
-/*	case 'fdele':
-		pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
-		for (const file of parms.files) {
-			fpath = pbase+file;
-			stats = fs.statSync(fpath);
-			if (stats.isDirectory()) {
-				fs.rmSync(fpath, {recursive: true, force: true});
-			} else {
-				fs.unlinkSync(fpath);
-			}
-		}
-		rmsg = null;
-		break;
-	case 'fdnld':
-		if (parms.files.length>1) {
-			rmsg = JSON.stringify({err: 'Multiple file download not yet implemented'});
-			break;
-		}
-		fpath = baseDir+parms.dir+parms.files[0];
-		stats = fs.statSync(fpath);
-		if (stats.isDirectory()) {
-			rmsg = JSON.stringify({err: 'Multiple file (i.e. folder) download not yet implemented'});
-			break;
-		}
-		rmsg = JSON.stringify({err: '', fnam: parms.files[0], f64: btoa(fpath)});
-		break;
-	case 'fmove':
-		let fdir = baseDir+parms.fdir;
-		let tdir = baseDir+parms.tdir;
-		for (const file of parms.files) {
-			fs.renameSync(fdir+file, tdir+file);
-		}
-		rmsg = null;
-		break;
-	case 'fnewf':
-		let pdir = baseDir+parms.dir;
-		fs.mkdirSync(path.join(pdir, parms.newf));
-		rmsg = null;
-		break;
-	case 'frnam':
-		pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
-		fs.renameSync(pbase+parms.file, pbase+parms.to);
-		rmsg = null;
-		break;
-	case 'funzp':
-		pbase  = baseDir+parms.dir+(parms.dir==''?'':'/');
-		require('child_process').exec('unzip -d "'+pbase+'" "'+pbase+parms.file+'"',{},(error, stdout, stderr)=>{
-				console.log(error);
-				rmsg = error ? String(error) : null;
-				resp.end(rmsg);
-			});
-		return;
-		break;
-	case 'faddl':
-		pbase = baseDir+parms.dir;
-		console.log(pbase,parms.files);
-		let plst = '';
-		for (const file of parms.files) {
-			plst += pbase+file + "\n";
-		}
-		try {
-			fs.writeFileSync(playlistDir+'/'+btoa(parms.plnam), plst);
-			// file written successfully
-			rmsg = null;
-		} catch (err) {
-			console.error(err);
-			rmsg = 'Failed to write playlist';
-		}
-		break;
-	case 'fview':
-		fpath = baseDir+parms.fpath;
-// @@@@@@@@@@
-// could get file type here and send to client for display adjustments
-//		stats = fs.statSync(fpath);
-//		console.log(stats);
-		rmsg = JSON.stringify({err: '', f64: btoa(fpath)});
-		break;
-	case 'splay':
-		fpath = baseDir+parms.fpath;
-		rmsg = JSON.stringify({err: 'NOT YET IMPLEMENTED', f64: btoa(fpath)});
-		break;*/
 	}
 	resp.end(rmsg);
 }
 
-const runScript = (file, url, pdata, response) => {
+const runScript = (file, url, response) => {
 	//console.log('SCRIPT: '+url);
 	file = file.replace(/^\.\//,'');
 	let param = url.substr(url.indexOf('?')+1);
-	if (pdata) {
-		param = param + '" "' + pdata;
-	}
 	//console.log(file,param);
 	require('child_process').exec('php ' + file + ' "' + param +'" ',{},(error, stdout, stderr)=>{
 		if (error) {
@@ -474,9 +256,18 @@ const runScript = (file, url, pdata, response) => {
 };
 
 // serve a file
-const serveFile = (filePath, response, url, pdata) => {
+const serveFile = (url, response) => {
+	let filePath = parse(url.substring(1));
+	// Correct root path
+	if (filePath === '/') {
+		filePath = documentRoot + '/index.html';
+	} else {
+		filePath = documentRoot + (enableUrlDecoding === true ? decodeURI(url) : url);
+	}
+	filePath = filePath.split('?').shift();
+
 	//console.log('SERVE FILE: '+filePath);
-	let extname = String(path.extname(filePath)).toLowerCase();
+	const extname = String(path.extname(filePath)).toLowerCase();
 	const MIME_TYPES = {
 		'.html': 'text/html',
 		'.css': 'text/css',
@@ -500,7 +291,7 @@ const serveFile = (filePath, response, url, pdata) => {
 	let contentType = MIME_TYPES[extname] || 'application/octet-stream';
 
 	if (contentType.indexOf('/zip')>0) {
-		progv = 'Scanning playlist ...';
+		ytextract.progv = 'Scanning playlist ...';
 		ytextract.sendzip(filePath, response);
 		return;
 	}
@@ -511,14 +302,14 @@ const serveFile = (filePath, response, url, pdata) => {
 	}
 
 	if (extname == '.php') {
-		runScript(filePath, url, pdata, response);
+		runScript(filePath, url, response);
 		return;
 	}
 
 	// Serve static files
 	fs.readFile(filePath, function(error, content) {
 		if (error) {
-			if(error.code === 'ENOENT') {
+			if (error.code === 'ENOENT') {
 				fs.readFile(documentRoot + '/404.html', function(error, content) {
 					if (error) { console.error(error); }
 					else {
@@ -549,8 +340,7 @@ const serveFile = (filePath, response, url, pdata) => {
 				console.log('[Error] Could not serve request:', url);
 				console.error(error);
 			}
-		}
-		else {
+		} else {
 			if (contentType=='text/html') {
 				response.setHeader('Cache-Control', ['no-cache','max-age=0']);
 			}
@@ -576,11 +366,9 @@ http.createServer(function (request, response) {
 	const {method, url} = request;
 
 	if (url.startsWith('/?upld')) {
-		receiveUpload(request, response);
+		fileman.receiveUpload(request, response);
 		return;
 	}
-
-	let pdata = null;
 
 	//console.log('[Info] Requested:', url);
 	if (debugMode === true && enableUrlDecoding === true) {
@@ -597,77 +385,30 @@ http.createServer(function (request, response) {
 			response.on('error', (err) => {
 				console.error(err);
 			});
-			if (url.startsWith('/?_FM')) {
+			if (url.startsWith('/?_Q')) {	// general post request
 				let rdata = request.headers['content-type'] == 'application/json' ? JSON.parse(body) : parse(body);
-				filemanAction(rdata, response);
+				reqAction(rdata, response);
 				return;
 			}
-			if (url.startsWith('/_')) {
+			if (url.startsWith('/_')) {		// post routed to specific service
 				let rdata = request.headers['content-type'] == 'application/json' ? JSON.parse(body) : parse(body);
-				router(url.substr(2), rdata, response);
+				p_router(url.substr(2), rdata, response);
 				return;
-			}
-//			if (url.startsWith('/?upld')) {
-//				receiveUpload(request, response);
-//				return;
-//			}
-			let filePath = parse(url.substring(1));
-			// Correct root path
-			if (filePath === '/') {
-				filePath = documentRoot + '/index.html';
-			} else {
-				filePath = documentRoot + (enableUrlDecoding === true ? decodeURI(url) : url);
 			}
 			// serve the file
-			serveFile(filePath.split('?').shift(), response, url, pdata);
+			serveFile(url, response, url);
 		});
 		return;
 	}
 
+	if (url.startsWith('/?_')) {
+		g_router(parse(url.substring(2)), response);
+		return;
+	}
 	if (url.startsWith('/?plstl')) {
 		response.writeHead(200, {'Content-Type': 'text/plain'});
 		playlistList(response);
 		//response.end(playlistMenu());
-		return;
-	}
-	if (url.startsWith('/?axtr')) {
-		ytextract.audioExtract(parse(url.substring(2)), response);
-		return;
-	}
-	if (url.startsWith('/?vxtr')) {
-		ytextract.videoExtract(parse(url.substring(2)), response);
-		return;
-	}
-	if (url.startsWith('/?sndf')) {
-		sendFile(parse(url.substring(2)), response);
-		return;
-	}
-	if (url.startsWith('/?pxtr')) {
-		progv = 'Scanning playlist ...';
-		ytextract.getPlaylist(parse(url.substring(2)), response);
-		response.writeHead(200, {'Content-Type': 'text/html'});
-	//	response.end();
-		return;
-	}
-	if (url.startsWith('/?prog')) {
-		console.log('P '+progv);
-		response.writeHead(200, {'Content-Type': 'text/plain'});
-		response.end(progv);
-		return;
-	}
-	if (url.startsWith('/?strms')) {
-		response.writeHead(200, {'Content-Type': 'text/plain'});
-		ytextract.getStreams(parse(url.substring(2)), response);
-	//	response.end(JSON.stringify(strms));
-		return;
-	}
-	if (url.startsWith('/?dirl')) {
-		//console.log(progv);
-		response.writeHead(200, {'Content-Type': 'text/plain'});
-		let dpath = parse(url.substring(2)).dirl;
-		getNavMenu(dpath, response);
-		getDirList(dpath, response);
-		//response.end();
 		return;
 	}
 	if (url.startsWith('/?plmn')) {
@@ -677,17 +418,8 @@ http.createServer(function (request, response) {
 		return;
 	}
 
-	let filePath = parse(url.substring(1));
-
-	// Correct root path
-	if (filePath === '/') {
-		filePath = documentRoot + '/index.html';
-	} else {
-		filePath = documentRoot + (enableUrlDecoding === true ? decodeURI(url) : url);
-	}
-
 	// serve the file
-	serveFile(filePath.split('?').shift(), response, url, pdata);
+	serveFile(url, response);
 
 }).listen(config.port, hostname, () => {
 	console.log(`YT Audio Extraction Server (http://${hostname}:${config.port}) started`);

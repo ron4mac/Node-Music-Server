@@ -7,31 +7,43 @@ const fs = require('fs');
 
 module.exports = class YTExtract {
 
-	action (what, bobj, resp) {
+	constructor () {
+		this.tlist = [];
+		this.pwtrk = '';
+		this.progv = 'Scanning playlist ...';
+	}
+
+	action (what, parms, resp) {
 		switch (what) {
+		case 'axtr':
+			this.audioExtract(parms, resp);
+			break;
+		case 'vxtr':
+			this.videoExtract(parms, resp);
+			break;
+		case 'pxtr':
+			this.progv = 'Scanning playlist ...';
+			this.getPlaylist(parms, resp);
+			break;
+		case 'strms':
+			this.getStreams(parms, resp);
+			break;
+		case 'prog':
+			resp.end(this.progv);
+			break;
 		case 'load':
 			resp.end(cntrlr.readFile('services/ytextract/ytextract.html', 'FAILED TO READ'));
 			break;
-		case 'search':
-			this.search(bobj, resp);
-			break;
-		case 'play':
-			this.play(bobj, resp);
-			break;
-		case 'lplay':
-			this.lplay(bobj, resp);
-			break;
-		case 'clear':
-			this.mpdc.clear();
-			resp.end();
+		default:
+			resp.end('Unknown webYTx: '+what);
 			break;
 		}
 	}
 
 	getTrack (trk, dest) {
 		//console.log(trk.index,trk.title);
-		progv = trk.index + ' files processed';
-		this.getAudioStream(trk.shortUrl, pwtrk, (aud) => {
+		this.progv = trk.index + ' files processed';
+		this.getAudioStream(trk.shortUrl, this.pwtrk, (aud) => {
 			//console.log(aud);
 			if (aud.error) {
 				console.log(aud.error.message);
@@ -39,15 +51,15 @@ module.exports = class YTExtract {
 			} else {
 				aud.stream.pipe(fs.createWriteStream(dest+'/'+trk.title+'.'+aud.fext));
 			}
-			if (tlist.length) {
-				this.getTrack(tlist.shift(), dest);
+			if (this.tlist.length) {
+				this.getTrack(this.tlist.shift(), dest);
 			} else {
 				if (cntrlr.config.extr2Intrn) {
-					progv = '.';
+					this.progv = '.';
 				} else {
-					progv = 'Zipping Files ...';
+					this.progv = 'Zipping Files ...';
 					require('child_process').exec('zip -r playlist playlist',{},(error, stdout, stderr)=>{
-						progv = '.';
+						this.progv = '.';
 					});
 				}
 			}
@@ -57,7 +69,7 @@ module.exports = class YTExtract {
 	async getPlaylist (parms, resp) {
 		const ytpl = require('ytpl');
 		fs.unlink('playlist.zip', (err) => 1);
-		emptyDir(playlistDir);
+	//	this._emptyDir(playlistDir);
 		let plurl = parms.pxtr;
 		let list;
 		try {
@@ -68,14 +80,13 @@ module.exports = class YTExtract {
 			resp.end(`<script>alert("${msg}")</script>`);
 			return;
 		}
-		tlist = list.items;
-	console.log(tlist.length+' tracks');
-		pwtrk = parms.wtrk;
+		this.tlist = list.items;
+	console.log(this.tlist.length+' tracks');
+		this.pwtrk = parms.wtrk;
 		let _dd = cntrlr.config.baseDir+'playlist_'+Date.now();
 		fs.mkdirSync(_dd);
-		this.getTrack(tlist.shift(), _dd);
+		this.getTrack(this.tlist.shift(), _dd);
 	}
-
 
 	sendExtraction (filePath) {
 		//console.log('[Info] Sending audio track');
@@ -154,12 +165,12 @@ module.exports = class YTExtract {
 			//console.log(aud);
 			if (aud.error) {
 				let msg = aud.error.message.replace(/\"/g,'');
-				resp.end(`<script>parent.extrFini("sgl","${msg}")</script>`);
+				resp.end(`<script>parent.YTx.extrFini("sgl","${msg}")</script>`);
 			} else if (cntrlr.config.extr2Intrn) {
 				let ws = fs.createWriteStream(cntrlr.config.baseDir+parms.tnam+'.'+aud.fext);
 				ws.on('finish', () => {
 					console.log('ws-end');
-					resp.end(`<script>parent.extrFini("sgl","Audio extracted as '${parms.tnam}.${aud.fext}'")</script>`);
+					resp.end(`<script>parent.YTx.extrFini("sgl","Audio extracted as '${parms.tnam}.${aud.fext}'")</script>`);
 				});
 				aud.stream.pipe(ws);
 			//	resp.end(`<script>alert("Audio extracted as '${parms.tnam}.${aud.fext}'")</script>`);
@@ -216,12 +227,12 @@ module.exports = class YTExtract {
 			//console.log(vid);
 			if (vid.error) {
 				let msg = vid.error.message.replace(/\"/g,'');
-				resp.end(`<script>parent.extrFini("vid","${msg}")</script>`);
+				resp.end(`<script>parent.YTx.extrFini("vid","${msg}")</script>`);
 			} else if (cntrlr.config.extr2Intrn) {
 				let ws = fs.createWriteStream(cntrlr.config.baseDir+parms.tnam+'.'+vid.fext);
 				ws.on('finish', () => {
 					console.log('ws-end');
-					resp.end(`<script>parent.extrFini("vid","Video extracted as '${parms.tnam}.${vid.fext}'")</script>`);
+					resp.end(`<script>parent.YTx.extrFini("vid","Video extracted as '${parms.tnam}.${vid.fext}'")</script>`);
 				});
 				vid.stream.pipe(ws);
 			//	resp.end(`<script>alert("Video extracted as '${parms.tnam}.${vid.fext}'")</script>`);
@@ -257,6 +268,17 @@ module.exports = class YTExtract {
 			++ix;
 		} while (ix < fmts.length);
 		return 0;
+	}
+
+	_emptyDir (dir) {
+		fs.readdir(dir, (err, files) => {
+			if (err) throw err;
+			for (const file of files) {
+				fs.unlink(path.join(dir, file), (err) => {
+					if (err) throw err;
+				});
+			}
+		});
 	}
 
 

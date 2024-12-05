@@ -9,6 +9,7 @@ module.exports = class Pandora {
 		this.client = client;
 		this.mpdc = mpdc;
 		this.queue = {};
+		this.queuel = [];
 		if (full) {
 			this.ws = new WebSocket.Server({port:cntrlr.config.pandora_socket});
 			this.ws.on('connection', (sc) => {
@@ -64,13 +65,20 @@ module.exports = class Pandora {
 		case 'play':
 			this.play(bobj, resp);
 			break;
+		case 'lplay':
+			this.lplay(bobj, resp);
+			break;
 		case 'clear':
 			this.mpdc.clear();
 			resp.end();
 			break;
 		case 'user':
-			const htm = this.client.authData ? 'user.html' : 'login.html';
-			resp.end(cntrlr.readFile('services/pandora/'+htm+'', 'FAILED TO READ'));
+			const file = this.client.authData ? 'user.html' : 'login.html';
+			let htm = cntrlr.readFile('services/pandora/'+file+'', 'FAILED TO READ')
+				.replace('%%UN%%',this.client.authData.username)
+				.replace('%%TA%%',this.client.authData.timeoutMinutes)
+				.replace('%%TR%%',this.client.authData.timeoutMinutes - this._remainingMinutes());
+			resp.end(htm);
 			break;
 		case 'load':
 			this.authenticated()
@@ -121,10 +129,12 @@ module.exports = class Pandora {
 			});
 			break;
 		case 'reauth':
+			console.log('re-authenticating');
 			this.client.authData = null;
 			this._login(this.client, cntrlr.settings.pandora_user, cntrlr.settings.pandora_pass)
 			.then(()=>{
 				if (this.client.authData) {
+					console.log(this.client.authData);
 					resp.end();
 				} else {
 					resp.end('FAILED TO AUTHENTICATE');
@@ -147,7 +157,7 @@ module.exports = class Pandora {
 		if (this.client.authData) {
 			// can get image sizes .. 90,130,250,500,640,1080
 			this.client.request('user.getStationList', {includeStationArtUrl: true, stationArtSize: 'W250H250'}, (err, stationList) => {
-				console.log(stationList);
+				//console.log(stationList);
 				if (stationList) {
 					resp.write(this._parseStations(stationList.stations));
 					resp.end();
@@ -167,6 +177,15 @@ module.exports = class Pandora {
 		this.stationName = station.snam;
 		this._getTracks();
 		resp.end();
+	}
+
+	lplay (station, resp) {
+		if (this.stationid != station.sid) this.queuel = [];
+		this.stationid = station.sid;
+		this.stationName = station.snam;
+		this._getLocalTrack(resp);
+//		const trk = this._getLocalTrack()
+//		.then(resp.end(JSON.stringify(trk)));
 	}
 
 	// used to authenticate login
@@ -189,8 +208,8 @@ module.exports = class Pandora {
 		if (!list) return 'NOT YET RESOLVED';
 		let htm = '';
 		for (const s of list) {
-			htm += '<div data-sid="'+s.stationId+'"><i class="fa fa-bars" aria-hidden="true" onclick="Pand.more(event)"></i>';
-			htm += '<a href="#" onclick="Pand.play(event)">'+s.stationName+'</a></div>'
+			htm += '<div data-sid="'+s.stationId+'"><i class="fa fa-bars bmnu" aria-hidden="true" onclick="Pand.more(event)"></i>';
+			htm += '<a href="#'+s.stationId.substr(-6)+'" onclick="Pand.play(event)">'+s.stationName+'</a> <i class="fa fa-headphones lplay" onclick="Pand.lplay(event)"></i></div>'
 		}
 		return htm;
 	}
@@ -218,15 +237,49 @@ module.exports = class Pandora {
 		return htm;
 	}
 
-	_getTracks () {
+	_getLocalTrack (resp) {
+		//console.log('LOCAL QUEUE', this.queuel);
+		let needed = true;
+		if (this.queuel.length) {
+			resp.end(JSON.stringify(this.queuel.shift()));
+			needed = false;
+		}
+		if (!this.queuel.length) this._getTracks((items)=>{
+			for (const t of items) {
+				if (t.additionalAudioUrl) {
+					const trk = {
+						audioUrl: t.additionalAudioUrl,
+						snam: this.stationName,
+						artistName: t.artistName,
+						albumName: t.albumName,
+						songName: t.songName,
+						albumArtUrl: t.albumArtUrl
+					};
+					this.queuel.push(trk);
+				} else {
+					console.log(t);
+				}
+			}
+			if (needed) resp.end(JSON.stringify(this.queuel.shift()));
+		});
+	}
+
+	_getTracks (cb=null) {
 		let gplp = {stationToken: this.stationid, additionalAudioUrl: 'HTTP_128_MP3'};
 		this.client.request('station.getPlaylist', gplp, (err, playlist) => {
 			if (err) {
 				console.error(err);
-				setTimeout(()=>this._getTracks, 15000);
+			//	setTimeout(()=>this._getTracks, 15000);
+				if (cb) cb([]);
 			} else {
 		//	console.log(playlist);
-				if (playlist) this._queueTracks(playlist.items);
+				if (playlist) {
+					if (cb) {
+						cb(playlist.items);
+					} else {
+						this._queueTracks(playlist.items);
+					}
+				}
 			}
 		});
 	}
@@ -296,6 +349,10 @@ module.exports = class Pandora {
 		for (const qid in this.queue) {
 			if (qid<base) delete this.queue[qid];
 		}
+	}
+
+	_remainingMinutes () {
+		return (Date.now()-this.client.authData.startTime)/60000|0;
 	}
 
 	_login (client, user, pass) {

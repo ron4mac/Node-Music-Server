@@ -54,6 +54,31 @@
 		}, 1);
 	};
 
+	Favorites.delete = (evt) => {
+		evt.preventDefault();
+		if (!confirm('Are you sure that you want to delete this favorite?')) return;
+		let fid = evt.target.closest('[data-fid]').dataset.fid;
+		const parms = {what: 'delete', bobj: fid};
+		postAction(sr, parms, (data) => {
+			if (data) {
+				alert(data);
+			} else {
+				evt.target.closest('dialog').close();
+				Favorites.get();
+			}
+		}, 1);
+	};
+
+	Favorites.more = (evt) => {
+		evt.preventDefault();
+		let fid = evt.target.closest('[data-fid]').dataset.fid;
+		const dlg = document.getElementById('fave-more');
+		dlg.setAttribute('data-fid',fid);
+		let name = evt.target.nextElementSibling.innerHTML;
+		dlg.querySelector('h3').innerHTML = name;
+		dlg.showModal();
+	};
+
 	Favorites.get = () => {
 		const parms = {what: 'home'};
 		postAction(sr, parms, (data) => {

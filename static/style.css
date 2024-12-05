@@ -367,15 +367,15 @@ i.lplay {
 #albumart dl {
 	line-height: 1.4rem;
 	margin: 0;
+	display: grid;
+	grid-template-columns: max-content;
 }
 #albumart dt {
-	display: inline-block;
-	width: 4rem;
 	text-align: right;
 	margin-right: 8px;
 }
 #albumart dd {
-	display: inline-block;
+	grid-column-start: 2;
 	margin-left: 0;
 	color: blue;
 }

@@ -5,6 +5,19 @@
 	const sr = 'pd';	// service route
 
 	let socket = null;
+	let hasael = false;
+
+	const showTrackArt = (data, pn=true) => {
+		const aa = document.getElementById('albumart');
+		displayCurrent('Pandora: '+data.snam);
+		displayCurrentTrack(data.artistName+' - '+data.songName);
+		aa.querySelector('img').src = data.albumArtUrl ? data.albumArtUrl : 'noimage.svg';
+		aa.querySelector('.artist').innerHTML = data.artistName;
+		aa.querySelector('.album').innerHTML = data.albumName;
+		aa.querySelector('.song').innerHTML = data.songName;
+		aa.querySelector('.prevnext').style.display = pn?'block':'none';
+		aa.style.display = 'block';
+	};
 
 	const startPlay = (how, url) => {
 		const parms = {what: how, bobj: url};
@@ -17,7 +30,19 @@
 				laudio.play();
 			}
 		}, 1);
-	}
+	};
+
+	const nextLocal = (sid, snam, aude) => {
+		let bobj = {sid: sid, snam: snam};
+		const parms = {what: 'lplay', bobj: bobj};
+		postAction(sr, parms, (data) => {
+			if (data) {
+				showTrackArt(data, false);
+				aude.src = data.audioUrl;
+				aude.play();
+			}
+		}, 2);
+	};
 
 	Pand.play = (evt) => {
 		evt.preventDefault();
@@ -34,12 +59,38 @@
 		nowPlaying = {name: currentStream, what:'Pand', how: 'play', url: bobj};
 	};
 
+	Pand.lplay = (evt) => {
+		evt.preventDefault();
+		let elm = evt.target.closest('[data-sid]');
+		const sid = elm.dataset.sid;
+		const chnam = elm.querySelector('a').innerHTML;
+		let bobj = {sid: sid, snam: chnam};
+		currentStream = 'Pandora: '+chnam;
+		const parms = {what: 'lplay', bobj: bobj};
+		postAction(sr, parms, (data) => {
+			if (data) {
+				showTrackArt(data, false);
+				showLocalAudio(true);
+				const laudio = document.getElementById('localaudio');
+				if (!hasael) {
+					laudio.addEventListener('ended', (evt) => {
+						nextLocal(sid,chnam,laudio);
+					});
+					hasael = true;
+				}
+				laudio.src = data.audioUrl;
+				laudio.play();
+			}
+		}, 2);
+		nowPlaying = {name: currentStream, what:'Pand', how: 'lplay', url: bobj};
+	};
+
 	Pand.fave = (how, url) => {
 		// make sure websocket is running
 		Pand.socket();
 		// play the saved favorite
 		startPlay(how, url);
-	}
+	};
 
 	Pand.login = (evt,elm) => {
 		console.log(evt);
@@ -102,23 +153,24 @@
 			// Listen for messages
 			socket.addEventListener('message', (event) => {
 				console.log('Message from server ', event.data);
-				let aa = document.getElementById('albumart');
+			//	let aa = document.getElementById('albumart');
 				let data = JSON.parse(event.data);
 				if (data.state=='play') {
-					displayCurrent('Pandora: '+data.snam);
-					displayCurrentTrack(data.artistName+' - '+data.songName);
-					aa.querySelector('img').src = data.albumArtUrl ? data.albumArtUrl : 'noimage.png';
-					aa.querySelector('.artist').innerHTML = data.artistName;
-					aa.querySelector('.album').innerHTML = data.albumName;
-					aa.querySelector('.song').innerHTML = data.songName;
-					aa.style.display = 'block';
+					showTrackArt(data);
+					//displayCurrent('Pandora: '+data.snam);
+					//displayCurrentTrack(data.artistName+' - '+data.songName);
+					//aa.querySelector('img').src = data.albumArtUrl ? data.albumArtUrl : 'noimage.png';
+					//aa.querySelector('.artist').innerHTML = data.artistName;
+					//aa.querySelector('.album').innerHTML = data.albumName;
+					//aa.querySelector('.song').innerHTML = data.songName;
+					//aa.style.display = 'block';
 				} else {
 				//	displayCurrentTrack('');
 					aa.style.display = 'none';
 				}
 			});
 		}
-	}
+	};
 
 	Pand.get = () => {
 		const parms = {what: 'home'};

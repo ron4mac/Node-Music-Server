@@ -5,7 +5,7 @@
 	const sr = 'fm';	// service route
 
 	const getDirList = (dirPath) => {
-		fetch('?dirl='+encodeURIComponent(dirPath), {method:'GET'})
+		fetch('?_=fm&act=dirl&dirl='+encodeURIComponent(dirPath), {method:'GET'})
 		.then((resp) => resp.text())
 		.then(data => {
 			_fm.innerHTML = data;
@@ -72,7 +72,7 @@
 						if (data.err) {
 							alert(data.err);
 						} else {
-							document.getElementById('dnldf').src = '/?sndf='+data.f64;
+							document.getElementById('dnldf').src = '/?_=fm&act=sndf&sndf='+data.f64;
 						}
 					} else { alert('download not available'); }
 				}, 2);
@@ -170,7 +170,7 @@
 				} else {
 					document.querySelector('#fvewd span').innerHTML = fpath;
 					document.getElementById('fvewd').style.display = 'block';
-					document.getElementById('fvewf').src = '/?sndf='+data.f64+'&v=1';
+					document.getElementById('fvewf').src = '/?_=fm&act=sndf&sndf='+data.f64+'&v=1';
 				}
 			} else { alert('not available'); }
 		}, 2);

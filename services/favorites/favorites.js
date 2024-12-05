@@ -17,7 +17,7 @@ module.exports = class Favorites {
 			if (this.faves.length) {
 				this.faves.forEach((fave, index) => {
 					resp.write(`<div class="${fave.how}" data-fid="${index}">`);
-					resp.write(`<i class="fa fa-bars" aria-hidden="true"></i>`);
+					resp.write(`<i class="fa fa-bars" aria-hidden="true" onclick="Favorites.more(event)"></i>`);
 					resp.write(`<a href="#F${index}">${fave.name}</a></div>`);
 				});
 				resp.end();
@@ -27,6 +27,11 @@ module.exports = class Favorites {
 			break;
 		case 'add':
 			this.add(bobj /*{...{what: bobj}, ...cntrlr.currentPlaying}*/, resp);
+			break;
+		case 'delete':
+			console.log('delete',bobj);
+			resp.end();
+			this.delete(bobj, resp);
 			break;
 		case 'play':
 			resp.end(JSON.stringify(this.faves[bobj]));
@@ -67,6 +72,12 @@ module.exports = class Favorites {
 		this.faves.push(fave);
 		let rslt = cntrlr.writeFile('services/favorites/favorites.json', JSON.stringify(this.faves, null, "\t"));
 		resp.end(rslt ? ('Error: '+rslt) : 'Added to favorites');
+	}
+
+	delete (fave, resp) {
+		this.faves.splice(fave,1);
+		let rslt = cntrlr.writeFile('services/favorites/favorites.json', JSON.stringify(this.faves, null, "\t"));
+		resp.end();
 	}
 
 	startRadio (surl) {

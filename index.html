@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>YT Audio Extract</title>
+<title>Node Music Server</title>
 <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <!-- <link rel="stylesheet" href="//rjcrans.net/rjlibs/dlog/dialog.css"> -->
 <link href="static/style.css" rel="stylesheet">
@@ -20,7 +20,7 @@
 			<button class="tablinks" onclick="openTab(event, 'tuninTab', 'ti')">Internet Radio</button>
 			<button class="tablinks" onclick="openTab(event, 'calmradioTab', 'cr')">Calm Radio</button>
 			<button class="tablinks" onclick="openTab(event, 'pandoraTab', 'pd')">Pandora</button>
-			<button class="tablinks" onclick="openTab(event, 'plstsTab', plpop)">Playlists</button>
+			<button class="tablinks" onclick="openTab(event, 'plstsTab', 'pl')">Playlists</button>
 			<button class="tablinks nompd" onclick="openTab(event, 'filemanTab', 'fm')">Manage File Storage</button>
 			<button class="tablinks nompd" onclick="openTab(event, 'ytxTab', 'yt')">YouTube Extraction</button>
 		</div>
@@ -58,30 +58,8 @@
 				<div id="pandora"></div>
 			</div>
 			<div id="plstsTab" class="tabcontent">
-				<nav class="plmnu">
-					<ul>
-						<li><a href="#" data-menu="plply">Play</a></li>
-						<li><a href="#" data-menu="pldel">Delete</a></li>
-						<li><a href="#" data-menu="plvue">View</a></li>
-					</ul>
-				</nav>
-				<div id="playlists"></div>
 			</div>
 			<div id="filemanTab" class="tabcontent">
-				<!-- <div class="fmenu">
-					<a href="#" data-menu="fcomb">Combine</a>
-					<a href="#" data-menu="fdele">Delete</a>
-					<a href="#" data-menu="fdnld">Download</a>
-					<a href="#" data-menu="fmove">Move<span></span></a>
-					<a href="#" data-menu="fnewf">New Folder</a>
-					<a href="#" data-menu="drefr">Refresh</a>
-					<a href="#" data-menu="frnam">Rename</a>
-					<a href="#" data-menu="fupld">Upload</a>
-					<a href="#" data-menu="funzp">Unzip</a>
-					<span> | </span>
-					<a href="#" data-menu="plmnu">Add To Playlist</a>
-				</div>
-				<div id="fileman"></div> -->
 			</div>
 			<div id="ytxTab" class="tabcontent">
 				<div id="ytextract"></div>
@@ -96,7 +74,7 @@
 	<div id="sseld" style="display:none">
 		<i class="fa fa-times" aria-hidden="true" onclick="this.parentElement.style.display='none'"></i>
 		<table id="sselt"><tbody></tbody></table>
-		<button onclick="extractSelected(this)">Extract Stream</button>
+		<button onclick="YTx.extractSelected(this)">Extract Stream</button>
 	</div>
 	<div class="dlogs">
 		<div id="plmnu" class="modl">
@@ -117,22 +95,21 @@
 	<iframe id="dnldf" style="display:none"></iframe>
 	<script>
 	var xtrLocal='XTRLOCALV';
-	_pb = document.getElementById('prog');
 	_fm = document.getElementById('fileman');
 	// setup fm menu
-	document.querySelectorAll('.fmenu a').forEach(elm => {
-		elm.addEventListener('click', (evt) => {
-			evt.preventDefault();	console.log(evt);
-			Fileman.menu(evt.target.closest('[data-menu]').dataset.menu, evt);
-		});
-	});
+//	document.querySelectorAll('.fmenu a').forEach(elm => {
+//		elm.addEventListener('click', (evt) => {
+//			evt.preventDefault();	console.log(evt);
+//			Fileman.menu(evt.target.closest('[data-menu]').dataset.menu, evt);
+//		});
+//	});
 	// setup playlist menu
-	document.querySelectorAll('.plmnu a').forEach(elm => {
-		elm.addEventListener('click', (evt) => {
-			evt.preventDefault();	console.log(evt);
-			doPlMenu(evt.target.dataset.menu || evt.target.parentElement.dataset.menu, evt);
-		});
-	});
+//	document.querySelectorAll('.plmnu a').forEach(elm => {
+//		elm.addEventListener('click', (evt) => {
+//			evt.preventDefault();	console.log(evt);
+//			doPlMenu(evt.target.dataset.menu || evt.target.parentElement.dataset.menu, evt);
+//		});
+//	});
 	// Show the default tab
 	document.getElementById('defaultOpen').click();
 //	console.log(document.forms.sglform.wtrk);

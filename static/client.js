@@ -6,9 +6,7 @@ var _pp = 0,
 	_fm,
 	curDir = '',
 	currentStream = '',
-	nowPlaying = {},
-
-	plstseen = false;
+	nowPlaying = {};
 
 
 YTx.fup_done = (errs) => {
@@ -16,70 +14,6 @@ YTx.fup_done = (errs) => {
 		modal(document.getElementById('filupld'), false);
 	}
 	Fileman.getDirList(curDir);
-};
-const getPlaylist = (frm) => {
-	document.querySelector('#lstTab input[type="submit"]').disabled = true;
-	let yturl = encodeURIComponent(frm.yturl.value.trim());
-	let wtrk = encodeURIComponent(frm.wtrk.value);
-	document.getElementById('dnldf').src = window.location.origin + `?pxtr=${yturl}&wtrk=${wtrk}`;
-	setTimeout(watchP, 1000);
-};
-const getVinfo = (frm,itag=false) => {
-	document.querySelector('#sglTab input[type="submit"]').disabled = true;
-	document.querySelector('#sglTab i').style.display = 'inline-block';
-	let yturl = encodeURIComponent(frm.yturl.value.trim());
-	let tname = encodeURIComponent(frm.tname.value.trim());
-	let wtrk = encodeURIComponent(frm.wtrk.value);
-	if (itag) wtrk += '.'+itag;
-	tname = tname ? tname : 'audio_track';
-	document.getElementById('dnldf').src = window.location.origin + `?axtr=${yturl}&tnam=${tname}&wtrk=${wtrk}`;
-};
-const extractSelected = (elm) => {
-	let itag = elm.parentElement.querySelector('input[name="itag"]:checked').value;
-	if (itag) {
-		let typ = elm.getAttribute('stype');
-		elm.parentElement.style.display = 'none';
-		if (typ=='audio') {
-			getVinfo(document.forms.sglform, itag);
-		} else {
-			getVideo(document.forms.vidform, itag);
-		}
-	}
-};
-const getVideo = (frm,itag=false) => {
-	document.querySelector('#vidTab input[type="submit"]').disabled = true;
-	document.querySelector('#vidTab i').style.display = 'inline-block';
-	let yturl = encodeURIComponent(frm.yturl.value.trim());
-	let tname = encodeURIComponent(frm.tname.value.trim());
-	let wtrk = encodeURIComponent(frm.wtrk.value);
-	if (itag) wtrk += '.'+itag;
-	let vida = encodeURIComponent(frm.vida.value);
-	tname = tname ? tname : 'video_track';
-	document.getElementById('dnldf').src = window.location.origin + `?vxtr=${yturl}&tnam=${tname}&wtrk=${wtrk}&vida=${vida}`;
-};
-function extrFini (wch, msg) {
-console.log(wch, msg);
-	service.fm.seen = false;
-	document.querySelector('#'+wch+'Tab i').style.display = 'none';
-	document.querySelector('#'+wch+'Tab input[type="submit"]').disabled = false;
-	if (msg) setTimeout(()=>alert(msg),100);
-}
-const watchP = () => {
-	fetch('?prog', {method:'GET'})
-	.then((resp) => resp.text())
-	.then(data => {
-		if (data == '.') {
-			service.fm.seen = false;
-			_pb.innerHTML = '';
-			document.querySelector('#lstTab input[type="submit"]').disabled = false;
-		} else {
-			_pb.innerHTML = data;
-			setTimeout(watchP, 1200);
-		}
-	});
-};
-const dlfile = () => {
-	document.getElementById('dnldf').src = 'video.mp4';
 };
 
 
@@ -166,7 +100,8 @@ var services = {
 	cr: {seen:false, id:'calmradio',	cb:(evt)=>Calm.get()},
 	pd: {seen:false, id:'pandora',		cb:(evt)=>Pand.get()},
 	fm: {seen:false, id:'filemanTab',	cb:(evt)=>Fileman.getDirList(curDir)},
-	yt: {seen:false, id:'ytextract',	cb:null}
+	yt: {seen:false, id:'ytextract',	cb:null},
+	pl: {seen:false, id:'plstsTab',		cb:(evt)=>Playlists.get()}
 };
 
 // populate a selected service interface panel
@@ -283,16 +218,16 @@ const mpdSocket = () => {
 
 
 // Playlists interface
-const plpop = () => {
-	if (!plstseen) {
-		setVolSlider();
-		getPlaylists();
-	}
-	plstseen = true;
-};
+//const plpop = () => {
+//	if (!plstseen) {
+//		setVolSlider();
+//		getPlaylists();
+//	}
+//	plstseen = true;
+//};
 
 
-const doPlMenu = (actn, evt) => {
+const xxxdoPlMenu = (actn, evt) => {
 	console.log(actn);
 	const slctd = document.querySelectorAll('.plsel:checked'),
 		scnt = slctd.length,
@@ -369,7 +304,7 @@ const postAction = (tos, parms={}, cb=()=>{}, json=false) => {
 		if (!json) parms = new URLSearchParams(parms);
 	}
 	if (json) hdrs['Content-Type'] = 'application/json';
-	const url = tos ? ('/_'+tos) : '?_FM'
+	const url = tos ? ('/_'+tos) : '?_Q'
 
 	fetch(url, {method:'POST', headers:hdrs, body:parms})
 	.then(resp => { if (!resp.ok) throw new Error('Network response was not OK'); if (json==2) return resp.json(); else return resp.text() })
@@ -377,7 +312,7 @@ const postAction = (tos, parms={}, cb=()=>{}, json=false) => {
 	.catch(err => alert(err));
 };
 
-const postAndRefreshPL = (parms, json=false) => {
-	postAction(null, parms, (data) => { if (data) alert(data); else getPlaylists() }, json);
-};
+//const postAndRefreshPL = (parms, json=false) => {
+//	postAction(null, parms, (data) => { if (data) alert(data); else getPlaylists() }, json);
+//};
 

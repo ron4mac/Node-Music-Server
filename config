@@ -4,6 +4,7 @@ var config = {
 	pandora_socket: 6681,
 	baseDir: '/media/YTx/',
 	upldTmpDir: '/tmp/',
+	playlistDir: 'playlists/',
 	extr2Intrn: true
 }; 
 if (typeof module === 'object') {

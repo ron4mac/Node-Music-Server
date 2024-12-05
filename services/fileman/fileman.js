@@ -3,6 +3,8 @@ const cntrlr = require('../../controller');
 //const config = require('../../config');
 const fs = require('fs');
 const path = require('path');
+const formidable = require('formidable');	//, {errors as formidableErrors} from 'formidable';
+const formidableErrors = formidable.errors;		//require('formidable:errors');
 
 module.exports = class Fileman {
 
@@ -11,10 +13,9 @@ module.exports = class Fileman {
 	}
 
 	action (what, parms, resp) {
-		console.log(what,parms);
+		//console.log(what,parms);
 		const baseDir = cntrlr.config.baseDir;
 		let rmsg = 'NOT YET IMPLEMENTED';
-		resp.writeHead(200, {'Content-Type': 'text/plain'});
 		let pbase, fpath, stats;
 		switch (what) {
 		case 'fcomb':
@@ -117,6 +118,16 @@ module.exports = class Fileman {
 	//		console.log(stats);
 			rmsg = JSON.stringify({err: '', f64: btoa(fpath)});
 			break;
+		case 'sndf':
+			this.sendFile(parms, resp);
+			return;
+			break;
+		case 'dirl':
+			const dpath = parms.dirl;
+			this.getNavMenu(dpath, resp);
+			this.getDirList(dpath, resp);
+			return;
+			break;
 		case 'splay':
 			fpath = baseDir+parms.fpath;
 			rmsg = JSON.stringify({err: 'NOT YET IMPLEMENTED', f64: btoa(fpath)});
@@ -129,6 +140,113 @@ module.exports = class Fileman {
 		resp.end(rmsg);
 	}
 
+	getDirList (dir, resp) {
+		const baseDir = cntrlr.config.baseDir;
+		const idtf = new Intl.DateTimeFormat('en-US',{year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hour12:false,timeZoneName:'short'});
+		fs.readdir(baseDir+dir, {withFileTypes: true}, (err, files) => {
+			if (err) throw err;
+			let rows = ['<thead><td></td><th>Name</th><th>Size </th><th> Date</th></thead>'];
+			let pdir = dir == '' ? dir : (dir+'/');
+			for (const file of files) {
+				let fcl, icn, lnk='';
+				if (file.isDirectory()) {
+					icn = '<i class="fa fa-folder fa-fw d-icn" aria-hidden="true"></i>';
+					fcl = 'isdir" data-dpath="'+pdir+file.name;
+				} else {
+					icn = '<i class="fa fa-file-o fa-fw" aria-hidden="true"></i>';
+					fcl = 'isfil" data-fpath="'+file.name;
+				}
+				if (file.isSymbolicLink()) {
+					lnk = ' <i class="fa fa-arrow-right fa-fw" aria-hidden="true"></i>';
+					let lnk2 = fs.readlinkSync(baseDir+dir+'/'+file.name);
+				//	if (fs.statSync(lnk2).isDirectory()) {
+				//		fcl = 'isdir" data-dpath="'+lnk2;
+				//	}
+					lnk += lnk2;
+				}
+				const fstat = fs.statSync(baseDir+dir+'/'+file.name);
+				rows.push('<td><input type="checkbox" class="fsel" name="files[]" value="'+file.name+'"></td>'
+					+'<td class="'+fcl+'">'+icn+file.name+lnk+'</td>'
+					+'<td>'+this._formatNumber(fstat.size)+' </td>'
+					+'<td> '+idtf.format(fstat.mtimeMs)+'</td>');
+			}
+			resp.write('<table><tr>'+rows.join('</tr><tr>')+'</tr></table>');
+			resp.end();
+		});
+	}
+
+	getNavMenu (dir, resp) {
+		let nav = '<div class="fmnav">';
+		let _D = '';
+		let parts = dir.split('/');
+		if (parts[0]) {
+			nav += '<span class="isdir" data-dpath=""><i class="fa fa-home" aria-hidden="true"></i></span> / ';
+		} else {
+			nav += '<span><i class="fa fa-home" aria-hidden="true"></i></span>';
+		}
+		do {
+			let _d = parts.shift();
+			let _dd = _d;
+			if (parts.length) {
+				_D += _d + (parts.length>1 ? '/' : '');
+				nav += `<span class="isdir" data-dpath="${_D}">${_dd}</span> / `;
+			} else {
+				nav += `<span>${_d}</span>`;
+			}
+		} while (parts.length);
+		resp.write(nav+'</div>');
+	}
+
+	sendFile (parms, resp) {
+		//console.log('[Info] Sending zip file');
+		let filePath = atob(parms.sndf);
+		let stats = fs.statSync(filePath);
+		resp.setHeader('Content-Length', stats.size);
+		if (parms.v) {
+			const mtyp = cntrlr.mimeType(filePath) || 'audio/mp4';
+			resp.setHeader('Content-Type', mtyp);
+		} else {
+			resp.setHeader('Content-Type', 'application/octet-stream');
+			resp.setHeader('Content-Disposition', 'attachment; filename="'+path.basename(filePath)+'"');
+		}
+		let stream = fs.createReadStream(filePath);
+		stream.on('open', () => {
+			stream.pipe(resp);
+		});
+		stream.on('error', () => {
+			resp.setHeader('Content-Type','text/plain');
+			resp.status(404).end('Not found');
+		});
+	}
+
+	async receiveUpload (req, res) {
+		const baseDir = cntrlr.config.baseDir;
+		const form = new formidable.IncomingForm({uploadDir: cntrlr.config.upldTmpDir, maxFileSize: 2147483648});	// formidable({});
+		return await form.parse(req, function(err, fields, files) {
+			if (err) {
+				console.error(err);
+				res.writeHead(err.httpCode || 400, {'Content-Type': 'text/plain'});
+				res.end(String(err));
+			} else {
+				fs.renameSync(files.upld.filepath, path.join(baseDir+fields.dir, files.upld.originalFilename));
+				res.writeHead(200, {'Content-Type': 'text/plain'});
+				res.end(JSON.stringify({ fields, files }, null, 2));
+			}
+		});
+	};
+
+
+	_formatNumber (num) {
+		if (num < 1024) {
+			return num.toString();
+		} else if (num < 1048576) {
+			return (num / 1024).toFixed(1) + 'K';
+		} else if (num < 1073741824) {
+			return (num / 1048576).toFixed(1) + 'M';
+		} else {
+			return (num / 1073741824).toFixed(1) + 'G';
+		}
+	}
 
 
 }
