@@ -137,7 +137,8 @@
 			break;
 		case 'plmnu':
 			if (!hasSome()) break;
-			add2Playlist();
+			assureService('Playlists')
+			.then(()=>add2Playlist());
 			break;
 		case 'faddl':
 			console.log(evt);
@@ -153,7 +154,7 @@
 			postAndRefresh({what:'faddl', bobj:{plnam: pnam, dir:(curDir?curDir:''), 'files': files}}, 1);
 			modal(dlg, false);
 			evt.target.parentElement.querySelector('i').style.display = 'none';
-			plstseen = false;
+			services.pl.seen = false;
 			break;
 		case 'drefr':
 			getDirList(curDir);

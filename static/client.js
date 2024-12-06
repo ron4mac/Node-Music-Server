@@ -6,6 +6,8 @@ var _pp = 0,
 	_fm,
 	curDir = '',
 	currentStream = '',
+	laudioctl = null,
+	laudioelm = null,
 	nowPlaying = {};
 
 
@@ -86,12 +88,38 @@ const displayCurrentTrack = (what) => {
 
 // LOCAL AUDIO
 const showLocalAudio = (yn) => {
-	const acts = yn ? {mpdcontrols:'none',localAudio:'block'} : {localAudio:'none',mpdcontrols:'block'};
-	for (const [k, v] of Object.entries(acts)) {
-		document.getElementById(k).style.display = v;
-	}
-};
+	//const acts = yn ? {mpdcontrols:'none',localAudio:'block'} : {localAudio:'none',mpdcontrols:'block'};
+	//for (const [k, v] of Object.entries(acts)) {
+	//	document.getElementById(k).style.display = v;
+	//}
+	if (laudioctl) laudioctl.remove();
+	laudioelm = null;
+	const ladiv = document.getElementById('localAudio');
+	const laudt = document.getElementById('local-audio').content.cloneNode(true);
+	ladiv.prepend(laudt);
+	laudioctl = ladiv.children[0];
+	laudioelm = ladiv.querySelector('audio');
+	ladiv.style.display = 'block';
+	return;
 
+
+
+	laudioelm = document.createElement('AUDIO');
+	laudioelm.innerHTML = 'Your browser does not support the audio element.';
+	laudioelm.setAttribute('controls','');
+	ladiv.prepend(laudioelm);
+	laudioelm.insertAdjacentHTML('beforebegin','<i class="fa fa-arrow-circle-left" step="prev"></i>');
+	laudioelm.insertAdjacentHTML('afterend','<i class="fa fa-arrow-circle-right" step="next"></i>');
+	ladiv.style.display = 'block';
+};
+const laudioAction = (evt) => {
+	console.log(evt);
+	const telm = evt.target;
+	if (telm.nodeName=='I' && telm.hasAttribute('step')) {
+		console.log(telm.getAttribute('step'));
+		document.dispatchEvent(new CustomEvent('laudact', {bubbles: true, detail: telm.getAttribute('step')}));
+	}
+}
 
 
 var services = {
@@ -146,6 +174,34 @@ const svcPop = (sid) => {
 		}
 	};
 }
+
+
+// make sure the particular service panel (script/html) is populated
+const assureService = async (what) => {
+	return new Promise((resolve, reject) => {
+		switch (what) {
+		case 'Tunein':
+			svcPop('ti');
+			break;
+		case 'Pand':
+			svcPop('pd');
+			break;
+		case 'Calm':
+			svcPop('cr');
+			break;
+		case 'Playlists':
+			svcPop('pl');
+			break;
+		}
+		const wait = setInterval(() => {
+			if (window[what]) {
+				clearInterval(wait);
+				resolve();
+			}
+		}, 100);
+	});
+}
+
 
 
 
@@ -215,16 +271,6 @@ const mpdSocket = () => {
 		}
 	});
 }
-
-
-// Playlists interface
-//const plpop = () => {
-//	if (!plstseen) {
-//		setVolSlider();
-//		getPlaylists();
-//	}
-//	plstseen = true;
-//};
 
 
 const xxxdoPlMenu = (actn, evt) => {

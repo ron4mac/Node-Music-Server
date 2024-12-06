@@ -18,7 +18,7 @@ module.exports = class Pandora {
 					console.log('received: %s', data);
 				});
 				// if message was 'probe' send albumart to this one connection
-				this.mpdc._status()
+				this.mpdc.status()
 				.then((stat) => {
 					let msg;
 					if (stat.songid && this.queue[stat.songid]) {
@@ -315,7 +315,7 @@ module.exports = class Pandora {
 			this.mpdc.mpdc.on('system-player', (a,b) => {
 				if (!this.client.authData) return;
 				console.log('pdo on system player event ',a,b);
-				this.mpdc._status()
+				this.mpdc.status()
 				.then((stat) => {
 					//console.log(stat);
 					console.log(stat.song+'/'+stat.playlistlength);

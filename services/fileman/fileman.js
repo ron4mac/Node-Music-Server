@@ -101,14 +101,19 @@ module.exports = class Fileman {
 			for (const file of parms.files) {
 				plst += pbase+file + "\n";
 			}
+			const pld = cntrlr.config.playlistDir;
 			try {
-				fs.writeFileSync(playlistDir+'/'+btoa(parms.plnam), plst);
+				fs.mkdir(pld, {recursive:true}, (err) => {
+					if (err) throw err;
+					fs.writeFileSync(pld+btoa(parms.plnam), plst);
+				});
 				// file written successfully
-				rmsg = null;
+				resp.end('Playlist saved');
 			} catch (err) {
 				console.error(err);
 				rmsg = 'Failed to write playlist';
 			}
+			return;
 			break;
 		case 'fview':
 			fpath = baseDir+parms.fpath;
@@ -167,7 +172,7 @@ module.exports = class Fileman {
 				const fstat = fs.statSync(baseDir+dir+'/'+file.name);
 				rows.push('<td><input type="checkbox" class="fsel" name="files[]" value="'+file.name+'"></td>'
 					+'<td class="'+fcl+'">'+icn+file.name+lnk+'</td>'
-					+'<td>'+this._formatNumber(fstat.size)+' </td>'
+					+'<td>'+this.#formatNumber(fstat.size)+' </td>'
 					+'<td> '+idtf.format(fstat.mtimeMs)+'</td>');
 			}
 			resp.write('<table><tr>'+rows.join('</tr><tr>')+'</tr></table>');
@@ -236,7 +241,7 @@ module.exports = class Fileman {
 	};
 
 
-	_formatNumber (num) {
+	#formatNumber (num) {
 		if (num < 1024) {
 			return num.toString();
 		} else if (num < 1048576) {

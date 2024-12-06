@@ -16,7 +16,7 @@ module.exports = class MyMPD {
 				sc.on('error', console.error);
 				sc.on('message', (data) => {
 					console.log('MPD received: %s', data);
-					this._socketRequest(data)
+					this.#socketRequest(data)
 					.then(reply => {
 						console.log('reply ',reply);
 						sc.send(JSON.stringify({state: this.mstatus.state, track: reply}));
@@ -25,18 +25,18 @@ module.exports = class MyMPD {
 			});
 			// register for events from MPD
 //			this.mpdc.on('system-player', (a,b) => {
-//				this._status()
+//				this.status()
 //				.then(s=>console.log('on system player event ',s,a,b));
 //			});
 			this.mpdc.on('system', name => {
 				console.log('on system event: %s', name);
-				this._status()
+				this.status()
 				.then((s)=> {
 				//	console.log('*mpd* ', s);
 					if (name=='playlist') {
-						this._broadcastTrack();
+						this.#broadcastTrack();
 					} else {
-						this._broadcastState();
+						this.#broadcastState();
 					}
 				});
 			});
@@ -53,34 +53,34 @@ module.exports = class MyMPD {
 	}
 
 	async getVolume () {
-	//	this._status()
+	//	this.status()
 	//	.then( () => {
-		let rslt = await this._status();
+		let rslt = await this.status();
 		//console.log('status::',this.mstatus);
 		return this.mstatus.volume;
 	//	});
 	}
 
 	setVolume (vol) {
-		this._sendCommand('setvol '+vol);
+		this.#sendCommand('setvol '+vol);
 	}
 
 	async bumpVolume (pm) {
-		await this._sendCommand('volume '+pm);
-		await this._status();
+		await this.#sendCommand('volume '+pm);
+		await this.status();
 		return this.mstatus.volume;
 	}
 
 	clear () {
-		this._sendCommand('clear');
+		this.#sendCommand('clear');
 	}
 
 	sendCommand (cmd) {
-		return this._sendCommand(cmd);
+		return this.#sendCommand(cmd);
 	}
 
 	sendCommands (cmds) {
-		this._sendCommands(cmds);
+		this.#sendCommands(cmds);
 	}
 
 	async sendCommandB (cmd) {
@@ -99,9 +99,15 @@ module.exports = class MyMPD {
 		
 	}
 
+	async status () {
+		//console.log('status');
+		this.mstatus = await this.mpdc.sendCommand('status').then(MPD.parseObject);
+		return this.mstatus;
+	}
+
 
 	// PRIVATE METHODS
-	async _connect () {
+	async #connect () {
 		console.log('mpdconnect');
 		try {
 			let mop = mpdConnOpts;
@@ -113,13 +119,7 @@ module.exports = class MyMPD {
 		}
 	}
 
-	async _status () {
-		//console.log('status');
-		this.mstatus = await this.mpdc.sendCommand('status').then(MPD.parseObject);
-		return this.mstatus;
-	}
-
-	async _sendCommand (cmd) {
+	async #sendCommand (cmd) {
 		try {
 			let rslt = await this.mpdc.sendCommand(cmd);
 			return rslt;
@@ -129,32 +129,32 @@ module.exports = class MyMPD {
 		}
 	}
 
-	async _sendCommands (cmds) {
+	async #sendCommands (cmds) {
 		let rslt = await this.mpdc.sendCommands(cmds);
 	}
 
-	async _socketRequest (msg) {
+	async #socketRequest (msg) {
 		const info = await this.mpdc.sendCommand('playlistinfo').then(MPD.parseObject);
 	//	console.log('@mpd.@\n', info)
 		return info ? (info.title ? info.title : 'NYET') : '?-?-?';
 	}
 
-	_broadcastTrack () {
-		this._sendCommand('playlistinfo')
+	#broadcastTrack () {
+		this.#sendCommand('playlistinfo')
 		.then((resp) => {
 			console.log('@mpd@\n', resp);
 			const info = MPD.parseObject(resp);
 			if (info && info.title) {
-				this._broadcast({state: this.mstatus.state, track: info.title});
+				this.#broadcast({state: this.mstatus.state, track: info.title});
 			}
 		});
 	}
 
-	_broadcastState () {
-		this._broadcast({state: this.mstatus.state});
+	#broadcastState () {
+		this.#broadcast({state: this.mstatus.state});
 	}
 
-	_broadcast (msg) {
+	#broadcast (msg) {
 		this.ws.clients.forEach((client) => {
 			if (client.readyState === WebSocket.OPEN) {
 				client.send(JSON.stringify(msg));

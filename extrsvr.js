@@ -16,7 +16,6 @@ const settings = cntrlr.getSettings();
 
 const enableUrlDecoding = true;
 const documentRoot = '.';
-const playlistDir = 'playlist';
 
 // polyfills
 if (typeof btoa === 'undefined') global.btoa = (str) => Buffer.from(str, 'binary').toString('base64');
@@ -35,7 +34,7 @@ var favorites = null,
 	fileman = null,
 	ytextract = null;
 
-const queMPD = (files) => {
+const xxxqueMPD = (files) => {
 	const writeStream = fs.createWriteStream('/var/lib/mpd/playlists/ytextrsvr.m3u');
 	writeStream.on('finish', () => {
 		mympd.sendCommands(['load ytextrsvr','play'], (err, status) => {console.log(err, status)});
@@ -43,7 +42,7 @@ const queMPD = (files) => {
 
 	let fcnt = files.length - 1;
 	files.forEach((file, ix) => {
-		const readStream = fs.createReadStream(playlistDir+'/'+file);
+		const readStream = fs.createReadStream(config.playlistDir+file);
 		if (ix < fcnt) {
 			readStream.pipe(writeStream, { end: false });
 		} else {
@@ -51,28 +50,6 @@ const queMPD = (files) => {
 		}
 	});
 };
-
-const xxxplaylistList = (resp) => {
-	resp.write('<section>');
-	fs.readdir(playlistDir, (err, files) => {
-		if (err) throw err;
-		for (const file of files) {
-			resp.write('<div><label><input type="checkbox" class="plsel" name="plsels[]" value="'+file+'">'+atob(file)+'</label></div>');
-		}
-		resp.end('</section>');
-	});
-};
-
-const playlistMenu = (resp) => {
-	resp.write('<select onchange="plselchg(this)"><option value="">- New Playlist -</option>');
-	fs.readdir(playlistDir, (err, files) => {
-		if (err) throw err;
-		for (const file of files) {
-			resp.write('<option value="'+file+'">'+atob(file)+'</option>');
-		}
-		resp.end('</select>');
-	});
-}
 
 
 /* initiations for the various services */
@@ -132,7 +109,10 @@ const webYtextr = async (what, bobj, resp) => {
 
 const webLists = async (what, bobj, resp) => {
 	if (!playlists) {
-		playlists = new (require('./services/playlists/playlists'))();
+		if (!mympd) {
+			mympd = await MyMPD.init();
+		}
+		playlists = new (require('./services/playlists/playlists'))(mympd);
 	}
 	playlists.action(what, bobj, resp);
 };
@@ -214,20 +194,20 @@ const reqAction = (parms, resp) => {
 		queMPD(parms.files);
 	//	let plst = '';
 	//	for (const file of parms.files) {
-	//		plst += playlistDir+'/'+file + "\n";
+	//		plst += config.playlistDir+file + "\n";
 	//		fs.unlinkSync(fpath);
 	//	}
 		rmsg = null;
 		break;
 	case 'pldel':
 		for (const file of parms.files) {
-			fpath = playlistDir+'/'+file;
+			fpath = config.playlistDir+file;
 			fs.unlinkSync(fpath);
 		}
 		rmsg = null;
 		break;
 	case 'plvue':
-		rmsg = JSON.stringify({err:'', pl:fs.readFileSync(playlistDir+'/'+parms.file,{encoding:'utf8'})});
+		rmsg = JSON.stringify({err:'', pl:fs.readFileSync(config.playlistDir+parms.file,{encoding:'utf8'})});
 		break;
 	case 'mpd':
 		mpdCtrl(parms.what, parms.bobj??'', resp);
@@ -296,10 +276,10 @@ const serveFile = (url, response) => {
 		return;
 	}
 
-	if (contentType.indexOf('mp4')>0) {
-		ytextract.sendExtraction('video.mp4');
-		return;
-	}
+//	if (contentType.indexOf('mp4')>0) {
+//		ytextract.sendExtraction('video.mp4');
+//		return;
+//	}
 
 	if (extname == '.php') {
 		runScript(filePath, url, response);
@@ -413,7 +393,7 @@ http.createServer(function (request, response) {
 	}
 	if (url.startsWith('/?plmn')) {
 		response.writeHead(200, {'Content-Type': 'text/plain'});
-		playlistMenu(response);
+		playlists.playlistMenu(response);
 		//response.end(playlistMenu());
 		return;
 	}

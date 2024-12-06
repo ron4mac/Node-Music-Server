@@ -40,8 +40,8 @@
 				<span class="curstrm"></span> :: <span class="curtrk"></span>
 				<i class="fa fa-heart" aria-hidden="true" onclick="Favorites.add()"></i>
 			</div>
-			<div id="localAudio">
-				<audio id ="localaudio" controls>Your browser does not support the audio element.</audio>
+			<div id="localAudio" onclick="laudioAction(event)">
+				<!-- <audio id ="localaudio" controls>Your browser does not support the audio element.</audio> -->
 				<span class="curstrm"></span>
 				<i class="fa fa-heart" aria-hidden="true" onclick="Favorites.add()"></i>
 			</div>
@@ -77,21 +77,19 @@
 		<button onclick="YTx.extractSelected(this)">Extract Stream</button>
 	</div>
 	<div class="dlogs">
-		<div id="plmnu" class="modl">
-			<h4>Playlist select:</h4>
-			<div></div>
-			<input type="text" placeholder="playlist name" spellcheck="false" autocomplete="off">
-			<hr>
-			<button onclick="doMenu('faddl', event)">Submit</button>
-			<button onclick="modal(this.parentElement, false)">Cancel</button>
-			<i class="fa fa-spinner fa-pulse fa-lg left"></i>
-		</div>
 		<div id="utldlg" class="modl">
 			<div></div>
 			<hr>
 			<button onclick="modal(this.parentElement, false)">Close</button>
 		</div>
 	</div>
+	<template id="local-audio">
+		<span>
+		<i class="fa fa-arrow-circle-left" step="prev"></i>
+		<audio controls>Your browser does not support the audio element.</audio>
+		<i class="fa fa-arrow-circle-right" step="next"></i>
+		</span>
+	</template>
 	<iframe id="dnldf" style="display:none"></iframe>
 	<script>
 	var xtrLocal='XTRLOCALV';

@@ -4,15 +4,13 @@ const https = require('https');
 const http = require('http');
 const fs = require('fs');
 
-//const mime = require('mime-lite');
-
 const settingsFile = 'settings.json';
 
 class Controller {
 
 	constructor () {
 		this.config = config;
-		this.settings = this._readSettings();
+		this.settings = this.#readSettings();
 //		this.currentPlaying = null;
 	}
 
@@ -26,19 +24,19 @@ class Controller {
 
 	setSettings (values) {
 		Object.assign(this.settings, values);
-		this._saveSettings();
+		this.#saveSettings();
 	}
 
 	deleteSetting (which) {
 		delete this.settings[which];
-		this._saveSettings();
+		this.#saveSettings();
 	}
 
 	deleteSettings (which) {
 		for (const w of which) {
 			delete this.settings[w];
 		}
-		this._saveSettings();
+		this.#saveSettings();
 	}
 
 	// read a file (sync) or return default data
@@ -67,7 +65,7 @@ class Controller {
 
 	/* PRIVATE METHODS */
 
-	_readSettings () {
+	#readSettings () {
 		try {
 			return JSON.parse(fs.readFileSync(settingsFile,{encoding:'utf8'}));
 		} catch (err) {
@@ -75,7 +73,7 @@ class Controller {
 			return {};
 		}
 	}
-	_saveSettings () {
+	#saveSettings () {
 		fs.writeFileSync(settingsFile, JSON.stringify(this.settings, null, "\t"));
 	}
 }
