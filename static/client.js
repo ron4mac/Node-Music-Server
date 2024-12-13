@@ -8,6 +8,7 @@ var _pp = 0,
 	currentStream = '',
 	laudioctl = null,
 	laudioelm = null,
+	laudiosvu = '',
 	nowPlaying = {};
 
 
@@ -87,37 +88,25 @@ const displayCurrentTrack = (what) => {
 };
 
 // LOCAL AUDIO
-const showLocalAudio = (yn) => {
-	//const acts = yn ? {mpdcontrols:'none',localAudio:'block'} : {localAudio:'none',mpdcontrols:'block'};
-	//for (const [k, v] of Object.entries(acts)) {
-	//	document.getElementById(k).style.display = v;
-	//}
+const showLocalAudio = (svc, pn=false) => {
 	if (laudioctl) laudioctl.remove();
 	laudioelm = null;
 	const ladiv = document.getElementById('localAudio');
 	const laudt = document.getElementById('local-audio').content.cloneNode(true);
 	ladiv.prepend(laudt);
 	laudioctl = ladiv.children[0];
+	if (pn) laudioctl.className = '';
 	laudioelm = ladiv.querySelector('audio');
 	ladiv.style.display = 'block';
-	return;
-
-
-
-	laudioelm = document.createElement('AUDIO');
-	laudioelm.innerHTML = 'Your browser does not support the audio element.';
-	laudioelm.setAttribute('controls','');
-	ladiv.prepend(laudioelm);
-	laudioelm.insertAdjacentHTML('beforebegin','<i class="fa fa-arrow-circle-left" step="prev"></i>');
-	laudioelm.insertAdjacentHTML('afterend','<i class="fa fa-arrow-circle-right" step="next"></i>');
-	ladiv.style.display = 'block';
+	laudiosvu = svc;
 };
 const laudioAction = (evt) => {
-	console.log(evt);
+	//console.log(evt);
 	const telm = evt.target;
 	if (telm.nodeName=='I' && telm.hasAttribute('step')) {
-		console.log(telm.getAttribute('step'));
-		document.dispatchEvent(new CustomEvent('laudact', {bubbles: true, detail: telm.getAttribute('step')}));
+		//console.log(telm.getAttribute('step'));
+		document.dispatchEvent(new CustomEvent(laudiosvu+'-laudact', {bubbles: true, detail: telm.getAttribute('step')}));
+		//console.log(laudiosvu+'-laudact');
 	}
 }
 
@@ -127,6 +116,7 @@ var services = {
 	ti: {seen:false, id:'tunein',		cb:(evt)=>Tunein.get()},
 	cr: {seen:false, id:'calmradio',	cb:(evt)=>Calm.get()},
 	pd: {seen:false, id:'pandora',		cb:(evt)=>Pand.get()},
+	sp: {seen:false, id:'spotifyTab',		cb:(evt)=>Spot.get()},
 	fm: {seen:false, id:'filemanTab',	cb:(evt)=>Fileman.getDirList(curDir)},
 	yt: {seen:false, id:'ytextract',	cb:null},
 	pl: {seen:false, id:'plstsTab',		cb:(evt)=>Playlists.get()}
@@ -208,6 +198,7 @@ const assureService = async (what) => {
 /* working with MPD */
 // MPD direct
 const mpdCmd = (cmd) => {
+	document.dispatchEvent(new CustomEvent('playctl', {bubbles: true, detail: cmd}));
 	const parms = {act:'mpd', what: 'cmd', bobj: cmd};
 	postAction(null, parms, (data) => {
 		if (data) alert(data);
@@ -326,6 +317,25 @@ const modal = (dlg, oc) => {
 		dlg.style.display = 'none';
 		dlg.parentElement.style.display = 'none';
 	}
+}
+
+
+const getFormValues = (frm) => {
+	const formData = new FormData(frm);
+	let values = {};
+	for (const [key, value] of formData.entries()) {
+		if (values[key]) {
+			if (Array.isArray(values[key])) {
+				values[key].push(value);
+			} else {
+				values[key] = [values[key],value];
+			}
+		} else {
+			values[key] = value;
+		}
+	}
+	console.log(values);
+	return values;
 }
 
 const toFormData = (obj) => {

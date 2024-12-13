@@ -1,0 +1,49 @@
+<script src="services/spotify/script.js"></script>
+<style>
+#spotify h4 {margin:0;padding:0}
+#spotify .sheader {
+	display: flex;
+	justify-content: space-between;
+	background-color: gold;
+	margin: 0 -8px;
+	padding: 2px 8px;
+}
+#spotsearch form {font-size: large;}
+#spotsearch .srchtyps {display: grid;grid-template-columns:auto auto auto;}
+#spotsearch .btns {flex-direction: row-reverse;}
+#spotsearch button {font-size: medium;}
+</style>
+<div class="service">
+	<div class="service-l">
+		<div id="spotcrumbs" noonclick="spotBack(event)"><a href="#" data-bobj="">Home</a></div>
+	</div>
+	<div class="service-r">
+		<i class="fa fa-user" onclick="Spot.user()"></i>
+		<i class="fa fa-search" onclick="Spot.search()"></i>
+	</div>
+</div>
+<div id="spot_user" class="hidden"></div>
+<div class="spot-nav">
+	<a href="#browse" onclick="Spot.nav(event,'browse.')">Browse</a>
+	<a href="#mylists" onclick="Spot.nav(event,'mylists.')">My Playlists</a>
+</div>
+<div id="spotify" onclick="Spot.nav(event)"></div>
+<dialog id="spot-search">
+<div class="closex" onclick="this.parentElement.close()">
+	<i class="fa fa-times" aria-hidden="true"></i>
+</div>
+<h3>Search Spotify</h3>
+<form action="#" id="spotsearch" method="post" onsubmit="return false">
+	<div><span>Search for: </span><input type="text" name="sterm" value="Angelina Jordan" spellcheck="false" autocomplete="off" required></div>
+	<div class="srchtyps">
+	<label><input type="checkbox" name="types[]" value="album">Albums</label>
+	<label><input type="checkbox" name="types[]" value="artist" disabled>Artists</label>
+	<label><input type="checkbox" name="types[]" value="playlist">Playlists</label>
+	<label><input type="checkbox" name="types[]" value="track">Tracks</label>
+	<label><input type="checkbox" name="types[]" value="show" disabled>Shows</label>
+	<label><input type="checkbox" name="types[]" value="episode" disabled>Episodes</label>
+	<label><input type="checkbox" name="types[]" value="audiobook" disabled>Audiobooks</label>
+	</div>
+	<div class="btns"><button type="submit" name="what" value="search" onclick="Spot.doSearch(event)">Search</button></div>
+</form>
+</dialog>

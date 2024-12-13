@@ -9,10 +9,9 @@
 		postAction(sr, parms, (data) => {
 			displayCurrent(currentStream);
 			if (data) {
-				showLocalAudio(true);
-				const laudio = document.getElementById('localaudio');
-				laudio.src = data;
-				laudio.play();
+				showLocalAudio('ti');
+				laudioelm.src = data;
+				laudioelm.play();
 			}
 		}, 1);
 	}

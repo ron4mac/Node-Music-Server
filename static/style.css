@@ -140,6 +140,9 @@ form i.fa {
 #localAudio i {
 	vertical-align: middle;
 }
+#localAudio .noprevnext {
+	color: #CCC;;
+}
 i.lplay {
 	font-size: large;
 	vertical-align: middle;

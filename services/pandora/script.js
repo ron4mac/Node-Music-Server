@@ -24,10 +24,9 @@
 		postAction(sr, parms, (data) => {
 			displayCurrent(currentStream);
 			if (data) {
-				showLocalAudio(true);
-				const laudio = document.getElementById('localaudio');
-				laudio.src = data;
-				laudio.play();
+				showLocalAudio('pd',true);
+				laudioelm.src = data;
+				laudioelm.play();
 			}
 		}, 1);
 	};
@@ -70,16 +69,15 @@
 		postAction(sr, parms, (data) => {
 			if (data) {
 				showTrackArt(data, false);
-				showLocalAudio(true);
-				const laudio = document.getElementById('localaudio');
-				if (!hasael) {
-					laudio.addEventListener('ended', (evt) => {
-						nextLocal(sid,chnam,laudio);
+				showLocalAudio('pd',true);
+			//	if (!hasael) {
+					laudioelm.addEventListener('ended', (evt) => {
+						nextLocal(sid,chnam,laudioelm);
 					});
-					hasael = true;
-				}
-				laudio.src = data.audioUrl;
-				laudio.play();
+			//		hasael = true;
+			//	}
+				laudioelm.src = data.audioUrl;
+				laudioelm.play();
 			}
 		}, 2);
 		nowPlaying = {name: currentStream, what:'Pand', how: 'lplay', url: bobj};

@@ -30,6 +30,7 @@ var favorites = null,
 	tunein = null,
 	calmradio = null,
 	pandora = null,
+	spotify = null,
 	playlists = null,
 	fileman = null,
 	ytextract = null;
@@ -93,6 +94,16 @@ const webPandora = async (what, bobj, resp) => {
 	pandora.action(what, bobj, resp);
 };
 
+const webSpotify = async (what, bobj, resp) => {
+	if (!spotify) {
+		if (!mympd) {
+			mympd = await MyMPD.init();
+		}
+		spotify = await (require('./services/spotify/spotify')).init(mympd, settings);
+	}
+	spotify.action(what, bobj, resp);
+};
+
 const webFileman = async (what, bobj, resp) => {
 	if (!fileman) {
 		fileman = new (require('./services/fileman/fileman'))();
@@ -124,6 +135,7 @@ const f_commands = {
 	ti: webRadio,
 	cr: webCalm,
 	pd: webPandora,
+	sp: webSpotify,
 	fm: webFileman,
 	yt: webYtextr,
 	pl: webLists
@@ -381,6 +393,12 @@ http.createServer(function (request, response) {
 		return;
 	}
 
+	if (url.startsWith('/_')) {
+		const [upth,qry] = url.split('?');
+		const [svc,act] = upth.substring(2).split('.');
+		g_router({_:svc, act:act, qry:parse(qry)}, response);
+		return;
+	}
 	if (url.startsWith('/?_')) {
 		g_router(parse(url.substring(2)), response);
 		return;

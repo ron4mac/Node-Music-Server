@@ -75,9 +75,9 @@ module.exports = class Pandora {
 		case 'user':
 			const file = this.client.authData ? 'user.html' : 'login.html';
 			let htm = cntrlr.readFile('services/pandora/'+file+'', 'FAILED TO READ')
-				.replace('%%UN%%',this.client.authData.username)
-				.replace('%%TA%%',this.client.authData.timeoutMinutes)
-				.replace('%%TR%%',this.client.authData.timeoutMinutes - this._remainingMinutes());
+				.replace('%%UN%%',this.client.authData?.username)
+				.replace('%%TA%%',this.client.authData?.timeoutMinutes)
+				.replace('%%TR%%',this.client.authData?.timeoutMinutes - this._remainingMinutes());
 			resp.end(htm);
 			break;
 		case 'load':
@@ -352,7 +352,7 @@ module.exports = class Pandora {
 	}
 
 	_remainingMinutes () {
-		return (Date.now()-this.client.authData.startTime)/60000|0;
+		return (Date.now()-this.client.authData?.startTime)/60000|0;
 	}
 
 	_login (client, user, pass) {
