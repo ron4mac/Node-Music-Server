@@ -11,6 +11,8 @@ module.exports = class Spotify {
 	constructor (client, mympd) {
 		this.mpdc = mympd;
 		this.client = client;
+		this.client.setClientId(cntrlr.getSetting('spotify_ClientId', null));
+		this.client.setClientSecret(cntrlr.getSetting('spotify_ClientSecret', null));
 		this.client.setAccessToken(cntrlr.getSetting('spotify_token', null));
 		this.client.setRefreshToken(cntrlr.getSetting('spotify_refresh', null));
 		this.client.setRedirectURI('http://pifourb.local:6680/_sp.callback');
