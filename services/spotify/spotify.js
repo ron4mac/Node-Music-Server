@@ -13,8 +13,6 @@ module.exports = class Spotify {
 		this.client = client;
 		this.client.setAccessToken(cntrlr.getSetting('spotify_token', null));
 		this.client.setRefreshToken(cntrlr.getSetting('spotify_refresh', null));
-		this.client.setClientId('468b4a8370ad44be8c7dfcf19ca55233');
-		this.client.setClientSecret('f5a5063ac9b8403ea8f00f6f798c9634');
 		this.client.setRedirectURI('http://pifourb.local:6680/_sp.callback');
 		this.expiration = Date.now();
 	}
