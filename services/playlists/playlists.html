@@ -1,0 +1,17 @@
+<script src="services/playlists/script.js"></script>
+<nav class="plmnu">
+	<ul>
+		<li><a href="#" data-menu="plply">Play</a></li>
+		<li><a href="#" data-menu="pldel">Delete</a></li>
+		<li><a href="#" data-menu="plvue">View</a></li>
+	</ul>
+</nav>
+<div id="playlists"></div>
+<script>
+document.querySelectorAll('.plmnu a').forEach(elm => {
+	elm.addEventListener('click', (evt) => {
+		evt.preventDefault();	console.log(evt);
+		Playlists.menu(evt.target.closest('[data-menu]').dataset.menu, evt);
+	});
+});
+</script>
