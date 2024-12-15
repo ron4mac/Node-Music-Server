@@ -11,7 +11,7 @@ class Controller {
 	constructor () {
 		this.config = config;
 		this.settings = this.#readSettings();
-//		this.currentPlaying = null;
+		this.errors = [];
 	}
 
 	getSettings () {

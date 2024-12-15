@@ -12,7 +12,7 @@
 <!-- <script src="static/upload.js"></script> -->
 <script src="config" type="text/javascript"></script>
 </head>
-<body>
+<body>%%ERRORS%%
 	<div class="content">
 		<!-- Tab links -->
 		<div class="tab">
@@ -101,28 +101,8 @@
 	<script>
 	var xtrLocal='XTRLOCALV';
 	_fm = document.getElementById('fileman');
-	// setup fm menu
-//	document.querySelectorAll('.fmenu a').forEach(elm => {
-//		elm.addEventListener('click', (evt) => {
-//			evt.preventDefault();	console.log(evt);
-//			Fileman.menu(evt.target.closest('[data-menu]').dataset.menu, evt);
-//		});
-//	});
-	// setup playlist menu
-//	document.querySelectorAll('.plmnu a').forEach(elm => {
-//		elm.addEventListener('click', (evt) => {
-//			evt.preventDefault();	console.log(evt);
-//			doPlMenu(evt.target.dataset.menu || evt.target.parentElement.dataset.menu, evt);
-//		});
-//	});
 	// Show the default tab
 	document.getElementById('defaultOpen').click();
-//	console.log(document.forms.sglform.wtrk);
-//	document.forms.sglform.wtrk.forEach(rb=>rb.addEventListener('change',
-//	(evt)=>{
-//		if (evt.target.value=='s') alert('SPECIFIC');
-//	}
-//	));
 	// open the MPD socket
 	mpdSocket();
 	</script>

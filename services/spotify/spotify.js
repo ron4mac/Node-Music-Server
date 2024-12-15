@@ -4,7 +4,13 @@ const https = require('https');
 const qs = require('querystring');
 const SpotifyWebApi = require('./spotify-web-api/server');
 
-//const fs = require('fs');
+const auth_perms = [
+	'user-read-private',
+	'user-read-email',
+	'streaming',
+	'user-read-playback-state',
+	'user-modify-playback-state'
+];
 
 module.exports = class Spotify {
 
@@ -13,9 +19,9 @@ module.exports = class Spotify {
 		this.client = client;
 		this.client.setClientId(cntrlr.getSetting('spotify_ClientId', null));
 		this.client.setClientSecret(cntrlr.getSetting('spotify_ClientSecret', null));
+		this.client.setRedirectURI(cntrlr.getSetting('spotify_RedirectURI', null));
 		this.client.setAccessToken(cntrlr.getSetting('spotify_token', null));
 		this.client.setRefreshToken(cntrlr.getSetting('spotify_refresh', null));
-		this.client.setRedirectURI('http://pifourb.local:6680/_sp.callback');
 		this.expiration = Date.now();
 	}
 
@@ -121,23 +127,30 @@ module.exports = class Spotify {
 			resp.end();
 			break;
 		case 'user':
-			const perms = [
-				'user-read-private',
-				'user-read-email',
-				'streaming',
-				'user-read-playback-state',
-				'user-modify-playback-state'
-			];
-			const rdir = this.client.createAuthorizeURL(perms, Date.now().toString(16), true);
-			//console.log('RDIR',rdir);
-			//resp.writeHead(302,  {Location: rdir});
-			//resp.end(`<script>window.location="${rdir}"</script>`);
+			if (!cntrlr.getSetting('spotify_auth', '')) {
+				const htm = cntrlr.readFile('services/spotify/client.html', 'FAILED TO READ')
+				.replace('%%ID%%',cntrlr.getSetting('spotify_ClientId', ''))
+				.replace('%%SC%%',cntrlr.getSetting('spotify_ClientSecret', ''))
+				.replace('%%RD%%',cntrlr.getSetting('spotify_RedirectURI', ''));
+				resp.write(htm);
+				resp.end();
+				break;
+			}
+			const rdir = this.client.createAuthorizeURL(auth_perms, Date.now().toString(16), true);
 			resp.end(rdir);
 			break;
-			const htm = cntrlr.readFile('services/spotify/login.html', 'FAILED TO READ')
-			.replace('%%authurl%%',rdir);
-			resp.write(htm);
-			resp.end();
+		case 'creds':
+			console.log(bobj);
+			this.client.setClientId(bobj.id);
+			this.client.setClientSecret(bobj.secret);
+			this.client.setRedirectURI(bobj.rdir);
+			cntrlr.setSettings({
+				spotify_ClientId: bobj.id,
+				spotify_ClientSecret: bobj.secret,
+				spotify_RedirectURI: bobj.rdir
+			});
+			const redir = this.client.createAuthorizeURL(auth_perms, Date.now().toString(16), true);
+			resp.end(redir);
 			break;
 		case 'login':
 			this.#login(this.client, bobj.user, bobj.pass)
@@ -185,7 +198,6 @@ module.exports = class Spotify {
 		case 'callback':
 			//console.log(bobj);
 			const code = bobj.qry.code;
-		//	cntrlr.setSettings({spotify_auth: code});
 			this.client.authorizationCodeGrant(code)
 			.then((prms)=>{
 				//console.log('WTF',prms);

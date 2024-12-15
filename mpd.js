@@ -47,9 +47,15 @@ module.exports = class MyMPD {
 	static async init () {
 		let mop = mpdConnOpts;
 		//mop = {port:6600, host: 'localhost'};
-		const mpdc = await MPD.connect(mop);
-		const status = await mpdc.sendCommand('status').then(MPD.parseObject);
-		return new MyMPD(mpdc,status,true);
+		try {
+			const mpdc = await MPD.connect(mop);
+			const status = await mpdc.sendCommand('status').then(MPD.parseObject);
+			return new MyMPD(mpdc,status,true);
+		} catch (err) {
+			console.error(err);
+			cntrlr.errors.push('Could not connect to MPD daemon');
+			return {};
+		}
 	}
 
 	async getVolume () {

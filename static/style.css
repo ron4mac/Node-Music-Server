@@ -19,6 +19,15 @@ body {
 	color: coral;
 	font-size: large;
 }
+.errors {
+	background-color: coral;
+	color: yellow;
+	font-size: large;
+}
+.errors p {
+	margin: 0;
+	padding: .5rem 1rem;
+}
 
 /* navigation */
 nav ul {
@@ -66,10 +75,12 @@ dialog .closex i {
 dialog h3 {margin-top:0}
 dialog .btns {
 	display: flex;
+	flex-direction: row-reverse;
 	justify-content: space-between;
 	gap: .5rem;
 	margin-top: 1rem;
 }
+dialog .btns button {font-size: large;}
 
 /*===========*/
 input, label, span {

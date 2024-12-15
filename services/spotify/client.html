@@ -1,0 +1,21 @@
+<style>
+#spot-creds h4 {margin-top:0; margin-bottom:.5rem;}
+.ffields {display:grid; grid-template-columns:auto auto; row-gap:.4rem}
+.ffields label {text-align:right;margin-right:.5rem}
+.ffields input {width:26rem}
+</style>
+<dialog  id="spot-creds">
+<div class="closex" onclick="this.parentElement.close()"><i class="fa fa-times"></i></div>
+<h4>Spotify Client Credentials</h4>
+<span>Needed before a user can be authenticated for music play ...</span>
+<form class="spotclient" onsubmit="return false">
+	<div class="ffields">
+		<label>Client Id</label><input type="text" name="clientId" value="%%ID%%" required>
+		<label>Client Secret</label><input type="password" name="clientSecret" value="%%SC%%" required>
+		<label>Redirect URI</label><input type="text" name="redirect" value="%%RD%%" required>
+	</div>
+	<div class="btns">
+		<button type="submit" onclick="Spot.creds(event,this)">Submit</button>
+	</div>
+</form>
+</dialog>

@@ -6,7 +6,6 @@ const process = require('process');
 const {parse} = require('querystring');
 const fs = require('fs');
 const path = require('path');
-//const ytdl = require('@distube/ytdl-core');
 const MyMPD = require('./mpd.js');
 
 const hostname = process.env.NODE_WEB_HOST || '0.0.0.0';
@@ -34,23 +33,6 @@ var favorites = null,
 	playlists = null,
 	fileman = null,
 	ytextract = null;
-
-const xxxqueMPD = (files) => {
-	const writeStream = fs.createWriteStream('/var/lib/mpd/playlists/ytextrsvr.m3u');
-	writeStream.on('finish', () => {
-		mympd.sendCommands(['load ytextrsvr','play'], (err, status) => {console.log(err, status)});
-	});
-
-	let fcnt = files.length - 1;
-	files.forEach((file, ix) => {
-		const readStream = fs.createReadStream(config.playlistDir+file);
-		if (ix < fcnt) {
-			readStream.pipe(writeStream, { end: false });
-		} else {
-			readStream.pipe(writeStream);
-		}
-	});
-};
 
 
 /* initiations for the various services */
@@ -313,13 +295,22 @@ const serveFile = (url, response) => {
 				});
 			}
 			else if (error.code === 'EISDIR' && fs.existsSync(filePath+'/index.html')) {
-				fs.readFile(filePath+'/index.html', function(error, content) {
+				fs.readFile(filePath+'/index.html', 'utf8', function(error, content) {
 					if (error) { console.error(error); }
 					else {
+						let errs = '';
+						if (cntrlr.errors) {
+							errs += '<div class="errors">';
+							cntrlr.errors.forEach((e)=>{
+								errs += '<p>'+e+'</p>';
+							});
+							errs += '</div>'
+						}
+						content = content.replace('%%ERRORS%%', errs);
 						response.setHeader('Cache-Control', ['no-cache','no-store','must-revalidate']);
 						response.setHeader('Pragma', 'no-cache');
 						response.writeHead(200, { 'Content-Type':'text/html' });
-						response.end(content, 'utf-8');
+						response.end(content);
 						// log served page
 						console.log('[Info] Served:', url);
 					}

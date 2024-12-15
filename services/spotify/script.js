@@ -100,23 +100,29 @@
 	Spot.user = () => {
 		const parms = {what: 'user'};
 		postAction(sr, parms, (data) => {
-		window.location = data;
-			//let elm = document.getElementById('spot_user');
-			//elm.innerHTML = data;
-			//document.getElementById('spot-user-dialog').showModal();
+		if (data.startsWith('http')) {
+			window.location = data;
+		} else {
+			let elm = document.getElementById('spot_user');
+			elm.innerHTML = data;
+			document.getElementById('spot-creds').showModal();
+		}
 		}, 1);
 	};
 
-	Spot.login = (evt,elm) => {
+	Spot.creds = (evt,elm) => {
 		console.log(evt);
 		let frm = evt.target.form;
-		const parms = {what: 'login', bobj:{user:frm.user.value, pass:frm.pass.value}};
+		const parms = {what: 'creds', bobj:{id:frm.clientId.value, secret:frm.clientSecret.value, rdir:frm.redirect.value}};
 		postAction(sr, parms, (data) => {
-			if (data) {
-				alert(data);
+			if (data.startsWith('http')) {
+				window.location = data;
 			} else {
-				elm.closest('dialog').close();
-				Spot.get();
+				if (data) {
+					alert(data);
+				} else {
+					frm.closest('dialog').close();
+				}
 			}
 		}, 1);
 	};
