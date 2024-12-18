@@ -243,16 +243,17 @@ i.lplay {
 	cursor: pointer;
 }
 #mpdvolume {
-	height: 4px;
-	width: 80px;
+	height: 5px;
+	width: 100px;
 	vertical-align: middle;
 }
 .volume-control {
 	display: inline-block;
-	float: right;
+/*	float: right;*/
 }
 .volume-control i {
 	margin-right: 0;
+	vertical-align: middle;
 }
 
 /* Marquis of current stream and track*/
@@ -265,6 +266,7 @@ i.lplay {
 	color: maroon;
 	font-size: larger;
 	vertical-align: middle;
+	margin-left: .5rem;
 }
 
 /* Service bar */

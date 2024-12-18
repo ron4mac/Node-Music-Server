@@ -33,6 +33,16 @@
 		});
 	};
 
+	const add2Playlist = () => {
+		const parms = {what: 'plmn'};
+		postAction('pl', parms, (data) => {
+			document.querySelector('#plmnu i').style.display = 'none';
+			let dlg = document.getElementById('plmnu');
+			dlg.querySelector('div').innerHTML = data;
+			modal(dlg, true);
+		}, true);
+	};
+
 	const postAndRefresh = (parms, json=false) => {
 		postAction(sr, parms, (data) => { if (data) alert(data); else getDirList(curDir) }, json);
 	};
@@ -137,8 +147,9 @@
 			break;
 		case 'plmnu':
 			if (!hasSome()) break;
-			assureService('Playlists')
-			.then(()=>add2Playlist());
+			//assureService('Playlists')
+			//.then(()=>add2Playlist());
+			add2Playlist();
 			break;
 		case 'faddl':
 			console.log(evt);
@@ -198,9 +209,6 @@
 				}, true);
 		}
 	}
-
-
-
 
 
 })(window.Fileman = window.Fileman || {});

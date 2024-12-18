@@ -1,20 +1,22 @@
 'use strict';
 const cntrlr = require('../../controller');
-//const config = require('../../config');
 const fs = require('fs');
 const path = require('path');
-const formidable = require('formidable');	//, {errors as formidableErrors} from 'formidable';
-const formidableErrors = formidable.errors;		//require('formidable:errors');
+const formidable = require('formidable');
+const formidableErrors = formidable.errors;
 
 module.exports = class Fileman {
 
 	constructor () {
 		this.debug = true;
+		this.baseDir = cntrlr.config.baseDir;
+		if (!fs.existsSync(this.baseDir)) {
+			fs.mkdirSync(this.baseDir, {recursive:true});
+		}
 	}
 
 	action (what, parms, resp) {
 		//console.log(what,parms);
-		const baseDir = cntrlr.config.baseDir;
 		let rmsg = 'NOT YET IMPLEMENTED';
 		let pbase, fpath, stats;
 		switch (what) {
@@ -23,7 +25,7 @@ module.exports = class Fileman {
 				rmsg = 'Required ffmpeg is not present';
 				break;
 			}
-			pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
+			pbase = this.baseDir+parms.dir+(parms.dir==''?'':'/');
 			let eprms = '';
 			for (const file of parms.files) {
 				fpath = pbase+file;
@@ -42,7 +44,7 @@ module.exports = class Fileman {
 			rmsg = null;
 			break;
 		case 'fdele':
-			pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
+			pbase = this.baseDir+parms.dir+(parms.dir==''?'':'/');
 			for (const file of parms.files) {
 				fpath = pbase+file;
 				stats = fs.statSync(fpath);
@@ -59,7 +61,7 @@ module.exports = class Fileman {
 				rmsg = JSON.stringify({err: 'Multiple file download not yet implemented'});
 				break;
 			}
-			fpath = baseDir+parms.dir+parms.files[0];
+			fpath = this.baseDir+parms.dir+parms.files[0];
 			stats = fs.statSync(fpath);
 			if (stats.isDirectory()) {
 				rmsg = JSON.stringify({err: 'Multiple file (i.e. folder) download not yet implemented'});
@@ -68,25 +70,25 @@ module.exports = class Fileman {
 			rmsg = JSON.stringify({err: '', fnam: parms.files[0], f64: btoa(fpath)});
 			break;
 		case 'fmove':
-			let fdir = baseDir+parms.fdir;
-			let tdir = baseDir+parms.tdir;
+			let fdir = this.baseDir+parms.fdir;
+			let tdir = this.baseDir+parms.tdir;
 			for (const file of parms.files) {
 				fs.renameSync(fdir+file, tdir+file);
 			}
 			rmsg = null;
 			break;
 		case 'fnewf':
-			let pdir = baseDir+parms.dir;
+			let pdir = this.baseDir+parms.dir;
 			fs.mkdirSync(path.join(pdir, parms.newf));
 			rmsg = null;
 			break;
 		case 'frnam':
-			pbase = baseDir+parms.dir+(parms.dir==''?'':'/');
+			pbase = this.baseDir+parms.dir+(parms.dir==''?'':'/');
 			fs.renameSync(pbase+parms.file, pbase+parms.to);
 			rmsg = null;
 			break;
 		case 'funzp':
-			pbase  = baseDir+parms.dir+(parms.dir==''?'':'/');
+			pbase  = this.baseDir+parms.dir+(parms.dir==''?'':'/');
 			require('child_process').exec('unzip -d "'+pbase+'" "'+pbase+parms.file+'"',{},(error, stdout, stderr)=>{
 					console.log(error);
 					rmsg = error ? String(error) : null;
@@ -95,7 +97,7 @@ module.exports = class Fileman {
 			return;
 			break;
 		case 'faddl':
-			pbase = baseDir+parms.dir;
+			pbase = this.baseDir+parms.dir;
 			console.log(pbase,parms.files);
 			let plst = '';
 			for (const file of parms.files) {
@@ -116,7 +118,7 @@ module.exports = class Fileman {
 			return;
 			break;
 		case 'fview':
-			fpath = baseDir+parms.fpath;
+			fpath = this.baseDir+parms.fpath;
 	// @@@@@@@@@@
 	// could get file type here and send to client for display adjustments
 	//		stats = fs.statSync(fpath);
@@ -134,7 +136,7 @@ module.exports = class Fileman {
 			return;
 			break;
 		case 'splay':
-			fpath = baseDir+parms.fpath;
+			fpath = this.baseDir+parms.fpath;
 			rmsg = JSON.stringify({err: 'NOT YET IMPLEMENTED', f64: btoa(fpath)});
 			break;
 		case 'load':
@@ -146,9 +148,8 @@ module.exports = class Fileman {
 	}
 
 	getDirList (dir, resp) {
-		const baseDir = cntrlr.config.baseDir;
 		const idtf = new Intl.DateTimeFormat('en-US',{year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hour12:false,timeZoneName:'short'});
-		fs.readdir(baseDir+dir, {withFileTypes: true}, (err, files) => {
+		fs.readdir(this.baseDir+dir, {withFileTypes: true}, (err, files) => {
 			if (err) throw err;
 			let rows = ['<thead><td></td><th>Name</th><th>Size </th><th> Date</th></thead>'];
 			let pdir = dir == '' ? dir : (dir+'/');
@@ -163,13 +164,13 @@ module.exports = class Fileman {
 				}
 				if (file.isSymbolicLink()) {
 					lnk = ' <i class="fa fa-arrow-right fa-fw" aria-hidden="true"></i>';
-					let lnk2 = fs.readlinkSync(baseDir+dir+'/'+file.name);
+					let lnk2 = fs.readlinkSync(this.baseDir+dir+'/'+file.name);
 				//	if (fs.statSync(lnk2).isDirectory()) {
 				//		fcl = 'isdir" data-dpath="'+lnk2;
 				//	}
 					lnk += lnk2;
 				}
-				const fstat = fs.statSync(baseDir+dir+'/'+file.name);
+				const fstat = fs.statSync(this.baseDir+dir+'/'+file.name);
 				rows.push('<td><input type="checkbox" class="fsel" name="files[]" value="'+file.name+'"></td>'
 					+'<td class="'+fcl+'">'+icn+file.name+lnk+'</td>'
 					+'<td>'+this.#formatNumber(fstat.size)+' </td>'
@@ -225,15 +226,14 @@ module.exports = class Fileman {
 	}
 
 	async receiveUpload (req, res) {
-		const baseDir = cntrlr.config.baseDir;
-		const form = new formidable.IncomingForm({uploadDir: cntrlr.config.upldTmpDir, maxFileSize: 2147483648});	// formidable({});
+		const form = new formidable.IncomingForm({uploadDir: cntrlr.config.upldTmpDir, maxFileSize: 2147483648});
 		return await form.parse(req, function(err, fields, files) {
 			if (err) {
 				console.error(err);
 				res.writeHead(err.httpCode || 400, {'Content-Type': 'text/plain'});
 				res.end(String(err));
 			} else {
-				fs.renameSync(files.upld.filepath, path.join(baseDir+fields.dir, files.upld.originalFilename));
+				fs.renameSync(files.upld.filepath, path.join(this.baseDir+fields.dir, files.upld.originalFilename));
 				res.writeHead(200, {'Content-Type': 'text/plain'});
 				res.end(JSON.stringify({ fields, files }, null, 2));
 			}

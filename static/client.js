@@ -6,6 +6,8 @@ var _pp = 0,
 	_fm,
 	curDir = '',
 	currentStream = '',
+	mpdUser = null,
+	laudioUser = null,
 	laudioctl = null,
 	laudioelm = null,
 	laudiosvu = '',
@@ -43,30 +45,13 @@ const openTab = (evt, tabName, cb) => {
 	}
 };
 
-const getPlaylists = () => {
-	fetch('?plstl', {method:'GET'})
-	.then((resp) => resp.text())
-	.then(data => {
-		console.log(data);
-		document.getElementById('playlists').innerHTML = data;
-	});
-};
-const add2Playlist = () => {
-	fetch('?plmn', {method:'GET'})
-	.then((resp) => resp.text())
-	.then(data => {
-		document.querySelector('#plmnu i').style.display = 'none';
-		let dlg = document.getElementById('plmnu');
-		dlg.querySelector('div').innerHTML = data;
-		modal(dlg, true);
-	//	RJ_DlogMgr.hoistTmpl({cselect:'#plmnu'}, {});
-	});
-};
+
 const plselchg = (sel) => {
 	let ielm = sel.closest('.modl').querySelector('input');
 	let dsp = sel.value == '' ? 'visible' : 'hidden';
 	ielm.style.visibility = dsp;
 };
+
 const srvrPlay = (fpath) => {		//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	postAction(null, {act:'splay', 'fpath':(curDir?(curDir+'/'):'')+fpath}, (data) => {
 		if (data) {
@@ -89,6 +74,47 @@ const displayCurrentTrack = (what) => {
 
 // LOCAL AUDIO
 const showLocalAudio = (svc, pn=false) => {
+	// remove any existing listener and audio element
+	document.removeEventListener('playctl', laudioEvent);
+	if (laudioelm) laudioelm.src='';
+	laudioelm = null;
+	// create the audio element
+	laudioelm = document.createElement('audio');
+	// set its volume to reflect the last value
+	const v100 = window.localStorage.getItem('nms_lclvol') || 50;
+	laudioelm.volume = v100/100;
+	document.getElementById('mpdvolume').value = v100;
+	// listen for player controls
+	document.addEventListener('playctl', laudioEvent);
+	
+};
+const laudioEvent = (evt) => {
+console.log(evt);
+	const [what, val] = evt.detail.split(' ', 2);
+	switch(what) {
+	case 'vset':
+		laudioelm.volume = val/100;
+		window.localStorage.setItem('nms_lclvol', val);
+		break;
+	case 'bump':
+		let nuv = laudioelm.volume + val/100;
+		nuv = val<0 ? Math.max(nuv,0) : Math.min(nuv,1);
+		laudioelm.volume = nuv;
+		window.localStorage.setItem('nms_lclvol', Math.round(nuv*100));
+		break;
+	case 'pause':
+		if (val==1) laudioelm.pause();
+		else laudioelm.play();
+		break;
+	case 'stop':
+		laudioelm.src='';
+		document.removeEventListener('playctl', laudioEvent);
+		laudioelm = null;
+		break;
+	}
+}
+
+const __showLocalAudio = (svc, pn=false) => {
 	if (laudioctl) laudioctl.remove();
 	laudioelm = null;
 	const ladiv = document.getElementById('localAudio');
@@ -193,8 +219,6 @@ const assureService = async (what) => {
 }
 
 
-
-
 /* working with MPD */
 // MPD direct
 const mpdCmd = (cmd) => {
@@ -230,12 +254,14 @@ const setVolSlider = () => {
 	}, 1);
 }
 const chgVolume = (elm) => {
+	document.dispatchEvent(new CustomEvent('playctl', {bubbles: true, detail: 'vset '+elm.value}));
 	const parms = {act:'mpd',what:'setVolume',bobj:elm.value};
 	postAction(null, parms, (data) => {
 		if (data) alert(data);
 	}, 1);
 }
 const bmpVolume = (amt) => {
+	document.dispatchEvent(new CustomEvent('playctl', {bubbles: true, detail: 'bump '+amt}));
 	const parms = {act:'mpd',what:'bumpVolume',bobj:amt};
 	postAction(null, parms, (data) => {
 		document.getElementById('mpdvolume').value = data;
@@ -262,51 +288,6 @@ const mpdSocket = () => {
 		}
 	});
 }
-
-
-const xxxdoPlMenu = (actn, evt) => {
-	console.log(actn);
-	const slctd = document.querySelectorAll('.plsel:checked'),
-		scnt = slctd.length,
-		oneItem = () => { if (!scnt) { alert('An item needs to be selected'); } else if (scnt>1) { alert('Please select only one item.'); } else { return true; } return false; },
-		hasSome = () => { if (scnt) { return true; } alert('Some items need to be selected'); return false; };
-	switch (actn) {
-	case 'pldel':
-		if (hasSome() && ((scnt==1) || confirm('You have multiple playlists selected. Are you sure you want to delete ALL the selected playlists?'))) {
-			const files = Array.from(slctd).map(el => el.value);
-			console.log(files);
-			postAndRefreshPL({act:'pldel','files':files}, 1);
-		}
-		break;
-	case 'plply':
-		if (hasSome()) {
-			const files = Array.from(slctd).map(el => el.value);
-			console.log(files);
-			//postAndRefreshPL({act:'plply','files':files}, 1);
-			document.addEventListener('mpdchg', (e) => console.log('mpdchg',e.detail));
-			const parms = {act:'plply',files:files};
-			postAction(null, parms, (data) => {
-				if (data) alert(data);
-				slctd.forEach((cb)=>{cb.checked=false});
-				let plnam = files.length>1 ? '[ multiple ]' : atob(files[0]);
-				displayCurrent('Playlist: '+plnam);
-			}, 1);
-		}
-		break;
-	case 'plvue':
-		if (oneItem()) {
-			const files = Array.from(slctd).map(el => el.value);
-			console.log(files);
-			const parms = {act:'plvue', file: files[0]};
-			postAction(null, parms, (data) => {
-				let dlg = document.getElementById('utldlg');
-				dlg.querySelector('div').innerHTML = data.pl.replace(/\n/gm, '<br>');
-				modal(dlg,true);
-			}, 2);
-		}
-		break;
-	}
-};
 
 
 const modal = (dlg, oc) => {
@@ -367,8 +348,4 @@ const postAction = (tos, parms={}, cb=()=>{}, json=false) => {
 	.then(data => cb(data))
 	.catch(err => alert(err));
 };
-
-//const postAndRefreshPL = (parms, json=false) => {
-//	postAction(null, parms, (data) => { if (data) alert(data); else getPlaylists() }, json);
-//};
 

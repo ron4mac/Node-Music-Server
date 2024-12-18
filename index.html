@@ -34,15 +34,16 @@
 				<i class="fa fa-arrow-right" onclick="mpdCmd('next')"></i>
 				<i class="fa fa-random" onclick="mpdCmd('shuffle')"></i>
 				<i class="fa fa-bug" onclick="mpdCmdBug()"></i>
+				<span class="curstrm"></span>
+				<i class="fa fa-heart" onclick="Favorites.add()"></i>
+			</div>
+			<div id="marquis" class="marquis">
 				<div class="volume-control">
 				<i class="fa fa-volume-down" onclick="bmpVolume('-5')"></i>
 				<input type="range" id="mpdvolume" name="mpdvolume" oninput="chgVolume(this)" min="0" max="100" step="5">
 				<i class="fa fa-volume-up" onclick="bmpVolume('+5')"></i>
 				</div>
-			</div>
-			<div id="marquis" class="marquis">
-				<span class="curstrm"></span> :: <span class="curtrk"></span>
-				<i class="fa fa-heart" onclick="Favorites.add()"></i>
+				<span class="curtrk"></span>
 			</div>
 			<div id="localAudio" onclick="laudioAction(event)">
 				<!-- <audio id ="localaudio" controls>Your browser does not support the audio element.</audio> -->

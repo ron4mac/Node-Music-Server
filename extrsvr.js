@@ -394,18 +394,6 @@ http.createServer(function (request, response) {
 		g_router(parse(url.substring(2)), response);
 		return;
 	}
-	if (url.startsWith('/?plstl')) {
-		response.writeHead(200, {'Content-Type': 'text/plain'});
-		playlistList(response);
-		//response.end(playlistMenu());
-		return;
-	}
-	if (url.startsWith('/?plmn')) {
-		response.writeHead(200, {'Content-Type': 'text/plain'});
-		playlists.playlistMenu(response);
-		//response.end(playlistMenu());
-		return;
-	}
 
 	// serve the file
 	serveFile(url, response);

@@ -164,7 +164,8 @@ module.exports = class Spotify {
 			});
 			break;
 		case 'playctl':
-			switch(bobj) {
+			const [act,val] = bobj.split('.', 2)
+			switch(act) {
 			case 'stop':
 				this.client.pause();
 				break;
@@ -172,6 +173,13 @@ module.exports = class Spotify {
 				this.client.skipToPrevious();
 				break;
 			case 'next':
+				this.client.skipToNext();
+				break;
+			case 'vset':
+				this.client.setVolume(val)
+				.then(v=>console.log('volume ',v));
+				break;
+			case 'vbmp':
 				this.client.skipToNext();
 				break;
 			}

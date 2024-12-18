@@ -19,18 +19,6 @@
 		aa.style.display = 'block';
 	};
 
-	const startPlay = (how, url) => {
-		const parms = {what: how, bobj: url};
-		postAction(sr, parms, (data) => {
-			displayCurrent(currentStream);
-			if (data) {
-				showLocalAudio('pd',true);
-				laudioelm.src = data;
-				laudioelm.play();
-			}
-		}, 1);
-	};
-
 	const nextLocal = (sid, snam, aude) => {
 		let bobj = {sid: sid, snam: snam};
 		const parms = {what: 'lplay', bobj: bobj};
@@ -54,6 +42,7 @@
 		postAction(sr, parms, (data) => {
 			//console.log('PPlay',data);
 			//displayCurrent('Pandora: '+evt.target.closest('[data-sid]').querySelector('a').innerHTML);
+			mpdUser = sr;
 		}, 1);
 		nowPlaying = {name: currentStream, what:'Pand', how: 'play', url: bobj};
 	};
@@ -69,7 +58,7 @@
 		postAction(sr, parms, (data) => {
 			if (data) {
 				showTrackArt(data, false);
-				showLocalAudio('pd',true);
+				showLocalAudio(sr, true);
 			//	if (!hasael) {
 					laudioelm.addEventListener('ended', (evt) => {
 						nextLocal(sid,chnam,laudioelm);
@@ -87,7 +76,17 @@
 		// make sure websocket is running
 		Pand.socket();
 		// play the saved favorite
-		startPlay(how, url);
+		const parms = {what: how, bobj: url};
+		postAction(sr, parms, (data) => {
+			displayCurrent(currentStream);
+			if (data) {
+				showLocalAudio(sr, true);
+				laudioelm.src = data;
+				laudioelm.play();
+			} else {
+				mpdUser = sr;
+			}
+		}, 1);
 	};
 
 	Pand.login = (evt,elm) => {

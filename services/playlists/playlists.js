@@ -62,6 +62,9 @@ module.exports = class Playlists {
 			this.mpdc.clear();
 			resp.end();
 			break;
+		case 'plmn':
+			this.#playlistMenu(resp);
+			break;
 		case 'load':
 			resp.end(cntrlr.readFile('services/playlists/playlists.html', 'FAILED TO READ'));
 			break;
@@ -71,7 +74,7 @@ module.exports = class Playlists {
 		}
 	}
 
-	playlistMenu (resp) {
+	#playlistMenu (resp) {
 		resp.write('<select onchange="plselchg(this)"><option value="">- New Playlist -</option>');
 		fs.readdir(this.playlistDir, (err, files) => {
 			if (err) {

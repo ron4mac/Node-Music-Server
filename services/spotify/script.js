@@ -5,7 +5,7 @@
 	const sr = 'sp';	// service route
 
 	document.addEventListener('playctl', (e) => {
-		console.log('playctl',e.detail);
+		console.log('playctl', e.detail);
 		const parms = {what: 'playctl', bobj: e.detail};
 		postAction(sr, parms, (data) => {
 			if (data) alert(data);
@@ -77,20 +77,8 @@
 		let how = elm.nodeName=='I' ? 'lplay' : 'play';
 		currentStream = 'Spotify: '+elmwurl.parentElement.querySelector('a').innerHTML;
 		startPlay(how, url);
-		//const parms = {act:'calm', what: how, bobj: bobj};
-		//postAction(null, parms, (data) => {
-		//	console.log(data);
-		//	displayCurrent(currentStream);
-		//	if (data) {
-		//		showLocalAudio(true);
-		//		const laudio = document.getElementById('localaudio');
-		//		laudio.src = data;
-		//		laudio.play();
-		//	}
-		//}, 1);
 		// save now playing info for favorites generation
 		nowPlaying = {name: currentStream, what:'Spot', how: how, url: url};
-
 	};
 
 	Spot.fave = (how, url) => {
