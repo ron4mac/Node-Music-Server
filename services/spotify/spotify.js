@@ -1,7 +1,7 @@
 'use strict';
 const cntrlr = require('../../controller');
-const https = require('https');
-const qs = require('querystring');
+//const https = require('https');
+//const qs = require('querystring');
 const SpotifyWebApi = require('./spotify-web-api/server');
 
 const auth_perms = [

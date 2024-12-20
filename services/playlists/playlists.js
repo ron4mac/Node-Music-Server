@@ -75,7 +75,7 @@ module.exports = class Playlists {
 	}
 
 	#playlistMenu (resp) {
-		resp.write('<select onchange="plselchg(this)"><option value="">- New Playlist -</option>');
+		resp.write('<select onchange="Playlists.plselchg(this)"><option value="">- New Playlist -</option>');
 		fs.readdir(this.playlistDir, (err, files) => {
 			if (err) {
 				if (err.code=='ENOENT') {

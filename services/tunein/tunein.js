@@ -45,10 +45,11 @@ module.exports = class TuneIn {
 			}).on('end', () => {
 				const parser = new XMLParser({ignoreAttributes: false, attributeNamePrefix: ''});
 				const jdat = parser.parse(dat);
+				console.log(jdat);
 				if (Array.isArray(jdat.opml.body.outline)) {
-					this._radioParse(jdat.opml.body.outline, resp);
-				} else {
-					this._radioParse([jdat.opml.body.outline], resp);
+					this.#radioParse(jdat.opml.body.outline, resp);
+				} else if (jdat.opml.body.outline) {
+					this.#radioParse([jdat.opml.body.outline], resp);
 				}
 				//}
 				resp.end()
@@ -65,9 +66,9 @@ module.exports = class TuneIn {
 				const parser = new XMLParser({ignoreAttributes: false, attributeNamePrefix: ''});
 				const jdat = parser.parse(dat);
 				if (Array.isArray(jdat.opml.body.outline)) {
-					this._radioParse(jdat.opml.body.outline, resp);
+					this.#radioParse(jdat.opml.body.outline, resp);
 				} else {
-					this._radioParse([jdat.opml.body.outline], resp);
+					this.#radioParse([jdat.opml.body.outline], resp);
 				}
 				//}
 				resp.end()
@@ -116,29 +117,35 @@ module.exports = class TuneIn {
 	}
 
 // @@@@@ private methods
-	_radioParse (data, resp) {
+	#radioParse (data, resp) {
+		//console.log(data);
 		if (!Array.isArray(data)) {
-		//	console.log(data);
+			//console.log(data);
 			data = data.outline;
 		}
+		//console.log(data);
 		for (let itm of data) {
 			if (itm.outline) {
 				if (Array.isArray(itm.outline)) {
-					resp.write('<div class="rheader">'+itm.text+'</div>');
-					this._radioParse(itm.outline, resp);
+					resp.write('<div class="rad-section"><div class="rheader">'+itm.text+'</div>');
+					this.#radioParse(itm.outline, resp);
+					resp.write('</div>');
 					continue;
 				} else {
 					itm = itm.outline;
 				}
 			}
-			let txt = (itm.text??'') + ' .. ' + (itm.subtext??'');
+			let txt = itm.text??'';
 			if (itm.type) {
 				switch (itm.type) {
 				case 'link':
+					//if (itm.key) console.log(itm);
+					txt += (itm.subtext ? (' - ' + itm.subtext) : '');
 					let urlsuf = itm.URL.split('/').pop();
 					let aid = itm.guide_id??itm.key;
-					resp.write('<div class="rad-link"><a href="#'+aid+'" data-url="'+btoa(urlsuf)+'">'+txt+'</a></div>');
-					if (itm.children) webRadioParse(itm.children, resp);
+					let xc = (itm.key && itm.key.startsWith('next')) ? ' next' : '';
+					resp.write('<div class="rad-link'+xc+'"><a href="#'+aid+'" data-url="'+btoa(urlsuf)+'">'+txt+'</a></div>');
+				//	if (itm.children) webRadioParse(itm.children, resp);
 					break;
 				case 'audio':
 					resp.write('<div class="rad-station" data-url="'+itm.URL+'"><img src="'+itm.image+'">');
@@ -151,7 +158,7 @@ module.exports = class TuneIn {
 				}
 			} else {
 				resp.write('<div class="chancat">'+txt+'</div>');
-				if (itm.children) webRadioParse(itm.children, resp);
+			//	if (itm.children) webRadioParse(itm.children, resp);
 			}
 		}
 	}

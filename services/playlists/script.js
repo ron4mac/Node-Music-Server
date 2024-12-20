@@ -97,6 +97,12 @@
 		}, 2);
 	}
 
+	Playlists.plselchg = (sel) => {
+		let ielm = sel.closest('.modl').querySelector('input');
+		let dsp = sel.value == '' ? 'visible' : 'hidden';
+		ielm.style.visibility = dsp;
+	};
+
 	Playlists.get = () => {
 		const parms = {what: 'home'};
 		postAction(sr, parms, (data) => {

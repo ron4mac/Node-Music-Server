@@ -32,13 +32,6 @@ const openTab = (evt, tabName, cb) => {
 };
 
 
-const plselchg = (sel) => {
-	let ielm = sel.closest('.modl').querySelector('input');
-	let dsp = sel.value == '' ? 'visible' : 'hidden';
-	ielm.style.visibility = dsp;
-};
-
-
 // UI display
 const displayCurrent = (what) => {
 	document.querySelectorAll('.curstrm').forEach((elm)=>{elm.innerHTML = what});

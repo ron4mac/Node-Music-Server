@@ -5,7 +5,6 @@
 	const sr = 'pd';	// service route
 
 	let socket = null;
-	let hasael = false;
 
 	const showTrackArt = (data, pn=true) => {
 		const aa = document.getElementById('albumart');
@@ -58,12 +57,9 @@
 			if (data) {
 				showTrackArt(data, false);
 				showLocalAudio(sr, true);
-			//	if (!hasael) {
-					laudioelm.addEventListener('ended', (evt) => {
-						nextLocal(sid,chnam,laudioelm);
-					});
-			//		hasael = true;
-			//	}
+				laudioelm.addEventListener('ended', (evt) => {
+					nextLocal(sid,chnam,laudioelm);
+				});
 				laudioelm.src = data.audioUrl;
 				laudioelm.play();
 			}

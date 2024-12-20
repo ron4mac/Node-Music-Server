@@ -21,7 +21,7 @@
 		let elm = evt.target;
 		if (!['A','I'].includes(elm.nodeName)) return;
 		let elmwurl = elm.closest('[data-url]');
-		if (elmwurl.parentElement.className=='rad-link') {
+		if (elmwurl.parentElement.classList.contains('rad-link')) {
 			Tunein.nav(evt, elm);
 			return;
 		}
@@ -60,6 +60,10 @@
 		let bobj = elm.closest('[data-url]').dataset.url;
 		const parms = {act:'radio', what: 'home', bobj: bobj};
 		postAction(sr, parms, (data) => {
+			if (!data) {
+				alert('No Returned Data');
+				return;
+			}
 			let el = document.getElementById('radio');
 			el.innerHTML = data;
 			let bt = elm.closest('a').innerHTML;
