@@ -131,7 +131,7 @@ module.exports = class TuneIn {
 					itm = itm.outline;
 				}
 			}
-			let txt = itm.text??'' + ' .. ' + itm.subtext??'';
+			let txt = (itm.text??'') + ' .. ' + (itm.subtext??'');
 			if (itm.type) {
 				switch (itm.type) {
 				case 'link':

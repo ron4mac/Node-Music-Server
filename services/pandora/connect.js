@@ -141,11 +141,11 @@ module.exports = class Connect {
 		let urlpath = querystring.encode(options.qs);
 		options.path = Connect.path + (urlpath ? ('?'+urlpath) : '');
 		options.method = 'post';
-		if (true || options.secure) {		// @@@@@ should always be secure, I guess
+//		if (options.secure) {		// @@@@@ should always be secure, I guess
 			this._reqHttps(options, callback)
-		} else {
-			this._reqHttp(options, callback)
-		}
+//		} else {
+//			this._reqHttp(options, callback)
+//		}
 	}
 
 	_reqHttp (options, callback) {

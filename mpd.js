@@ -113,18 +113,6 @@ module.exports = class MyMPD {
 
 
 	// PRIVATE METHODS
-	async #connect () {
-		console.log('mpdconnect');
-		try {
-			let mop = mpdConnOpts;
-			//mop = {port:6600, host: 'localhost'};
-		//	this.mpdc = await MPD.connect(mop);
-			return await MPD.connect(mop);
-		} catch (error) {
-			console.error(error);
-		}
-	}
-
 	async #sendCommand (cmd) {
 		try {
 			let rslt = await this.mpdc.sendCommand(cmd);

@@ -20,7 +20,6 @@ const documentRoot = '.';
 if (typeof btoa === 'undefined') global.btoa = (str) => Buffer.from(str, 'binary').toString('base64');
 if (typeof atob === 'undefined') global.atob = (b64) => Buffer.from(b64, 'base64').toString('binary');
 
-//var gresp = null;	// global response
 var errs = [];
 var mympd = null;
 
@@ -269,11 +268,6 @@ const serveFile = (url, response) => {
 		ytextract.sendzip(filePath, response);
 		return;
 	}
-
-//	if (contentType.indexOf('mp4')>0) {
-//		ytextract.sendExtraction('video.mp4');
-//		return;
-//	}
 
 	if (extname == '.php') {
 		runScript(filePath, url, response);

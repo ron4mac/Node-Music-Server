@@ -42,7 +42,6 @@
 		postAction(sr, parms, (data) => {
 			//console.log('PPlay',data);
 			//displayCurrent('Pandora: '+evt.target.closest('[data-sid]').querySelector('a').innerHTML);
-			mpdUser = sr;
 		}, 1);
 		nowPlaying = {name: currentStream, what:'Pand', how: 'play', url: bobj};
 	};
@@ -83,8 +82,6 @@
 				showLocalAudio(sr, true);
 				laudioelm.src = data;
 				laudioelm.play();
-			} else {
-				mpdUser = sr;
 			}
 		}, 1);
 	};

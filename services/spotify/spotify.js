@@ -79,8 +79,8 @@ module.exports = class Spotify {
 					//console.dir(rslt.tracks,{depth:3});
 					this.#displayTracks(rslt.tracks, resp);
 					resp.end();
-				//	this.client.getMyDevices()
-				//	.then(rslt=>console.log('DEVICES ',rslt));
+					this.client.getMyDevices()
+					.then(rslt=>console.log('DEVICES ',rslt));
 				});
 				//resp.end();
 				break;
@@ -233,49 +233,6 @@ module.exports = class Spotify {
 		});
 	}
 
-	play (which, resp) {
-		this._getChanData()
-		.then(() => {
-			const chan = this.chns[which];
-			let stream;
-			if (this.userToken) {
-				const cred = '?' + qs.stringify({user: this.user, pass: this.userToken});
-				const rate = cntrlr.getSetting('calmradio_bitrate', 192);
-				stream = chan.vip[0].streams[rate] + cred;
-				console.log(stream);
-			} else {
-				stream = chan.free[0].streams[128];
-				console.log(stream);
-			}
-			try {
-				this.mpdc.sendCommand('clear');
-				this.mpdc.sendCommand('add "'+stream+'"');
-				this.mpdc.sendCommand('play');
-			} catch (error) {
-				console.error(error);
-			}
-		});
-		resp.end();
-	}
-
-	lplay (which, resp) {
-		this._getChanData()
-		.then(() => {
-			const chan = this.chns[which];
-			let stream;
-			if (this.userToken) {
-				const cred = '?' + qs.stringify({user: this.user, pass: this.userToken});
-				const rate = cntrlr.getSetting('calmradio_bitrate', 192);
-				stream = chan.vip[0].streams[rate] + cred;
-				console.log(stream);
-			} else {
-				stream = chan.free[0].streams[128];
-				console.log(stream);
-			}
-			resp.end(stream);
-		});
-		//resp.end();
-	}
 
 	/* PRIVATE METHODS BELOW HERE */
 
@@ -341,7 +298,6 @@ module.exports = class Spotify {
 			resp.end();
 		});
 	}
-
 
 	#login (client, user, pass) {
 		return new Promise((resolve, reject) => {
@@ -418,103 +374,6 @@ module.exports = class Spotify {
 			resp.write('<a href="#.'+cat.id+'">'+cat.name+'</a></div>');
 		});
 		resp.end();
-	}
-
-	_displayCategory (which, resp) {
-		const chs = this.cats[which].channels;
-		chs.forEach((c) => {
-			const g = this.chns[c];
-			if (!this.userToken && !g.free[0]) {
-				resp.write('<div class="calm-noplay"><img src="'+CRURLS.arts+g.img+'" class="noplay"><span>'+g.title+'</span></div>');
-			} else {
-				resp.write('<div class="calm-play" data-url="'+c+'"><img src="'+CRURLS.arts+g.img+'">');
-				resp.write('<a href="#..'+c+'">'+g.title+'</a> <i class="fa fa-headphones lplay"></i></div>');
-			}
-		});
-		resp.end();
-	}
-
-	_camel (string) {
-		return string.toLowerCase().split(' ').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-	}
-
-	_parseMetadata (data) {
-		let rows = {};
-		let cats = {}
-		for (let row of data.metadata.rows) {
-			let arow = []
-			arow['id'] = row.id
-			arow['title'] = this._camel(row['title'])
-			arow['cats'] = row['categories'] || [row['category']]
-			arow['art'] = row['background_art_url']
-			rows[row['id']] = arow
-		}
-		for (let cat of data.metadata.categories) {
-			let acat = []
-			acat['id'] = cat.id
-			acat['title'] = this._camel(cat['title'])
-			acat['img'] = cat['square_art_url'] || cat['tiny_square_art_url'] || cat['hd_square_art_url'] || cat['background_art_url']
-			acat['channels'] = cat['channels']
-			cats[cat['id']] = acat
-		}
-		//console.log(cats);
-		return {rows: rows, cats: cats}
-	}
-
-	_parseChannels (data) {
-		let chns = []
-		for (let chn of data.channels) {
-			let achn = []
-			achn['title'] = this._camel(chn['title'])
-			achn['desc'] = chn['md_description'] || chn['description']
-			achn['img'] = chn['square_art_url'] || chn['hd_square_art_url'] || chn['tiny_square_art_url']
-			achn['story'] = chn['story']
-			achn['cat'] = chn['category'] || 999
-			achn['vip'] = chn['vip']
-			achn['free'] = chn['free']
-			chns[chn['id']] = achn
-		}
-		return chns
-	}
-
-	_getMetaData () {
-		return new Promise((resolve, reject) => {
-			if (this.grps) resolve();
-			try {
-				https.get(CRURLS.categories, (r) => {
-					let dat = '';
-					r.on('data', (chunk) => {
-						dat += chunk;
-					}).on('end', () => {
-						const parsed = this._parseMetadata(JSON.parse(dat));
-						this.grps = parsed.rows;
-						this.cats = parsed.cats;
-						resolve();
-					});
-				}).end();
-			} catch (error) {
-				reject(error);
-			}
-		});
-	}
-
-	_getChanData () {
-		return new Promise((resolve, reject) => {
-			if (this.chns) resolve();
-			try {
-				https.get(CRURLS.channels, (r) => {
-					let dat = '';
-					r.on('data', (chunk) => {
-						dat += chunk;
-					}).on('end', () => {
-						this.chns = this._parseChannels(JSON.parse(dat));
-						resolve();
-					});
-				}).end();
-			} catch (error) {
-				reject(error);
-			}
-		});
 	}
 
 

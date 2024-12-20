@@ -135,10 +135,6 @@ module.exports = class Fileman {
 			this.getDirList(dpath, resp);
 			return;
 			break;
-		case 'splay':
-			fpath = this.baseDir+parms.fpath;
-			rmsg = JSON.stringify({err: 'NOT YET IMPLEMENTED', f64: btoa(fpath)});
-			break;
 		case 'load':
 			resp.end(cntrlr.readFile('services/fileman/fileman.html', 'FAILED TO READ'));
 			return;
@@ -186,7 +182,7 @@ module.exports = class Fileman {
 		let _D = '';
 		let parts = dir.split('/');
 		if (parts[0]) {
-			nav += '<span class="isdir" data-dpath=""><i class="fa fa-home" aria-hidden="true"></i></span> / ';
+			nav += '<span class="isdir" data-dpath="."><i class="fa fa-home" aria-hidden="true"></i></span> / ';
 		} else {
 			nav += '<span><i class="fa fa-home" aria-hidden="true"></i></span>';
 		}
@@ -227,7 +223,7 @@ module.exports = class Fileman {
 
 	async receiveUpload (req, res) {
 		const form = new formidable.IncomingForm({uploadDir: cntrlr.config.upldTmpDir, maxFileSize: 2147483648});
-		return await form.parse(req, function(err, fields, files) {
+		return await form.parse(req, (err, fields, files) => {
 			if (err) {
 				console.error(err);
 				res.writeHead(err.httpCode || 400, {'Content-Type': 'text/plain'});

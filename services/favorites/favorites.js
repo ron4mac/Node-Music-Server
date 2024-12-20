@@ -1,7 +1,5 @@
 'use strict';
 const cntrlr = require('../../controller');
-//const http = require('http');
-//const https = require('https');
 
 module.exports = class Favorites {
 
@@ -26,12 +24,12 @@ module.exports = class Favorites {
 			}
 			break;
 		case 'add':
-			this.add(bobj /*{...{what: bobj}, ...cntrlr.currentPlaying}*/, resp);
+			this.#add(bobj /*{...{what: bobj}, ...cntrlr.currentPlaying}*/, resp);
 			break;
 		case 'delete':
 			console.log('delete',bobj);
 			resp.end();
-			this.delete(bobj, resp);
+			this.#delete(bobj, resp);
 			break;
 		case 'play':
 			resp.end(JSON.stringify(this.faves[bobj]));
@@ -49,38 +47,19 @@ module.exports = class Favorites {
 		}
 	}
 
-	browse (surl, resp) {
-		let dat = '';
-		http.get(baseUrl+surl, (r) => {
-			r.on('data', (chunk) => {
-				dat += chunk;
-			}).on('end', () => {
-				const parser = new XMLParser({ignoreAttributes: false, attributeNamePrefix: ''});
-				const jdat = parser.parse(dat);
-				if (Array.isArray(jdat.opml.body.outline)) {
-					this._radioParse(jdat.opml.body.outline, resp);
-				} else {
-					this._radioParse([jdat.opml.body.outline], resp);
-				}
-				//}
-				resp.end()
-			});
-		}).end();
-	}
-
-	add (fave, resp) {
+	#add (fave, resp) {
 		this.faves.push(fave);
 		let rslt = cntrlr.writeFile('services/favorites/favorites.json', JSON.stringify(this.faves, null, "\t"));
 		resp.end(rslt ? ('Error: '+rslt) : 'Added to favorites');
 	}
 
-	delete (fave, resp) {
+	#delete (fave, resp) {
 		this.faves.splice(fave,1);
 		let rslt = cntrlr.writeFile('services/favorites/favorites.json', JSON.stringify(this.faves, null, "\t"));
 		resp.end();
 	}
 
-	startRadio (surl) {
+	#startFave (surl) {
 		try {
 			this.mpdc.sendCommand('clear');
 			this.mpdc.sendCommand('add '+surl);
@@ -100,7 +79,7 @@ module.exports = class Favorites {
 			}).on('end', () => {
 				// drove me CRAZY discovering that linefeeds at the end caused things to hang!
 				let surl = dat.replace(/[\r\n]+/gm, '');
-				this.startRadio(surl);
+				this.#startFave(surl);
 				resp.end();
 			});
 		}).end();
@@ -114,51 +93,10 @@ module.exports = class Favorites {
 			}).on('end', () => {
 				// drove me CRAZY discovering that linefeeds at the end caused things to hang!
 				let surl = dat.replace(/[\r\n]+/gm, '');
-				//this.startRadio(surl);
+				//this.#startFave(surl);
 				resp.end(surl);
 			});
 		}).end();
 	}
-
-// @@@@@ private methods
-	_radioParse (data, resp) {
-		if (!Array.isArray(data)) {
-		//	console.log(data);
-			data = data.outline;
-		}
-		for (let itm of data) {
-			if (itm.outline) {
-				if (Array.isArray(itm.outline)) {
-					resp.write('<div class="rheader">'+itm.text+'</div>');
-					this._radioParse(itm.outline, resp);
-					continue;
-				} else {
-					itm = itm.outline;
-				}
-			}
-			let txt = itm.text??'' + ' .. ' + itm.subtext??'';
-			if (itm.type) {
-				switch (itm.type) {
-				case 'link':
-					let urlsuf = itm.URL.split('/').pop();
-					let aid = itm.guide_id??itm.key;
-					resp.write('<div class="rad-link"><a href="#'+aid+'" data-url="'+btoa(urlsuf)+'">'+txt+'</a></div>');
-					if (itm.children) webRadioParse(itm.children, resp);
-					break;
-				case 'audio':
-					resp.write('<div class="rad-station" data-url="'+itm.URL+'"><img src="'+itm.image+'"><a href="#'+itm.guide_id+'">'+txt+'</a></div>');
-				//	resp.write('<div class="rad-station">'+txt+'</div>');
-					break;
-				case 'text':
-					resp.write('<div class="notice">'+txt+'</div>');
-					break;
-				}
-			} else {
-				resp.write('<div class="chancat">'+txt+'</div>');
-				if (itm.children) webRadioParse(itm.children, resp);
-			}
-		}
-	}
-
 
 };

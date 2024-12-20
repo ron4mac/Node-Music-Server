@@ -76,7 +76,7 @@ module.exports = class YTExtract {
 			list = await ytpl(plurl, {limit:Infinity});
 			resp.end();
 		} catch (err) {
-			let msg = err.message.replace(/\"/g,'');
+			let msg = err.message.replace(/"/g,'');
 			resp.end(`<script>alert("${msg}")</script>`);
 			return;
 		}
@@ -87,24 +87,6 @@ module.exports = class YTExtract {
 		fs.mkdirSync(_dd);
 		this.getTrack(this.tlist.shift(), _dd);
 	}
-
-	sendExtraction (filePath) {
-		//console.log('[Info] Sending audio track');
-		let stats = fs.statSync(filePath);
-		gresp.setHeader('Content-Type', 'application/octet-stream');
-		gresp.setHeader('Content-Length', stats.size);
-		gresp.setHeader('Content-Disposition', 'attachment; filename="audio.m4a"');
-		let stream = fs.createReadStream(filePath);
-		stream.on("open", () => {
-			//gresp.set("Content-Type","video/mp4");
-			//gresp.writeHead(200, {'Content-Type':'video/mp4','Content-Length':stats.size});
-			stream.pipe(gresp);
-		});
-		stream.on("error", () => {
-			gresp.set("Content-Type","text/plain");
-			gresp.status(404).end("Not found");
-		});
-	};
 
 	sendzip (filePath, resp) {
 		//console.log('[Info] Sending zip file');
@@ -164,7 +146,7 @@ module.exports = class YTExtract {
 		this.getAudioStream(parms.axtr, parms.wtrk, (aud) => {
 			//console.log(aud);
 			if (aud.error) {
-				let msg = aud.error.message.replace(/\"/g,'');
+				let msg = aud.error.message.replace(/"/g,'');
 				resp.end(`<script>parent.YTx.extrFini("sgl","${msg}")</script>`);
 			} else if (cntrlr.config.extr2Intrn) {
 				let ws = fs.createWriteStream(cntrlr.config.baseDir+parms.tnam+'.'+aud.fext);
@@ -226,7 +208,7 @@ module.exports = class YTExtract {
 		this.getVideo(parms.vxtr, parms.wtrk, parms.vida, (vid) => {
 			//console.log(vid);
 			if (vid.error) {
-				let msg = vid.error.message.replace(/\"/g,'');
+				let msg = vid.error.message.replace(/"/g,'');
 				resp.end(`<script>parent.YTx.extrFini("vid","${msg}")</script>`);
 			} else if (cntrlr.config.extr2Intrn) {
 				let ws = fs.createWriteStream(cntrlr.config.baseDir+parms.tnam+'.'+vid.fext);

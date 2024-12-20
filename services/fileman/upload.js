@@ -1,12 +1,13 @@
 'use strict';
 var upldDestURL = '?upld';
-var fup_payload = {dir: curDir};
+var fup_payload = {dir: ''};
 
 YTx._Id = (elm) => document.getElementById(elm);
 
 YTx.Upld5d = (function(){
 
 	var isInitted = false;
+	var uploadMaxFilesize = 500*1024*1024;
 
 	var totProgressDiv;
 	var progressDiv;
@@ -53,7 +54,7 @@ YTx.Upld5d = (function(){
 		var files = e.target.files || e.dataTransfer.files;
 
 		// process all File objects
-		for (var i = 0, f; f = files[i]; i++) {
+		for (var i = 0, f; (f = files[i]); i++) {
 			total2do += f.size;
 			upQueue.push(f);
 			NextInQueue(false,'fsel');
@@ -63,7 +64,7 @@ YTx.Upld5d = (function(){
 	const NextInQueue = (decr,tag) => {
 		if (decr) {
 			if (! --inPrg) {
-				if (typeof(YTx.fup_done == 'function')) YTx.fup_done(errCnt);
+				if (typeof Fileman.fup_done === 'function') Fileman.fup_done(errCnt);
 				total2do = totalDone = errCnt = 0;
 				if (responses) { console.log(responses); }
 			}
@@ -149,7 +150,7 @@ YTx.Upld5d = (function(){
 
 			if (typeof(fup_ftypes) == 'object' && fup_ftypes.indexOf(file.type) < 0) {
 				errM = UNote.sprintf(UNote.L.fbadtyp, file.type);
-			} else if (false && file.size > uploadMaxFilesize) {
+			} else if (file.size > uploadMaxFilesize) {
 				errM = UNote.L.fsz2big;
 			}
 
@@ -200,7 +201,8 @@ YTx.Upld5d = (function(){
 	}
 
 	return {
-		Init: () => {
+		Init: (mxfs=false) => {
+			if (mxfs) uploadMaxFilesize = mxfs;
 			let fSel = _Id("upload_field");
 			if (isInitted) {
 				// clear stuff from previous

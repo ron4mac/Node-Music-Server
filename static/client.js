@@ -1,25 +1,11 @@
 'use strict';
+
 var YTx = {};	// js container
 // establish some variables
-var _pp = 0,
-	_pb,
-	_fm,
-	curDir = '',
-	currentStream = '',
-	mpdUser = null,
-	laudioUser = null,
-	laudioctl = null,
+var currentStream = '',
 	laudioelm = null,
 	laudiosvu = '',
 	nowPlaying = {};
-
-
-YTx.fup_done = (errs) => {
-	if (!errs) {
-		modal(document.getElementById('filupld'), false);
-	}
-	Fileman.getDirList(curDir);
-};
 
 
 const openTab = (evt, tabName, cb) => {
@@ -52,17 +38,6 @@ const plselchg = (sel) => {
 	ielm.style.visibility = dsp;
 };
 
-const srvrPlay = (fpath) => {		//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-	postAction(null, {act:'splay', 'fpath':(curDir?(curDir+'/'):'')+fpath}, (data) => {
-		if (data) {
-			console.log(data);
-			if (data.err) {
-				alert(data.err);
-			}
-		} else { alert('server play not available'); }
-	}, 2);
-};
-
 
 // UI display
 const displayCurrent = (what) => {
@@ -71,6 +46,7 @@ const displayCurrent = (what) => {
 const displayCurrentTrack = (what) => {
 	document.querySelectorAll('.curtrk').forEach((elm)=>{elm.innerHTML = what});
 };
+
 
 // LOCAL AUDIO
 const showLocalAudio = (svc, pn=false) => {
@@ -88,6 +64,7 @@ const showLocalAudio = (svc, pn=false) => {
 	document.addEventListener('playctl', laudioEvent);
 	
 };
+
 const laudioEvent = (evt) => {
 console.log(evt);
 	const [what, val] = evt.detail.split(' ', 2);
@@ -112,20 +89,8 @@ console.log(evt);
 		laudioelm = null;
 		break;
 	}
-}
-
-const __showLocalAudio = (svc, pn=false) => {
-	if (laudioctl) laudioctl.remove();
-	laudioelm = null;
-	const ladiv = document.getElementById('localAudio');
-	const laudt = document.getElementById('local-audio').content.cloneNode(true);
-	ladiv.prepend(laudt);
-	laudioctl = ladiv.children[0];
-	if (pn) laudioctl.className = '';
-	laudioelm = ladiv.querySelector('audio');
-	ladiv.style.display = 'block';
-	laudiosvu = svc;
 };
+
 const laudioAction = (evt) => {
 	//console.log(evt);
 	const telm = evt.target;
@@ -134,7 +99,7 @@ const laudioAction = (evt) => {
 		document.dispatchEvent(new CustomEvent(laudiosvu+'-laudact', {bubbles: true, detail: telm.getAttribute('step')}));
 		//console.log(laudiosvu+'-laudact');
 	}
-}
+};
 
 
 var services = {
@@ -142,8 +107,8 @@ var services = {
 	ti: {seen:false, id:'tunein',		cb:(evt)=>Tunein.get()},
 	cr: {seen:false, id:'calmradio',	cb:(evt)=>Calm.get()},
 	pd: {seen:false, id:'pandora',		cb:(evt)=>Pand.get()},
-	sp: {seen:false, id:'spotifyTab',		cb:(evt)=>Spot.get()},
-	fm: {seen:false, id:'filemanTab',	cb:(evt)=>Fileman.getDirList(curDir)},
+	sp: {seen:false, id:'spotifyTab',	cb:(evt)=>Spot.get()},
+	fm: {seen:false, id:'filemanTab',	cb:(evt)=>Fileman.getDirList()},
 	yt: {seen:false, id:'ytextract',	cb:null},
 	pl: {seen:false, id:'plstsTab',		cb:(evt)=>Playlists.get()}
 };
@@ -216,7 +181,7 @@ const assureService = async (what) => {
 			}
 		}, 100);
 	});
-}
+};
 
 
 /* working with MPD */
@@ -252,21 +217,21 @@ const setVolSlider = () => {
 	postAction(null, parms, (data) => {
 		document.getElementById('mpdvolume').value = data;
 	}, 1);
-}
+};
 const chgVolume = (elm) => {
 	document.dispatchEvent(new CustomEvent('playctl', {bubbles: true, detail: 'vset '+elm.value}));
 	const parms = {act:'mpd',what:'setVolume',bobj:elm.value};
 	postAction(null, parms, (data) => {
 		if (data) alert(data);
 	}, 1);
-}
+};
 const bmpVolume = (amt) => {
 	document.dispatchEvent(new CustomEvent('playctl', {bubbles: true, detail: 'bump '+amt}));
 	const parms = {act:'mpd',what:'bumpVolume',bobj:amt};
 	postAction(null, parms, (data) => {
 		document.getElementById('mpdvolume').value = data;
 	}, 1);
-}
+};
 
 const mpdSocket = () => {
 	const socket = new WebSocket('ws://'+window.location.hostname+':'+config.socket);
@@ -287,7 +252,7 @@ const mpdSocket = () => {
 			displayCurrentTrack('');
 		}
 	});
-}
+};
 
 
 const modal = (dlg, oc) => {
@@ -298,7 +263,7 @@ const modal = (dlg, oc) => {
 		dlg.style.display = 'none';
 		dlg.parentElement.style.display = 'none';
 	}
-}
+};
 
 
 const getFormValues = (frm) => {
@@ -317,7 +282,7 @@ const getFormValues = (frm) => {
 	}
 	console.log(values);
 	return values;
-}
+};
 
 const toFormData = (obj) => {
 	const formData = new FormData();
@@ -341,7 +306,7 @@ const postAction = (tos, parms={}, cb=()=>{}, json=false) => {
 		if (!json) parms = new URLSearchParams(parms);
 	}
 	if (json) hdrs['Content-Type'] = 'application/json';
-	const url = tos ? ('/_'+tos) : '?_Q'
+	const url = tos ? ('/_'+tos) : '?_Q';
 
 	fetch(url, {method:'POST', headers:hdrs, body:parms})
 	.then(resp => { if (!resp.ok) throw new Error('Network response was not OK'); if (json==2) return resp.json(); else return resp.text() })

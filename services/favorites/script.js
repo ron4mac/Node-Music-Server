@@ -1,5 +1,5 @@
 'use strict';
-
+/*global svcPop*/
 (function(Favorites) {
 
 	const sr = 'fa';	// service route

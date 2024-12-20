@@ -76,7 +76,7 @@ module.exports = class CalmRadio {
 			resp.end();
 			break;
 		case 'load':
-				resp.end(cntrlr.readFile('services/calmradio/calmradio.html', 'FAILED TO READ'));
+			resp.end(cntrlr.readFile('services/calmradio/calmradio.html', 'FAILED TO READ'));
 			break;
 		default:
 			resp.end('Unknown webCalmradio: '+what);

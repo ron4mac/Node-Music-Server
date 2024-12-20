@@ -1,5 +1,5 @@
 'use strict';
-
+/*eslint no-prototype-builtins: 'off'*/
 var AuthenticationRequest = require('./authentication-request'),
   WebApiRequest = require('./webapi-request'),
   HttpManager = require('./http-manager');

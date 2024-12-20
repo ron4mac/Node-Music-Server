@@ -3,11 +3,14 @@
 (function(Fileman) {
 
 	const sr = 'fm';	// service route
+	let curDir = '';
 
-	const getDirList = (dirPath) => {
+	const getDirList = (dirPath='') => {
+		if (dirPath=='.') dirPath = '';
 		fetch('?_=fm&act=dirl&dirl='+encodeURIComponent(dirPath), {method:'GET'})
 		.then((resp) => resp.text())
 		.then(data => {
+			let _fm = document.getElementById('fileman');
 			_fm.innerHTML = data;
 			curDir = dirPath;
 			const dirs = _fm.querySelectorAll('.isdir');
@@ -23,10 +26,6 @@
 				elm.addEventListener('click', (evt) => {
 					console.log(evt);
 					let fpath = evt.target.closest('[data-fpath]')?.dataset.fpath;
-					if (evt.target.nodeName=='I') {
-						srvrPlay(fpath);
-						return;
-					}
 					Fileman.view(fpath);
 				});
 			});
@@ -47,6 +46,7 @@
 		postAction(sr, parms, (data) => { if (data) alert(data); else getDirList(curDir) }, json);
 	};
 
+	Fileman.currentDir = () => curDir;
 	Fileman.getDirList = (dir) => getDirList(dir);
 
 	Fileman.menu = (actn, evt) => {
@@ -135,7 +135,7 @@
 			break;
 		case 'fupld':
 			fup_payload.dir = curDir;
-			YTx.Upld5d.Init();
+			YTx.Upld5d.Init(500*1024*1024);
 			modal(document.getElementById('filupld'), true);
 			break;
 		case 'funzp':
@@ -209,6 +209,15 @@
 				}, true);
 		}
 	}
+
+	Fileman.fup_done = (errs) => {
+		if (!errs) {
+			modal(document.getElementById('filupld'), false);
+		}
+		getDirList(curDir);
+	};
+
+
 
 
 })(window.Fileman = window.Fileman || {});
