@@ -98,24 +98,28 @@ module.exports = class Fileman {
 			break;
 		case 'faddl':
 			pbase = this.baseDir+parms.dir;
-			console.log(pbase,parms.files);
+			console.log(pbase,parms);
 			let plst = '';
 			for (const file of parms.files) {
 				plst += pbase+file + "\n";
 			}
 			const pld = cntrlr.config.playlistDir;
+			fpath = pld;
+			let clst = '';
+			rmsg = 'Playlist saved (huh?)';
 			try {
-				fs.mkdir(pld, {recursive:true}, (err) => {
-					if (err) throw err;
-					fs.writeFileSync(pld+btoa(parms.plnam), plst);
-				});
-				// file written successfully
-				resp.end('Playlist saved');
+				fs.mkdirSync(pld, {recursive:true});
+				if (parms.plsel) {
+					fpath += parms.plsel;
+					clst = fs.readFileSync(fpath, 'utf8')
+				} else {
+					fpath += btoa(parms.plnam);
+				}
+				fs.writeFileSync(fpath, clst+plst);
 			} catch (err) {
 				console.error(err);
 				rmsg = 'Failed to write playlist';
 			}
-			return;
 			break;
 		case 'fview':
 			fpath = this.baseDir+parms.fpath;

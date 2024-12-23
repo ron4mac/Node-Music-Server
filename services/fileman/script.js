@@ -116,10 +116,11 @@ class FilemanClass extends ServiceClass {
 			}
 			evt.target.parentElement.querySelector('i').style.display = 'inline-block';
 			const files = Array.from(slctd).map(el => el.value);
-			this.#postAndRefresh({what:'faddl', bobj:{plnam: pnam, dir:(this.curDir?this.curDir:''), 'files': files}}, 1);
+			this.#postAndRefresh({what:'faddl', bobj:{plsel: psel, plnam: pnam, dir:(this.curDir?this.curDir:''), 'files': files}}, 1);
 			modal(dlg, false);
 			evt.target.parentElement.querySelector('i').style.display = 'none';
-			services.pl.seen = false;
+			//services.pl.seen = false;
+			Playlists.get();
 			break;
 		case 'drefr':
 			this.#getDirList(this.curDir);
@@ -210,6 +211,7 @@ class FilemanClass extends ServiceClass {
 			const dlg = document.getElementById('plmnu');
 			dlg.querySelector('div').innerHTML = data;
 			modal(dlg, true);
+			svcPop('pl');
 		}, true);
 	}
 
