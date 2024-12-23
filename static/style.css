@@ -44,6 +44,7 @@ nav ul {
 
 /* dialogs */
 dialog {
+	min-width: 275px;
 	margin-top: 8em;
 	line-height: 2rem;
 	background-color: aliceblue;
@@ -52,12 +53,12 @@ dialog {
 	border-radius: 5px;
 	box-shadow: 2px 2px 8px #BBB;
 }
-dialog[open]::backdrop {
+/*dialog[open]::backdrop {
 	background-color: rgba(120,120,120,0.4);
 	@starting-style {
 		background-color: rgba(255,255,255,0);
 	}
-}
+}*/
 dialog .closex {
 	width: 20px;
 	height: 20px;
@@ -81,6 +82,16 @@ dialog .btns {
 	margin-top: 1rem;
 }
 dialog .btns button {font-size: large;}
+/* my alert confirm prompt dialog */
+#myacpd {
+	max-width: 50%;
+}
+#myacpd.alert .hidden {
+	display: none;
+}
+.myacpd-msg {
+	line-height: normal;
+}
 
 /*===========*/
 input, label, span {

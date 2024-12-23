@@ -2,9 +2,9 @@
 var upldDestURL = '?upld';
 var fup_payload = {dir: ''};
 
-YTx._Id = (elm) => document.getElementById(elm);
+//YTx._Id = (elm) => document.getElementById(elm);
 
-YTx.Upld5d = (function(){
+const Upld5d = (function(){
 
 	var isInitted = false;
 	var uploadMaxFilesize = 500*1024*1024;

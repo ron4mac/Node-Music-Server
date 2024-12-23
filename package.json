@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/ron4mac/yt-audio-extract#readme",
   "dependencies": {
+    "@babel/eslint-parser": "^7.25.9",
     "@distube/ytdl-core": "^4.15.1",
     "archiver": "^6.0.1",
     "cookie": "^1.0.1",

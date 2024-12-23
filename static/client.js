@@ -1,6 +1,5 @@
 'use strict';
 
-var YTx = {};	// js container
 // establish some variables
 var currentStream = '',
 	laudioelm = null,
@@ -183,16 +182,18 @@ const mpdCmd = (cmd) => {
 	document.dispatchEvent(new CustomEvent('playctl', {bubbles: true, detail: cmd}));
 	const parms = {act:'mpd', what: 'cmd', bobj: cmd};
 	postAction(null, parms, (data) => {
-		if (data) alert(data);
+		if (data) my.alert(data);
 	}, 1);
 };
 const mpdCmdBug = (cmd) => {
-	let mpc = prompt('MPD command:');
-	if (!mpc) return;
-	const parms = {act:'mpd', what: 'cmdb', bobj: mpc};
-	postAction(null, parms, (data) => {
-		if (data) alert(data);
-	}, 1);
+	my.prompt('MPD command:')
+	.then(v=>{
+		if (v===false) return;
+		const parms = {act:'mpd', what: 'cmdb', bobj: v};
+		postAction(null, parms, (data) => {
+			if (data) my.alert(data.replace(/\n/g,'<br>'));
+		}, 1);
+	});
 };
 
 const prevnext = (evt) => {
@@ -201,7 +202,7 @@ const prevnext = (evt) => {
 		let act = t.classList.contains('left') ? 'previous' : 'next';
 		const parms = {act:'mpd', what: 'cmd', bobj: act};
 		postAction(null, parms, (data) => {
-			if (data) alert(data);
+			if (data) my.alert(data);
 		}, 1);
 	}
 };
@@ -215,7 +216,7 @@ const chgVolume = (elm) => {
 	document.dispatchEvent(new CustomEvent('playctl', {bubbles: true, detail: 'vset '+elm.value}));
 	const parms = {act:'mpd',what:'setVolume',bobj:elm.value};
 	postAction(null, parms, (data) => {
-		if (data) alert(data);
+		if (data) my.alert(data);
 	}, 1);
 };
 const bmpVolume = (amt) => {
@@ -304,6 +305,5 @@ const postAction = (tos, parms={}, cb=()=>{}, json=false) => {
 	fetch(url, {method:'POST', headers:hdrs, body:parms})
 	.then(resp => { if (!resp.ok) throw new Error('Network response was not OK'); if (json==2) return resp.json(); else return resp.text() })
 	.then(data => cb(data))
-	.catch(err => alert(err));
+	.catch(err => my.alert(err));
 };
-

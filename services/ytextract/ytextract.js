@@ -77,7 +77,7 @@ module.exports = class YTExtract {
 			resp.end();
 		} catch (err) {
 			let msg = err.message.replace(/"/g,'');
-			resp.end(`<script>alert("${msg}")</script>`);
+			resp.end(`<script>my.alert("${msg}")</script>`);
 			return;
 		}
 		this.tlist = list.items;
