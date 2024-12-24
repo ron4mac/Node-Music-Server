@@ -1,7 +1,8 @@
-# Node-Music-Server
-My Music Server written for Node
+# Node-Music-Server  
+### My Music Server written for Node  
+_[ a work in progress ]_
 
-Features:
+Features:  
 - Local file storage with file manager
 - Upload files; create playlists
 - Tunein Radio stations
