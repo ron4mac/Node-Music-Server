@@ -1,7 +1,7 @@
 {
   "name": "ytextr",
   "version": "1.0.0",
-  "description": "Get audio tracks from YT content",
+  "description": "Node Musice Server - various souces",
   "main": "extrsvr.js",
   "files": [
     "extrsvr.js",
@@ -15,9 +15,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ron4mac/yt-audio-extract.git"
+    "url": "git+https://github.com/ron4mac/Node-Music-Server.git"
   },
   "keywords": [
+    "music",
+    "server",
+    "Tunein",
+    "Pandora",
     "YouTube",
     "audio",
     "extract"
@@ -25,11 +29,10 @@
   "author": "ron4mac",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ron4mac/yt-audio-extract/issues"
+    "url": "https://github.com/ron4mac/Node-Music-Server/issues"
   },
-  "homepage": "https://github.com/ron4mac/yt-audio-extract#readme",
+  "homepage": "https://github.com/ron4mac/Node-Music-Server#readme",
   "dependencies": {
-    "@babel/eslint-parser": "^7.25.9",
     "@distube/ytdl-core": "^4.15.1",
     "archiver": "^6.0.1",
     "cookie": "^1.0.1",
