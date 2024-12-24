@@ -1,0 +1,16 @@
+[Unit]
+Description=Node Music Server
+After=network.target
+StartLimitIntervalSec=30
+StartLimitBurst=3
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/node <INSTALL DIRECTORY>/extrsvr.js
+WorkingDirectory=<INSTALL DIRECTORY>
+Restart=on-failure
+# needed for Pandora authentication
+Environment="NODE_OPTIONS=--openssl-legacy-provider"
+
+[Install]
+WantedBy=multi-user.target
