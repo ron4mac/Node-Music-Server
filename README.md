@@ -1,6 +1,6 @@
 # Node-Music-Server  
 ### My Music Server written for Node  
-_[ a work in progress ]_
+Developed on Raspberry Pi OS (bookworm) _[ a work in progress ]_
 
 Features:  
 - Local file storage with file manager
