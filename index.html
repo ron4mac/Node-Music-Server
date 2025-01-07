@@ -75,16 +75,6 @@
 			</div>
 		</div>
 	</div>
-	<div id="fvewd" style="display:none">
-		<span>TITLE</span>
-		<i class="fa fa-window-close-o" onclick="this.parentElement.style.display='none';this.nextElementSibling.src=''"></i>
-		<iframe id="fvewf"></iframe>
-	</div>
-	<div id="sseld" style="display:none">
-		<i class="fa fa-times" onclick="this.parentElement.style.display='none'"></i>
-		<table id="sselt"><tbody></tbody></table>
-		<button onclick="YTx.extractSelected(this)">Extract Stream</button>
-	</div>
 	<div class="dlogs">
 		<div id="utldlg" class="modl">
 			<div></div>
@@ -92,39 +82,29 @@
 			<button onclick="modal(this.parentElement, false)">Close</button>
 		</div>
 	</div>
-	<template id="local-audio">
-		<span class="noprevnext">
-		<i class="fa fa-arrow-circle-left" step="prev"></i>
-		<audio controls>Your browser does not support the audio element.</audio>
-		<i class="fa fa-arrow-circle-right" step="next"></i>
-		</span>
-	</template>
 	<dialog id="myacpd">
-		<div class="closex" onclick="this.parentElement.close()"><i class="fa fa-times"></i></div>
-		<div class="myacpd-msg"></div>
-		<div class="btns">
-			<button type="submit" onclick="this.closest('dialog').close()">Okay</button>
-			<button type="cancel" class="hidden" onclick="this.closest('dialog').close()">Cancel</button>
-		</div>
-	</dialog>
-	<dialog id="myacpdc">
-		<div class="closex" onclick="this.parentElement.close()"><i class="fa fa-times"></i></div>
-		<div class="myacpd-msg"></div>
+		<div class="macp-msg"></div>
 		<form method="dialog">
-			<div class="btns">
-				<button class="YB" value="y">Yes</button>
-				<button class="NB" value="n">No</button>
+			<div class="macp-pmpt">
+				<input type="text" name="txt">
+			</div>
+			<div class="macp-btns">
+				<button class="YB" name="YB" value="y">Submit</button>
+				<button class="NB" name="NB" value="n" formnovalidate>Cancel</button>
 			</div>
 		</form>
 	</dialog>
-	<dialog id="myacpdp">
+	<dialog id="mymodl">
+		<div class="modl-titl"></div>
 		<div class="closex" onclick="this.parentElement.close()"><i class="fa fa-times"></i></div>
-		<div class="myacpd-msg"></div>
-		<form method="dialog">
-			<input type="text">
-			<div class="btns">
-				<button class="YB" value="y">Submit</button>
-				<button class="NB" value="n">Cancel</button>
+		<div class="modl-hedr"></div>
+		<div class="modl-msg"></div>
+		<form method="dialog" onsubmit="return my.dlgsub(event)">
+			<div class="modl-body"></div>
+			<div class="modl-btns">
+				<button class="YB" name="YB" value="y">Submit</button>
+				<button class="NB" name="NB" value="n" formnovalidate>Cancel</button>
+				<button class="AB" name="AB" value="a">Alt</button>
 			</div>
 		</form>
 	</dialog>

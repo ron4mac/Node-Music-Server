@@ -1,20 +1,8 @@
-<dialog id="calm-user-dialog">
-<div class="closex" onclick="this.parentElement.close()">
-	<i class="fa fa-times" aria-hidden="true"></i>
-</div>
-<h3>Settings for Calm Radio</h3>
-<form class="calmlogin" onsubmit="return false">
-	<label>
-		Stream Bitrate Preference: 
-		<select>
-		<option value="64">64</option>
-		<option value="192">192</option>
-		<option value="320">320</option>
-		</select>
-	</label>
-	<div class="btns">
-		<button type="submit" onclick="Calm.logout(event,this)">Log Out</button>
-		<button type="submit" onclick="Calm.save(event,this)">Save Settings</button>
-	</div>
-</form>
-</dialog>
+<label>
+	Stream Bitrate Preference: 
+	<select name="bitrate">
+	<option value="64" s="64">64</option>
+	<option value="192" s="192">192</option>
+	<option value="320" s="320">320</option>
+	</select>
+</label>

@@ -58,7 +58,7 @@ const showLocalAudio = (svc, pn=false) => {
 };
 
 const laudioEvent = (evt) => {
-console.log(evt);
+//console.log(evt);
 	const [what, val] = evt.detail.split(' ', 2);
 	switch(what) {
 	case 'vset':
@@ -235,7 +235,7 @@ const mpdSocket = () => {
 	});
 	// Listen for messages
 	socket.addEventListener('message', (event) => {
-		console.log('MPD message from server ', event.data);
+		//console.log('MPD message from server ', event.data);
 		let data = JSON.parse(event.data);
 		document.dispatchEvent(new CustomEvent('mpdchg', {bubbles: true, detail: data}));
 		if (data.track) {
@@ -274,7 +274,7 @@ const getFormValues = (frm) => {
 			values[key] = value;
 		}
 	}
-	console.log(values);
+	//console.log(values);
 	return values;
 };
 

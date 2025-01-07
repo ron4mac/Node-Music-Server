@@ -1,3 +1,4 @@
+<link href="services/fileman/style.css" rel="stylesheet">
 <script src="services/fileman/script.js"></script>
 <script src="services/fileman/upload.js"></script>
 <div class="fmenu">
@@ -10,7 +11,7 @@
 	<a href="#" data-menu="frnam">Rename</a>
 	<a href="#" data-menu="fupld">Upload</a>
 	<a href="#" data-menu="funzp">Unzip</a>
-	<span> | </span>
+	<span>&nbsp;</span>
 	<a href="#" data-menu="plmnu">Add To Playlist</a>
 </div>
 <div id="fileman"></div>
@@ -41,6 +42,11 @@
 		<button onclick="modal(this.parentElement, false)">Cancel</button>
 		<i class="fa fa-spinner fa-pulse fa-lg left"></i>
 	</div>
+</div>
+<div id="fvewd">
+	<span>TITLE</span>
+	<i class="fa fa-window-close-o" onclick="this.parentElement.style.display='none';this.nextElementSibling.src=''"></i>
+	<iframe id="fvewf"></iframe>
 </div>
 <iframe id="dnldf" style="display:none"></iframe>
 <script>

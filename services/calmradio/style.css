@@ -1,0 +1,38 @@
+/* Calm Radio */
+#calm {
+	display: flex;
+	flex-wrap: wrap;
+}
+#calm .calm-link {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+#calm .calm-play, #calm .calm-noplay {
+	position: relative;
+	margin-bottom: 1.8rem;
+	margin-right: .5em;
+}
+#calm .calm-play i {
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	background-color: aliceblue;
+	padding: 1px 2px;
+}
+#calm .calm-play a, #calm .calm-noplay span {
+	position: absolute;
+	left: 50%;
+	padding: 0 1rem;
+	background-color: #E0F0F0;
+	transform: translate(-50%);
+	bottom: -1.2rem;
+/*	white-space: nowrap;*/
+}
+#calm img {
+	width: 300px;
+	height: 300px;
+}
+#calm img.noplay {
+	opacity: 0.3;
+}

@@ -45,8 +45,18 @@ module.exports = class CalmRadio {
 			resp.end();
 			break;
 		case 'user':
-			const htm = this.userToken ? 'user.html': 'login.html';
-			resp.write(cntrlr.readFile('services/calmradio/'+htm, 'FAILED TO READ'));
+			const logged = (this.userToken);
+			const htmf = logged ? 'user.html': 'login.html';
+			let htm = cntrlr.readFile('services/calmradio/'+htmf, 'FAILED TO READ');
+			const rate = cntrlr.getSetting('calmradio_bitrate', 64);
+			htm = htm.replace('s="'+rate+'"','selected')
+			resp.end(JSON.stringify({logged: logged, body: htm}));
+			break;
+		case 'usave':
+			//console.log(bobj);
+			let vals = {};
+			Object.entries(bobj).forEach(([k,v])=>{vals['calmradio_'+k] = v});
+			cntrlr.setSettings(vals);
 			resp.end();
 			break;
 		case 'login':
@@ -85,7 +95,7 @@ module.exports = class CalmRadio {
 	}
 
 	browse (surl, resp) {
-		console.log('browseSurl',surl);
+		//console.log('browseSurl',surl);
 		this._getMetaData()
 		.then(() => {
 			if (surl) {
@@ -112,12 +122,12 @@ module.exports = class CalmRadio {
 			let stream;
 			if (this.userToken) {
 				const cred = '?' + qs.stringify({user: this.user, pass: this.userToken});
-				const rate = cntrlr.getSetting('calmradio_bitrate', 192);
+				const rate = cntrlr.getSetting('calmradio_bitrate', 64);
 				stream = chan.vip[0].streams[rate] + cred;
-				console.log(stream);
+				//console.log(stream);
 			} else {
 				stream = chan.free[0].streams[128];
-				console.log(stream);
+				//console.log(stream);
 			}
 			try {
 				this.mpdc.sendCommand('clear');
@@ -137,12 +147,12 @@ module.exports = class CalmRadio {
 			let stream;
 			if (this.userToken) {
 				const cred = '?' + qs.stringify({user: this.user, pass: this.userToken});
-				const rate = cntrlr.getSetting('calmradio_bitrate', 192);
+				const rate = cntrlr.getSetting('calmradio_bitrate', 64);
 				stream = chan.vip[0].streams[rate] + cred;
-				console.log(stream);
+				//console.log(stream);
 			} else {
 				stream = chan.free[0].streams[128];
-				console.log(stream);
+				//console.log(stream);
 			}
 			resp.end(stream);
 		});

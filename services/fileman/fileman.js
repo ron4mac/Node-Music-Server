@@ -34,9 +34,9 @@ module.exports = class Fileman {
 			}
 			if (parms.files.length > 1) eprms += ' -codec copy';
 			eprms += ` "${pbase+parms.asfile}"`;
-			console.log(eprms);
+			//console.log(eprms);
 			require('child_process').exec('ffmpeg -loglevel 16 -n'+eprms,{},(error, stdout, stderr)=>{
-					console.log(error);
+					console.error(error);
 					rmsg = error ? String(error) : null;
 					resp.end(rmsg);
 				});
@@ -90,7 +90,7 @@ module.exports = class Fileman {
 		case 'funzp':
 			pbase  = this.baseDir+parms.dir+(parms.dir==''?'':'/');
 			require('child_process').exec('unzip -d "'+pbase+'" "'+pbase+parms.file+'"',{},(error, stdout, stderr)=>{
-					console.log(error);
+					console.error(error);
 					rmsg = error ? String(error) : null;
 					resp.end(rmsg);
 				});
@@ -98,7 +98,7 @@ module.exports = class Fileman {
 			break;
 		case 'faddl':
 			pbase = this.baseDir+parms.dir;
-			console.log(pbase,parms);
+			//console.log(pbase,parms);
 			let plst = '';
 			for (const file of parms.files) {
 				plst += pbase+file + "\n";

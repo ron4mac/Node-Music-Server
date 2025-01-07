@@ -6,7 +6,7 @@ class FilemanClass extends ServiceClass {
 	curDir = '';
 
 	menu (actn, evt) {
-		console.log(actn);
+		//console.log(actn);
 		const slctd = document.querySelectorAll('.fsel:checked'),
 			scnt = slctd.length;
 		switch (actn) {
@@ -17,9 +17,15 @@ class FilemanClass extends ServiceClass {
 			}
 			break;
 		case 'fdele':
-			if (super.hasSome(scnt) && ((scnt==1) || confirm('You have multiple files selected. Are you sure you want to delete ALL the selected files?'))) {
-				const files = Array.from(slctd).map(el => el.value);
-				this.#postAndRefresh({what:'fdele', bobj:{'dir': this.curDir, 'files': files}}, 1);
+			if (super.hasSome(scnt)) {
+				if (scnt==1) {
+					this.#delFiles(slctd);
+				} else {
+					my.confirm('You have multiple files selected. Are you sure you want to delete ALL the selected files?',{yesBtn:'YES'})
+					.then(y=>{
+						if (y) this.#delFiles(slctd);
+					});
+				}
 			}
 			break;
 		case 'fdnld':
@@ -27,7 +33,7 @@ class FilemanClass extends ServiceClass {
 				const files = Array.from(slctd).map(el => el.value);
 				postAction('fm', {what:'fdnld', bobj: {'dir': this.curDir?(this.curDir+'/'):'','files': files}}, (data) => {
 					if (data) {
-						console.log(data);
+						//console.log(data);
 						if (data.err) {
 							my.alert(data.err);
 						} else {
@@ -43,7 +49,7 @@ class FilemanClass extends ServiceClass {
 				let usp = JSON.stringify({'fdir': this.curDir?(this.curDir+'/'):'','files': files});
 				// remember the items in local storage
 				sessionStorage.nfm_mvto = usp;
-				console.log(evt);
+				//console.log(evt);
 				// show the item count in the span element
 				evt.target.firstElementChild.innerHTML = `(${files.length})`;
 			} else {
@@ -71,20 +77,13 @@ class FilemanClass extends ServiceClass {
 			});
 			break;
 		case 'frnam':
-			if (super.oneItem(scnt))  {
+			if (super.oneItem(scnt)) {
 				let curfn = slctd[0].value;
-					my.prompt(`Rename ${curfn} to:`, curfn, {yesBtn:'Rename'})
-					.then(v=>{
-						if (v===false) return;
-						this.#postAndRefresh({what:'frnam', bobj:{dir: this.curDir, file:curfn, to:v}}, 1);
-					});
-					break;
-				let nnam = prompt(`Rename ${curfn} to:`, curfn);
-				if (nnam) {
-					this.#postAndRefresh({what:'frnam', bobj:{dir: this.curDir, file:curfn, to:nnam}}, 1);
-				//	postAndRefresh('act=frnam&dir='+encodeURIComponent(curDir)+'&file='+encodeURIComponent(curfn)+'&to='+encodeURIComponent(nnam));
-				//	postAndRefresh({act: 'frnam',dir: curDir,file: curfn,to: nnam});
-				}
+				my.prompt(`Rename ${curfn} to:`, curfn, {yesBtn:'Rename',required:true})
+				.then(nn=>{
+					if (!nn) return;
+					this.#postAndRefresh({what:'frnam', bobj:{dir: this.curDir, file:curfn, to:nn}}, 1);
+				});
 			}
 			break;
 		case 'fupld':
@@ -106,7 +105,7 @@ class FilemanClass extends ServiceClass {
 			this.#add2Playlist();
 			break;
 		case 'faddl':
-			console.log(evt);
+			//console.log(evt);
 			let dlg = document.getElementById('plmnu');
 			let psel = dlg.querySelector('select').value;
 			let pnam = dlg.querySelector('input').value.trim();
@@ -135,7 +134,7 @@ class FilemanClass extends ServiceClass {
 	view (fpath) {
 		postAction(this.sr, {what:'fview', bobj:{'fpath':(this.curDir?(this.curDir+'/'):'')+fpath}}, (data) => {
 			if (data) {
-				console.log(data);
+				//console.log(data);
 				if (data.err) {
 					my.alert(data.err);
 				} else {
@@ -177,6 +176,11 @@ class FilemanClass extends ServiceClass {
 	}
 
 
+	#delFiles (lst) {
+		const files = Array.from(lst).map(el => el.value);
+		this.#postAndRefresh({what:'fdele', bobj:{'dir': this.curDir, 'files': files}}, 1);
+	}
+
 	#getDirList (dirPath='') {
 		if (dirPath=='.') dirPath = '';
 		fetch('?_=fm&act=dirl&dirl='+encodeURIComponent(dirPath), {method:'GET'})
@@ -188,7 +192,7 @@ class FilemanClass extends ServiceClass {
 			const dirs = _fm.querySelectorAll('.isdir');
 			dirs.forEach(elm => {
 				elm.addEventListener('click', (evt) => {
-					console.log(evt);
+					//console.log(evt);
 					const todir = evt.target.closest('[data-dpath]')?.dataset.dpath;
 					this.#getDirList(todir);
 				});
@@ -196,7 +200,7 @@ class FilemanClass extends ServiceClass {
 			const fils = _fm.querySelectorAll('.isfil');
 			fils.forEach(elm => {
 				elm.addEventListener('click', (evt) => {
-					console.log(evt);
+					//console.log(evt);
 					const fpath = evt.target.closest('[data-fpath]')?.dataset.fpath;
 					this.view(fpath);
 				});

@@ -68,7 +68,7 @@ module.exports = class Spotify {
 					resp.end();
 				})
 				.catch(err=>{
-					console.log(err);
+					console.error(err);
 					resp.end();
 				});
 				//resp.end();
@@ -110,7 +110,7 @@ module.exports = class Spotify {
 		case 'next':
 			this.#next(bobj, resp)
 			.then((d)=>console.log('NEXTresp',d))		//resp.end('NEXTresp',d))
-			.catch((err)=>console.log(err));
+			.catch((err)=>console.error(err));
 			break;
 		case 'play':
 			this.client.play({device_id: '076a47815b5316506aeff7b527e50ed20fdeb51a', 'context_uri': bobj})
@@ -140,7 +140,7 @@ module.exports = class Spotify {
 			resp.end(rdir);
 			break;
 		case 'creds':
-			console.log(bobj);
+			//console.log(bobj);
 			this.client.setClientId(bobj.id);
 			this.client.setClientSecret(bobj.secret);
 			this.client.setRedirectURI(bobj.rdir);
@@ -304,10 +304,10 @@ module.exports = class Spotify {
 			try {
 				client.login(user, pass, (err) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						resolve('Login Failure');
 					} else {
-						console.log('Pandora Ready!');
+						//console.log('Pandora Ready!');
 						resolve();
 					}
 				});
@@ -318,7 +318,7 @@ module.exports = class Spotify {
 	}
 
 	#displayTracks (data, resp) {
-	console.log(data);
+	//console.log(data);
 		if (data.offset + data.limit < data.total) {
 			resp.write('<div class="sheader"><h4>TRACKS</h4><a href="#" data-next="trk.'+data.next+'">More</a></div>');
 		}

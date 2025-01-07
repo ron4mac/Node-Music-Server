@@ -1,18 +1,12 @@
 <style>
-.calmlogin {display:inline-block}
-.calmlogin * {float:right}
-.calmlogin input {margin-left:.5em}
+.ucreds {
+	display: grid;
+}
+.ucreds label {
+	text-align: right;
+}
 </style>
-<dialog id="calm-user-dialog">
-<div class="closex" onclick="this.parentElement.close()">
-	<i class="fa fa-times" aria-hidden="true"></i>
+<div class="ucreds">
+<label>User <input type="text" name="user" pattern="\s*\S+\s*" required></label>
+<label>Password <input type="password" name="pass" pattern="\s*\S+\s*" required></label>
 </div>
-<h3>Login to your Calm Radio account</h3>
-<form class="calmlogin" onsubmit="return false">
-<label>User <input type="text" name="user" required></label><br>
-<label>Password<input type="password" name="pass" required></label><br>
-<div class="btns">
-	<button type="submit" onclick="Calm.login(event,this)">Submit</button>
-</div>
-</form>
-</dialog>

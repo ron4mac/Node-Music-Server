@@ -1,24 +1,16 @@
 <script src="services/ytextract/script.js"></script>
 <style>
-.tabcontent.ytx form {
-	max-width: 660px;
-}
+.tabcontent.ytx form {max-width: 660px;}
 .tabcontent.ytx form>div {
 	display: flex;
     flex-direction: column;
     row-gap: 6px;
     max-width: 600px;
 }
-.tabcontent.ytx .asfile {
-	display: flex;
-}
-.tabcontent.ytx .asfile input {
-	flex-grow: 1;
-}
-.tabcontent.ytx label {
-	white-space: nowrap;
-}
-
+.tabcontent.ytx .asfile {display: flex;}
+.tabcontent.ytx .asfile input {flex-grow: 1;}
+.tabcontent.ytx label {white-space: nowrap;}
+#sseld {display:none}
 </style>
 <div class="tab">
 	<button class="tablinks active nompd" onclick="openTab(event, 'sglTab')">Extract Audio from a Single File</button>
@@ -84,4 +76,9 @@
 		</form>
 		<div id="vinfov"></div>
 	</div>
+</div>
+<div id="sseld">
+	<i class="fa fa-times" onclick="this.parentElement.style.display='none'"></i>
+	<table id="sselt"><tbody></tbody></table>
+	<button onclick="YTx.extractSelected(this)">Extract Stream</button>
 </div>

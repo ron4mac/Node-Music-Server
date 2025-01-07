@@ -8,21 +8,26 @@ class PlaylistsClass extends ServiceClass {
 	tcl = false;
 
 	menu (actn, evt) {
-		console.log(actn);
+		//console.log(actn);
 		const slctd = document.querySelectorAll('.plsel:checked'),
 			scnt = slctd.length;
 		switch (actn) {
 		case 'pldel':
-			if (super.hasSome(scnt) && ((scnt==1) || confirm('You have multiple playlists selected. Are you sure you want to delete ALL the selected playlists?'))) {
-				const files = Array.from(slctd).map(el => el.value);
-				console.log(files);
-				this.#postAndRefresh({what:'pldel',bobj:{'files':files}}, 1);
+			if (super.hasSome(scnt)) {
+				if (scnt==1) {
+					this.#delFiles(slctd);
+				} else {
+					my.confirm('You have multiple files selected. Are you sure you want to delete ALL the selected files?',{yesBtn:'YES'})
+					.then(y=>{
+						if (y) this.#delFiles(slctd);
+					});
+				}
 			}
 			break;
 		case 'plply':
 			if (super.hasSome(scnt)) {
 				const files = Array.from(slctd).map(el => el.value);
-				console.log(files);
+				//console.log(files);
 				//postAndRefreshPL({act:'plply','files':files}, 1);
 				document.addEventListener('mpdchg', (e) => console.log('mpdchg',e.detail));
 				const parms = {what:'plply',bobj:{files:files}};
@@ -37,12 +42,13 @@ class PlaylistsClass extends ServiceClass {
 		case 'plvue':
 			if (super.oneItem(scnt)) {
 				const files = Array.from(slctd).map(el => el.value);
-				console.log(files);
+				//console.log(files);
 				const parms = {what:'plvue', bobj: {file: files[0]}};
 				postAction(this.sr, parms, (data) => {
-					let dlg = document.getElementById('utldlg');
-					dlg.querySelector('div').innerHTML = data.pl.replace(/\n/gm, '<br>');
-					modal(dlg,true);
+				//	let dlg = document.getElementById('utldlg');
+				//	dlg.querySelector('div').innerHTML = data.pl.replace(/\n/gm, '<br>');
+				//	modal(dlg,true);
+					my.alert(data.pl.replace(/\n/gm, '<br>'));
 				}, 2);
 			}
 			break;
@@ -50,19 +56,19 @@ class PlaylistsClass extends ServiceClass {
 	}
 
 	lplay (evt) {
-		console.log(evt);
+		//console.log(evt);
 		const plfn = evt.target.closest('[data-plfn]')?.dataset.plfn;
 		const parms = {what:'plvue', bobj: {file: plfn}};
 		postAction(this.sr, parms, (data) => {
 			this.lclplylst = data.pl.trim().split("\n");
-			console.log(this.lclplylst);
+			//console.log(this.lclplylst);
 			const cnt = this.lclplylst.length;
 			if (!cnt) return;
 			showLocalAudio(this.sr,true);
 			this.lcix = 0;
 			laudioelm.addEventListener('ended', (evt) => {
 				if (this.lcix < cnt) {
-					console.log(this.lclplylst[this.lcix]);
+					//console.log(this.lclplylst[this.lcix]);
 					displayCurrentTrack(this.lclplylst[this.lcix].split('/').pop());
 					laudioelm.src = this.lclplylst[this.lcix++];
 					laudioelm.play();
@@ -109,6 +115,13 @@ class PlaylistsClass extends ServiceClass {
 			let elm = document.getElementById('playlists');
 			elm.innerHTML = data;
 		}, 1);
+	}
+
+
+	#delFiles (slctd) {
+		const files = Array.from(slctd).map(el => el.value);
+		//console.log(files);
+		this.#postAndRefresh({what:'pldel',bobj:{'files':files}}, 1);
 	}
 
 	#postAndRefresh (parms, json=false) {

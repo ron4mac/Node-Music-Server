@@ -1,0 +1,55 @@
+/* pandora */
+#pandoraTab {
+	position: relative;
+}
+#stations i.bmnu {font-size:small;color:#888;margin-right:5px;}
+#pand-search {height:50vh;max-width:75%}
+#pand-search .results {color:blue;line-height:1.4rem;height:calc(100% - 32px);overflow-y:auto}
+#pand-search .subs {
+	color: white;
+	padding: 2px 0;
+	background-color: cornflowerblue;
+	text-align: center;
+}
+#pand-search h4 {margin:0; height:32px}
+#pand-search i {margin-right:.4rem;color:darkorchid;}
+.pdor-sna {
+	display: flex;
+	justify-content: space-between;
+}
+#albumart {
+	display: none;
+/*	position: absolute;
+	top: 0;
+	right: 0;*/
+	width: 50%;
+	height: fit-content;
+	padding: .5em;
+	background-color: aliceblue;
+}
+#albumart .prevnext {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: .4em;
+	font-size: larger;
+}
+#albumart img {
+	object-fit: contain;
+	width: 100%;
+}
+#albumart dl {
+	line-height: 1.4rem;
+	margin: 0;
+	display: grid;
+	grid-template-columns: max-content;
+}
+#albumart dt {
+	text-align: right;
+	margin-right: 8px;
+}
+#albumart dd {
+	grid-column-start: 2;
+	margin-left: 0;
+	color: blue;
+}
+

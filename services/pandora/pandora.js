@@ -15,7 +15,7 @@ module.exports = class Pandora {
 			this.ws.on('connection', (sc) => {
 				sc.on('error', console.error);
 				sc.on('message', (data) => {
-					console.log('received: %s', data);
+					//console.log('received: %s', data);
 				});
 				// if message was 'probe' send albumart to this one connection
 				this.mpdc.status()
@@ -23,7 +23,7 @@ module.exports = class Pandora {
 					let msg;
 					if (stat.songid && this.queue[stat.songid]) {
 						msg = {...{state: stat.state}, ...{snam: this.stationName}, ...this.queue[stat.songid]};
-						console.log(msg);
+						//console.log(msg);
 					} else {
 						return;		//msg = {state: stat.state};
 					}
@@ -129,12 +129,12 @@ module.exports = class Pandora {
 			});
 			break;
 		case 'reauth':
-			console.log('re-authenticating');
+			//console.log('re-authenticating');
 			this.client.authData = null;
 			this.#login(this.client, cntrlr.settings.pandora_user, cntrlr.settings.pandora_pass)
 			.then(()=>{
 				if (this.client.authData) {
-					console.log(this.client.authData);
+					//console.log(this.client.authData);
 					resp.end();
 				} else {
 					resp.end('FAILED TO AUTHENTICATE');
@@ -162,7 +162,7 @@ module.exports = class Pandora {
 					resp.write(this.#parseStations(stationList.stations));
 					resp.end();
 				} else {
-					console.log(err);
+					console.error(err);
 					resp.end('-- Failed connection to Pandora ... may need to refresh authorization --');
 				}
 			});
@@ -193,10 +193,10 @@ module.exports = class Pandora {
 		if (this.client.authData) return true;
 		const sets = cntrlr.settings;
 		if (!sets.pandora_user) return false;
-		console.log('trying to authenticate');
+		//console.log('trying to authenticate');
 		const yn = await this.#login(this.client, sets.pandora_user, sets.pandora_pass)
 		.then(rslt => {
-			console.log('pdor auth',rslt);
+			//console.log('pdor auth',rslt);
 			return !rslt;
 		});
 		return yn;
@@ -257,7 +257,7 @@ module.exports = class Pandora {
 					};
 					this.queuel.push(trk);
 				} else {
-					console.log(t);
+					console.error(t);
 				}
 			}
 			if (needed) resp.end(JSON.stringify(this.queuel.shift()));
@@ -291,7 +291,7 @@ module.exports = class Pandora {
 					this.mpdc.sendCommand('addid '+t.additionalAudioUrl)
 					.then((rslt) => {
 						let id = rslt.match(/\d+/)[0];
-						console.log('add id',id);
+						//console.log('add id',id);
 						this.queue[id] = {
 							artistName: t.artistName,
 							albumName: t.albumName,
@@ -301,7 +301,7 @@ module.exports = class Pandora {
 						this.lastAddedId = id;
 					});
 				} else {
-					console.log(t);
+					console.error(t);
 				}
 			}
 			this.mpdc.sendCommand('play');
@@ -314,11 +314,11 @@ module.exports = class Pandora {
 		if (this.ws) {
 			this.mpdc.mpdc.on('system-player', (a,b) => {
 				if (!this.client.authData) return;
-				console.log('pdo on system player event ',a,b);
+				//console.log('pdo on system player event ',a,b);
 				this.mpdc.status()
 				.then((stat) => {
 					//console.log(stat);
-					console.log(stat.song+'/'+stat.playlistlength);
+					//console.log(stat.song+'/'+stat.playlistlength);
 					let msg;
 					if (stat.songid && this.queue[stat.songid]) {
 						msg = {...{state: stat.state}, ...{snam: this.stationName}, ...this.queue[stat.songid]};
@@ -332,7 +332,7 @@ module.exports = class Pandora {
 					} else {
 						msg = {state: 'stop'};
 					}
-					console.log(msg);
+					//console.log(msg);
 					this.ws.clients.forEach((client) => {
 						if (client.readyState === WebSocket.OPEN) {
 							client.send(JSON.stringify(msg));
@@ -360,10 +360,10 @@ module.exports = class Pandora {
 			try {
 				client.login(user, pass, (err) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						resolve('Login Failure');
 					} else {
-						console.log('Pandora Ready!');
+						//console.log('Pandora Ready!');
 						resolve();
 					}
 				});

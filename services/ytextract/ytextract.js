@@ -46,7 +46,7 @@ module.exports = class YTExtract {
 		this.getAudioStream(trk.shortUrl, this.pwtrk, (aud) => {
 			//console.log(aud);
 			if (aud.error) {
-				console.log(aud.error.message);
+				console.error(aud.error.message);
 				errs.push(aud.error);
 			} else {
 				aud.stream.pipe(fs.createWriteStream(dest+'/'+trk.title+'.'+aud.fext));
@@ -81,7 +81,7 @@ module.exports = class YTExtract {
 			return;
 		}
 		this.tlist = list.items;
-	console.log(this.tlist.length+' tracks');
+	//console.log(this.tlist.length+' tracks');
 		this.pwtrk = parms.wtrk;
 		let _dd = cntrlr.config.baseDir+'playlist_'+Date.now();
 		fs.mkdirSync(_dd);
@@ -151,7 +151,7 @@ module.exports = class YTExtract {
 			} else if (cntrlr.config.extr2Intrn) {
 				let ws = fs.createWriteStream(cntrlr.config.baseDir+parms.tnam+'.'+aud.fext);
 				ws.on('finish', () => {
-					console.log('ws-end');
+					//console.log('ws-end');
 					resp.end(`<script>parent.YTx.extrFini("sgl","Audio extracted as '${parms.tnam}.${aud.fext}'")</script>`);
 				});
 				aud.stream.pipe(ws);
@@ -203,7 +203,7 @@ module.exports = class YTExtract {
 	}
 
 	videoExtract (parms, resp) {
-		console.log(parms);
+		//console.log(parms);
 		let yturl = parms.vxtr;
 		this.getVideo(parms.vxtr, parms.wtrk, parms.vida, (vid) => {
 			//console.log(vid);
@@ -213,7 +213,7 @@ module.exports = class YTExtract {
 			} else if (cntrlr.config.extr2Intrn) {
 				let ws = fs.createWriteStream(cntrlr.config.baseDir+parms.tnam+'.'+vid.fext);
 				ws.on('finish', () => {
-					console.log('ws-end');
+					//console.log('ws-end');
 					resp.end(`<script>parent.YTx.extrFini("vid","Video extracted as '${parms.tnam}.${vid.fext}'")</script>`);
 				});
 				vid.stream.pipe(ws);
@@ -226,7 +226,7 @@ module.exports = class YTExtract {
 	}
 
 	getStreams (parms, resp) {
-		console.log(parms);
+		//console.log(parms);
 		let yturl = parms.strms;
 		let whch = parms.whch;
 		ytdl.getInfo(yturl)

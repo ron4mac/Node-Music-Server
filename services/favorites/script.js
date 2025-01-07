@@ -5,7 +5,7 @@ class FavoritesClass {
 	sr = 'fa';	// service route
 
 	play (evt) {
-		console.log(evt);
+		//console.log(evt);
 		evt.preventDefault();
 		const welm = evt.target.nodeName;
 		if (welm!='A') return;
@@ -13,10 +13,10 @@ class FavoritesClass {
 		const parms = {what: 'play', bobj: fid};
 		postAction(this.sr, parms, (data) => {
 			if (data) {
-				console.log(data);
+				//console.log(data);
 				this.#assure(data.what)
 				.then(()=>{
-					console.log('assured');
+					//console.log('assured');
 					currentStream = data.name;
 					window[data.what].fave(data.how, data.url);
 				//console.log([data.what]);
@@ -37,8 +37,8 @@ class FavoritesClass {
 	delete (evt) {
 		evt.preventDefault();
 		my.confirm('Are you sure that you want to delete this favorite?')
-		.then(yn=>{
-			if (!yn) return;
+		.then(y=>{
+			if (!y) return;
 			const fid = evt.target.closest('[data-fid]').dataset.fid;
 			const parms = {what: 'delete', bobj: fid};
 			postAction(this.sr, parms, (data) => {

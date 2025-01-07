@@ -45,7 +45,7 @@ module.exports = class TuneIn {
 			}).on('end', () => {
 				const parser = new XMLParser({ignoreAttributes: false, attributeNamePrefix: ''});
 				const jdat = parser.parse(dat);
-				console.log(jdat);
+				//console.log(jdat);
 				if (Array.isArray(jdat.opml.body.outline)) {
 					this.#radioParse(jdat.opml.body.outline, resp);
 				} else if (jdat.opml.body.outline) {

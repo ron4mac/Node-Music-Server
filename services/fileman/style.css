@@ -1,0 +1,165 @@
+/* filemanager */
+#filemanTab {
+	min-height: 480px;
+}
+.fmenu a {
+	margin-left: .3rem;
+	color: green;
+}
+.fmenu a:visited {
+	color: green;
+}
+.fmenu span {
+	border-right: 1px solid #888;
+}
+.fmnav {
+	margin-left: .3rem;
+}
+.fmnav .isdir {
+	color: gray;
+}
+table {
+	line-height: 1rem;
+}
+table .fa {
+	width: 1.7rem;
+}
+#fileman tbody>tr>:nth-child(3) {
+	text-align: right;
+	padding: 1px 1rem;
+}
+#fileman tbody>tr>:nth-child(4) {
+	text-align: right;
+}
+.fsel {
+	margin-right: 0;
+}
+.isdir, .isfil {
+	cursor: pointer;
+}
+.d-icn {
+	color: teal;
+	font-size: large;
+}
+#fvewd {
+	display: none;
+	position: absolute;
+	/*width: 480px;
+	height: 294px;*/
+	min-width: 600px;
+	width: 90%;
+	height: 90%;
+	top: 0;
+	left: 50%;
+	transform: translate(-50%, 0);
+	border: 1px solid #888;
+	border-radius: 5px;
+	background-color: #FFF;
+	box-shadow: 2px 2px 8px #BBB;
+	padding-top: 24px;
+}
+#fvewd span {
+	position: absolute;
+	top: 0;
+	left: 5px;
+	line-height: 24px;
+	font-size: medium;
+}
+#fvewd i, #sseld i {
+	position: absolute;
+	top: 5px;
+	right: 6px;
+	cursor: pointer;
+	color: #888;
+}
+#fvewf {
+	height: 100%;
+	width: 100%;
+	border: none;
+}
+
+/* ============================ file upload dialog with drag and drop
+*/
+.pbwrp {
+	position:relative;
+	border:1px solid #BBB;
+	border-radius:3px;
+	boxsizing:border-box;
+}
+.normpb, .chnkpb, .indeterm {
+	position: absolute;
+	width:0;
+	min-height:100%;
+/*	z-index:-1;*/
+}
+.normpb { background-color:#AAD7FD; }
+.chnkpb { background-color:#D9D2FF; }
+.indeterm { background: #efefef url(indtrm.gif) repeat-x top; }
+.pbfinf {
+	padding: 3px 4px;
+	position:relative;
+	z-index: 1;
+}
+.pbfinf.failure {background-color: #F99}
+.pbfinf.success {background-color: #CFC}
+
+
+div.uplddlog {
+	position: absolute;
+	top: 60px;
+	left: 50%;
+	transform: translate(-50%, 0);
+	width: 400px;
+	padding: 6px;
+	background-color: #CEF;
+	border: 1px solid #999;
+	border-radius: 3px;
+	box-shadow: 0 0 5px #AAA;
+}
+div.uplddlog input { width: 100% }
+#dropArea {
+	border: 1px dashed #CCC;
+	width: 100%;
+	padding: .5em 0;
+	margin-bottom: 5px;
+	text-align: center;
+	border-radius: 5px;
+	cursor: auto;
+}
+#dropArea.hover {
+	background-color: #DFD;
+	border: 1px solid #999;
+	box-shadow: inset 2px 2px 3px #999;
+}
+.prgwrp {
+	border: 1px solid #BBB;
+	border-radius: 3px;
+}
+#totprogress {
+	width: 0;
+	height: 8px;
+	background-color: blue;
+/*	background: #eee url("../imgs/progress_t.png") 100% 0 no-repeat;*/
+}
+#fprogress p {
+	display: block;
+	padding: 0 0 0 4px;
+	line-height: 1.4em;
+	margin: 2px 0;
+	border: 1px solid #BBB;
+	border-radius: 3px;
+	font-size: 0.9em;
+	background: #eee url("../imgs/progress_f.png") 100% 0 no-repeat;
+}
+#fprogress p.success {
+	background: #0C0 none 0 0 no-repeat;
+}
+#fprogress p.failure {
+	background: #F99 none 0 0 no-repeat;
+}
+#fprogress .abortX {
+	position: absolute;
+	top: 3px;
+	right: 3px;
+	cursor: pointer;
+}

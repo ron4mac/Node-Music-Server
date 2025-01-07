@@ -15,10 +15,10 @@ module.exports = class MyMPD {
 			this.ws.on('connection', (sc) => {
 				sc.on('error', console.error);
 				sc.on('message', (data) => {
-					console.log('MPD received: %s', data);
+					//console.log('MPD received: %s', data);
 					this.#socketRequest(data)
 					.then(reply => {
-						console.log('reply ',reply);
+						//console.log('reply ',reply);
 						sc.send(JSON.stringify({state: this.mstatus.state, track: reply}));
 					});
 				});
@@ -29,7 +29,7 @@ module.exports = class MyMPD {
 //				.then(s=>console.log('on system player event ',s,a,b));
 //			});
 			this.mpdc.on('system', name => {
-				console.log('on system event: %s', name);
+				//console.log('on system event: %s', name);
 				this.status()
 				.then((s)=> {
 				//	console.log('*mpd* ', s);
@@ -118,8 +118,7 @@ module.exports = class MyMPD {
 			let rslt = await this.mpdc.sendCommand(cmd);
 			return rslt;
 		} catch (error) {
-			console.log(cmd);
-			console.error(error);
+			console.error(cmd, error);
 		}
 	}
 
@@ -136,7 +135,7 @@ module.exports = class MyMPD {
 	#broadcastTrack () {
 		this.#sendCommand('playlistinfo')
 		.then((resp) => {
-			console.log('@mpd@\n', resp);
+			//console.log('@mpd@\n', resp);
 			const info = MPD.parseObject(resp);
 			if (info && info.title) {
 				this.#broadcast({state: this.mstatus.state, track: info.title});

@@ -6,7 +6,7 @@ class SpotClass {
 
 	constructor () {
 		document.addEventListener('playctl', (e) => {
-			console.log('playctl', e.detail);
+			//console.log('playctl', e.detail);
 			const parms = {what: 'playctl', bobj: e.detail};
 			postAction(this.sr, parms, (data) => {
 				if (data) my.alert(data);
@@ -16,7 +16,7 @@ class SpotClass {
 
 	nav (evt, mnu='') {
 		evt.preventDefault();
-		console.log(evt);
+		//console.log(evt);
 		let parms;
 		if (mnu) {
 			parms = {what: 'nav', bobj: mnu};
@@ -42,12 +42,12 @@ class SpotClass {
 	}
 
 	back (evt) {
-		console.log(evt);
+		//console.log(evt);
 		this.nav(evt, evt.target);
 	}
 
 	play (evt) {
-		console.log(evt);
+		//console.log(evt);
 		evt.preventDefault();
 		const elm = evt.target;
 		const elmwurl = elm.closest('[data-url]');
@@ -69,7 +69,7 @@ class SpotClass {
 	}
 
 	doSearch (evt) {
-		console.log(evt);
+		//console.log(evt);
 		evt.preventDefault();
 		const vals = getFormValues(evt.target.form);
 		if (!vals['sterm']) {my.alert('Please specify a search term');return;}
@@ -108,7 +108,7 @@ class SpotClass {
 	}
 
 	creds (evt, elm) {
-		console.log(evt);
+		//console.log(evt);
 		const frm = evt.target.form;
 		const parms = {what: 'creds', bobj:{id:frm.clientId.value, secret:frm.clientSecret.value, rdir:frm.redirect.value}};
 		postAction(this.sr, parms, (data) => {
@@ -125,7 +125,7 @@ class SpotClass {
 	};
 
 	logout (evt, elm) {
-		console.log(evt);
+		//console.log(evt);
 		if (!confirm('Are you sure you want to logout?')) return;
 		const parms = {what: 'logout'};
 		postAction(this.sr, parms, (data) => {
@@ -154,7 +154,7 @@ class SpotClass {
 
 	#reflectPlayer () {
 		postAction(this.sr, {what:'state'}, (data) => {
-			console.log(data);
+			//console.log(data);
 		}, 2);
 	};
 

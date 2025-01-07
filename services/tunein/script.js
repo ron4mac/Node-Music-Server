@@ -3,6 +3,7 @@
 class TuneinClass {
 
 	sr = 'ti';	// service route
+	last = '';
 
 	play (evt) {
 		const elm = evt.target;
@@ -21,7 +22,7 @@ class TuneinClass {
 	}
 
 	fave (how, url) {
-		console.log(how, url);
+		//console.log(how, url);
 		this.#startPlay(how, url);
 	}
 
@@ -44,7 +45,7 @@ class TuneinClass {
 	}
 
 	back (evt) {
-		console.log(evt);
+		//console.log(evt);
 		evt.preventDefault();
 		if (evt.target.nodeName != 'A') return;
 		const bobj = evt.target.dataset.bobj;
@@ -56,14 +57,16 @@ class TuneinClass {
 	}
 
 	search () {
-		let sterm = prompt('Search radio stations');
-		if (sterm) {
-			const parms = {act:'radio', what: 'search', bobj: sterm};
+		my.prompt('Search radio stations',this.last,{required:true})
+		.then(st=>{
+			if (!st) return;
+			this.last = st;
+			const parms = {act:'radio', what: 'search', bobj: st};
 			postAction(this.sr, parms, (data) => {
 				let el = document.getElementById('radio');
 				el.innerHTML = data;
 			}, 1);
-		}
+		});
 	}
 
 	get () {

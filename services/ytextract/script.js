@@ -45,7 +45,7 @@ class YTxClass {
 	}
 
 	extrFini (wch, msg) {
-		console.log(wch, msg);
+		//console.log(wch, msg);
 		services.fm.seen = false;
 		document.querySelector('#'+wch+'Tab i').style.display = 'none';
 		document.querySelector('#'+wch+'Tab input[type="submit"]').disabled = false;
@@ -66,7 +66,7 @@ class YTxClass {
 		fetch(`?_=yt&act=strms&strms=${yturl}&whch=${type}`, {method:'GET'})
 		.then((resp) => resp.json())
 		.then(data => {
-			console.log(data);
+			//console.log(data);
 			if (type=='audio') {
 				data.forEach(td => selt.innerHTML += `<tr><td><input type="radio" name="itag" value="${td.itag}"></td><td>${td.mime}</td><td>${td.audbr}</td><td>${td.audsr}</td></tr>`);
 			} else {

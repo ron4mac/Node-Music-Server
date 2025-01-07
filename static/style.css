@@ -74,24 +74,42 @@ dialog .closex i {
 	vertical-align: middle;
 }
 dialog h3 {margin-top:0}
-dialog .btns {
+dialog .btns, .modl-btns, .macp-btns {
 	display: flex;
 	flex-direction: row-reverse;
 	justify-content: space-between;
 	gap: .5rem;
 	margin-top: 1rem;
 }
-dialog .btns button {font-size: large;}
-/* my alert confirm prompt dialog */
-#myacpd {
+dialog .macp-btns {
+	justify-content: flex-start;
+}
+dialog .btns button, .modl-btns button {font-size: unset;}
+/* my alert confirm prompt modal dialog */
+#mymodl {
 	max-width: 50%;
 }
-#myacpd.alert .hidden {
-	display: none;
-}
-.myacpd-msg {
+.modl-msg, .macp-msg {
+	margin-top: .5rem;
 	line-height: normal;
+	font-size: large;
 }
+.modl-hedr {
+	max-height: 1rem;
+}
+.modl-titl {
+	position: absolute;
+	left: .5rem;
+	top: 3px;
+	line-height: normal;
+	font-weight: bold;
+}
+#myacpd input {
+	width: 100%;
+}
+.my-acpd-info {background-color:#EFE}
+.my-acpd-warn {background-color:#FFD}
+.my-acpd-error {background-color:#FCC}
 
 /*===========*/
 input, label, span {
@@ -121,29 +139,7 @@ form i.fa {
 	padding-bottom: 0.5rem;
 }
 #hdr i {float:right}
-#plists {
-	display: flex;
-	flex-wrap: wrap;
-}
-.plst {
-	display: inline-block;
-	text-align: center;
-	border: 1px solid #33F;
-	padding: 0.5em 1em;
-	border-radius: 0.4em;
-	margin-right: 1rem;
-	margin-bottom: 1rem;
-	background-color: aliceblue;
-}
-.plst.activ {
-	background-color: khaki;
-}
-.plst-ttl {font-size: x-large}
 
-#playlists input[type='checkbox'] {
-	vertical-align: text-bottom;
-	margin-right: .5rem;
-}
 
 /* LOCAL AUDIO */
 #localAudio {
@@ -297,278 +293,6 @@ i.lplay {
 }
 
 
-/* Web Radio */
-/*
-#radcrumbs {
-	border-bottom: 1px solid #555;
-	padding-bottom: .5rem;
-}
-#radcrumbs i {
-	float: right;
-	margin-left: 1rem;
-	font-size: larger;
-	color: gray;
-	cursor: pointer;
-}
-#radcrumbs i:hover {
-	color: magenta;
-}
-*/
-/*
-.rad-link {
-	line-height: 1.5rem;
-}
-.rad-station img {
-	width: 48px;
-	height: 48px;
-	vertical-align: middle;
-	margin: 2px 6px 2px 0;
-	cursor: pointer;
-}
-.rheader {
-	background-color: gold;
-	font-size: x-large;
-	text-align: center;
-}
-*/
-
-/* Calm Radio */
-#calm {
-	display: flex;
-	flex-wrap: wrap;
-}
-#calm .calm-link {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-}
-#calm .calm-play, #calm .calm-noplay {
-	position: relative;
-	margin-bottom: 1.8rem;
-	margin-right: .5em;
-}
-#calm .calm-play i {
-	position: absolute;
-	top: 5px;
-	right: 5px;
-	background-color: aliceblue;
-	padding: 1px 2px;
-}
-#calm .calm-play a, #calm .calm-noplay span {
-	position: absolute;
-	left: 50%;
-	padding: 0 1rem;
-	background-color: #E0F0F0;
-	transform: translate(-50%);
-	bottom: -1.2rem;
-/*	white-space: nowrap;*/
-}
-#calm img {
-	width: 300px;
-	height: 300px;
-}
-#calm img.noplay {
-	opacity: 0.3;
-}
-
-/* pandora */
-#pandoraTab {
-	position: relative;
-}
-#albumart {
-	display: none;
-/*	position: absolute;
-	top: 0;
-	right: 0;*/
-	width: 50%;
-	height: fit-content;
-	padding: .5em;
-	background-color: aliceblue;
-}
-#albumart .prevnext {
-	display: flex;
-	justify-content: space-between;
-	margin-bottom: .4em;
-	font-size: larger;
-}
-#albumart img {
-	object-fit: contain;
-	width: 100%;
-}
-#albumart dl {
-	line-height: 1.4rem;
-	margin: 0;
-	display: grid;
-	grid-template-columns: max-content;
-}
-#albumart dt {
-	text-align: right;
-	margin-right: 8px;
-}
-#albumart dd {
-	grid-column-start: 2;
-	margin-left: 0;
-	color: blue;
-}
-
-/* filemanager */
-#filemanTab {
-	min-height: 480px;
-}
-.fmenu a {
-	margin-left: .3rem;
-	color: green;
-}
-.fmenu a:visited {
-	color: green;
-}
-.fmnav {
-	margin-left: .3rem;
-}
-.fmnav .isdir {
-	color: gray;
-}
-table {
-	line-height: 1rem;
-}
-table .fa {
-	width: 1.7rem;
-}
-#fileman tbody>tr>:nth-child(3) {
-	text-align: right;
-}
-#fileman tbody>tr>:nth-child(4) {
-	text-align: right;
-}
-.isdir, .isfil {
-	cursor: pointer;
-}
-.d-icn {
-	color: teal;
-	font-size: large;
-}
-#fvewd {
-	position: absolute;
-	/*width: 480px;
-	height: 294px;*/
-	min-width: 600px;
-	width: 90%;
-	height: 90%;
-	top: 0;
-	left: 50%;
-	transform: translate(-50%, 0);
-	border: 1px solid #888;
-	border-radius: 5px;
-	background-color: #FFF;
-	box-shadow: 2px 2px 8px #BBB;
-	padding-top: 24px;
-}
-#fvewd span {
-	position: absolute;
-	top: 0;
-	left: 5px;
-	line-height: 24px;
-	font-size: medium;
-}
-#fvewd i, #sseld i {
-	position: absolute;
-	top: 5px;
-	right: 6px;
-	cursor: pointer;
-	color: #888;
-}
-#fvewf {
-	height: 100%;
-	width: 100%;
-	border: none;
-}
-
-/* ============================ file upload dialog with drag and drop
-*/
-.pbwrp {
-	position:relative;
-	border:1px solid #BBB;
-	border-radius:3px;
-	boxsizing:border-box;
-}
-.normpb, .chnkpb, .indeterm {
-	position: absolute;
-	width:0;
-	min-height:100%;
-/*	z-index:-1;*/
-}
-.normpb { background-color:#AAD7FD; }
-.chnkpb { background-color:#D9D2FF; }
-.indeterm { background: #efefef url(indtrm.gif) repeat-x top; }
-.pbfinf {
-	padding: 3px 4px;
-	position:relative;
-	z-index: 1;
-}
-.pbfinf.failure {background-color: #F99}
-.pbfinf.success {background-color: #CFC}
-
-
-div.uplddlog {
-	position: absolute;
-	top: 60px;
-	left: 50%;
-	transform: translate(-50%, 0);
-	width: 400px;
-	padding: 6px;
-	background-color: #CEF;
-	border: 1px solid #999;
-	border-radius: 3px;
-	box-shadow: 0 0 5px #AAA;
-}
-div.uplddlog input { width: 100% }
-#dropArea {
-	border: 1px dashed #CCC;
-	width: 100%;
-	padding: .5em 0;
-	margin-bottom: 5px;
-	text-align: center;
-	border-radius: 5px;
-	cursor: auto;
-}
-#dropArea.hover {
-	background-color: #DFD;
-	border: 1px solid #999;
-	box-shadow: inset 2px 2px 3px #999;
-}
-.prgwrp {
-	border: 1px solid #BBB;
-	border-radius: 3px;
-}
-#totprogress {
-	width: 0;
-	height: 8px;
-	background-color: blue;
-/*	background: #eee url("../imgs/progress_t.png") 100% 0 no-repeat;*/
-}
-#fprogress p {
-	display: block;
-	padding: 0 0 0 4px;
-	line-height: 1.4em;
-	margin: 2px 0;
-	border: 1px solid #BBB;
-	border-radius: 3px;
-	font-size: 0.9em;
-	background: #eee url("../imgs/progress_f.png") 100% 0 no-repeat;
-}
-#fprogress p.success {
-	background: #0C0 none 0 0 no-repeat;
-}
-#fprogress p.failure {
-	background: #F99 none 0 0 no-repeat;
-}
-#fprogress .abortX {
-	position: absolute;
-	top: 3px;
-	right: 3px;
-	cursor: pointer;
-}
-
 /* ============================ file combine/convert dialog
 */
 .dlogs {
@@ -617,27 +341,4 @@ div.uplddlog input { width: 100% }
 .modl i.left {
 	float: left;
 }
-/*
-#plmnu {
-	position: absolute;
-	width: fit-content;
-	top: 120px;
-	background-color: lightcyan;
-	left: 50%;
-	transform: translate(-50%, 0);
-	padding: 1rem;
-	border: 1px solid #999;
-	border-radius: 5px;
-	box-shadow: 0 0 5px #AAA;
-}
-#plmnu h4 {
-	margin: 0;
-}
-#plmnu input {
-	width: 20rem;
-}
-#plmnu button {
-	float: right;
-	margin-left: 1rem;
-}
-*/
+

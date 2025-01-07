@@ -4,6 +4,7 @@ class PandClass {
 
 	sr = 'pd';	// service route
 	socket = null;
+	last = '';
 
 	play (evt) {
 		evt.preventDefault();
@@ -58,7 +59,7 @@ class PandClass {
 	}
 
 	login (evt,elm) {
-		console.log(evt);
+		//console.log(evt);
 		let frm = evt.target.form;
 		const parms = {what: 'login', bobj:{user:frm.user.value, pass:frm.pass.value}};
 		postAction(this.sr, parms, (data) => {
@@ -81,7 +82,7 @@ class PandClass {
 	}
 
 	reauth (evt,elm) {
-		console.log(evt);
+		//console.log(evt);
 		const parms = {what: 'reauth'};
 		postAction(this.sr, parms, (data) => {
 			if (data) {
@@ -94,18 +95,21 @@ class PandClass {
 	}
 
 	logout (evt,elm) {
-		console.log(evt);
-		if (!confirm('Are you sure you want to logout?')) return;
-		const parms = {what: 'logout'};
-		postAction(this.sr, parms, (data) => {
-			if (data) {
-				my.alert(data);
-			} else {
-				my.alert('You have been logged out from Pandora');
-				elm.closest('dialog').close();
-				this.get();
-			}
-		}, 1);
+		//console.log(evt);
+		my.confirm('Are you sure you want to logout?')
+		.then(y=>{
+			if (!y) return;
+			const parms = {what: 'logout'};
+			postAction(this.sr, parms, (data) => {
+				if (data) {
+					my.alert(data);
+				} else {
+					my.alert('You have been logged out from Pandora');
+					elm.closest('dialog').close();
+					this.get();
+				}
+			}, 1);
+		});
 	}
 
 	get () {
@@ -119,15 +123,18 @@ class PandClass {
 	};
 
 	search () {
-		const sterm = prompt('Search Pandora stations ...');
-		if (!sterm) return;
-		const parms = {what: 'search', bobj: sterm};
-		postAction(this.sr, parms, (data) => {
-			if (!data) return;
-			const dlg = document.getElementById('pand-search');
-			dlg.querySelector('.results').innerHTML = data;
-			dlg.showModal();
-		}, 1);
+		my.prompt('Search Pandora stations ...',this.last,{yesBtn:'Search',required:true})
+		.then(st=>{
+			if (!st) return;
+			this.last = st;
+			const parms = {what: 'search', bobj: st};
+			postAction(this.sr, parms, (data) => {
+				if (!data) return;
+				const dlg = document.getElementById('pand-search');
+				dlg.querySelector('.results').innerHTML = data;
+				dlg.showModal();
+			}, 1);
+		});
 	}
 
 	add (evt, mtyp) {
@@ -146,17 +153,20 @@ class PandClass {
 
 	delete (evt) {
 		evt.preventDefault();
-		if (!confirm('Are you sure that you want to delete this station?')) return;
-		const sid = evt.target.closest('[data-sid]').dataset.sid;
-		const parms = {what: 'delete', bobj: sid};
-		postAction(this.sr, parms, (data) => {
-			if (data) {
-				my.alert(data);
-			} else {
-				evt.target.closest('dialog').close();
-				this.get();
-			}
-		}, 1);
+		my.confirm('Are you sure that you want to delete this station?')
+		.then(y=>{
+			if (!y) return;
+			const sid = evt.target.closest('[data-sid]').dataset.sid;
+			const parms = {what: 'delete', bobj: sid};
+			postAction(this.sr, parms, (data) => {
+				if (data) {
+					my.alert(data);
+				} else {
+					evt.target.closest('dialog').close();
+					this.get();
+				}
+			}, 1);
+		});
 	}
 
 	more (evt) {
@@ -203,7 +213,7 @@ class PandClass {
 			});
 			// Listen for messages
 			this.socket.addEventListener('message', (event) => {
-				console.log('Message from server ', event.data);
+				//console.log('Message from server ', event.data);
 				let data = JSON.parse(event.data);
 				if (data.state=='play') {
 					this.#showTrackArt(data);
