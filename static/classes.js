@@ -57,6 +57,8 @@ class MyClass {
 				bdy.appendChild(body);
 			}
 
+			// clear any 'pending' status
+			this._pend(dlg);
 			// set the buttons
 			this._setDlgBtns(dlg, opts, true);
 			// run the dialog
@@ -69,7 +71,8 @@ class MyClass {
 	dlgsub (evt) {
 		//console.log(evt);
 		const dlg = evt.target.closest('dialog');
-		//return true;
+		this._pend(dlg, true);
+		//return false;
 		return dlg.myCBk(dlg, evt.submitter.value);
 	}
 
@@ -131,6 +134,22 @@ class MyClass {
 			btn.innerText = opts.altBtn;
 			btn.style.display = opts.altBtn?'block':'none';
 		}
+	}
+
+	_pend (dlg, p=false) {
+		const bd = dlg.querySelector('.modl-btns');
+		const ovr = bd.querySelector('.modl-busy');
+		const btns = bd.querySelectorAll('button');
+		let dis, vis;
+		if (p) {
+			dis = true;
+			vis = 'block';
+		} else {
+			dis = false;
+			vis = 'none';
+		}
+		btns.forEach(btn=>{btn.disabled = dis});
+		ovr.style.display = vis;
 	}
 
 	_fd2obj (fd) {

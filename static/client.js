@@ -251,7 +251,7 @@ const mpdSocket = () => {
 
 const modal = (dlg, oc) => {
 	if (oc) {
-		dlg.parentElement.style.display = 'block';
+		dlg.parentElement.style.display = 'flex';
 		dlg.style.display = 'block';
 	} else {
 		dlg.style.display = 'none';
@@ -305,5 +305,5 @@ const postAction = (tos, parms={}, cb=()=>{}, json=false) => {
 	fetch(url, {method:'POST', headers:hdrs, body:parms})
 	.then(resp => { if (!resp.ok) throw new Error('Network response was not OK'); if (json==2) return resp.json(); else return resp.text() })
 	.then(data => cb(data))
-	.catch(err => my.alert(err));
+	.catch(err => my.alert(err,{class:'error'}));
 };

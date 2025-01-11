@@ -50,11 +50,11 @@
 </div>
 <iframe id="dnldf" style="display:none"></iframe>
 <script>
-	_fm = document.getElementById('fileman');
-	document.querySelectorAll('.fmenu a').forEach(elm => {
-		elm.addEventListener('click', (evt) => {
-			evt.preventDefault();	console.log(evt);
-			Fileman.menu(evt.target.closest('[data-menu]').dataset.menu, evt);
-		});
+_fm = document.getElementById('fileman');
+document.querySelectorAll('.fmenu a').forEach(elm => {
+	elm.addEventListener('click', (evt) => {
+		evt.preventDefault();
+		Fileman.menu(evt.target.closest('[data-menu]').dataset.menu, evt);
 	});
+});
 </script>

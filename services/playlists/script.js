@@ -45,9 +45,6 @@ class PlaylistsClass extends ServiceClass {
 				//console.log(files);
 				const parms = {what:'plvue', bobj: {file: files[0]}};
 				postAction(this.sr, parms, (data) => {
-				//	let dlg = document.getElementById('utldlg');
-				//	dlg.querySelector('div').innerHTML = data.pl.replace(/\n/gm, '<br>');
-				//	modal(dlg,true);
 					my.alert(data.pl.replace(/\n/gm, '<br>'));
 				}, 2);
 			}

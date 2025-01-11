@@ -84,7 +84,7 @@ dialog .btns, .modl-btns, .macp-btns {
 dialog .macp-btns {
 	justify-content: flex-start;
 }
-dialog .btns button, .modl-btns button {font-size: unset;}
+dialog .btns button, .modl-btns button {font-size: unset; position: relative}
 /* my alert confirm prompt modal dialog */
 #mymodl {
 	max-width: 50%;
@@ -95,6 +95,7 @@ dialog .btns button, .modl-btns button {font-size: unset;}
 	font-size: large;
 }
 .modl-hedr {
+	margin-top: .5rem;
 	max-height: 1rem;
 }
 .modl-titl {
@@ -103,6 +104,14 @@ dialog .btns button, .modl-btns button {font-size: unset;}
 	top: 3px;
 	line-height: normal;
 	font-weight: bold;
+}
+.modl-busy {
+	position: absolute;
+/*	width: 100%;
+	height: 100%;
+	text-align: center;*/
+	left: 50%;
+	font-size: x-large;
 }
 #myacpd input {
 	width: 100%;
@@ -122,6 +131,7 @@ form [type="checkbox"], form [type="radio"] {
 }
 form i.fa {
 	display: none;
+	vertical-align: baseline;
 }
 /*
 .yturl {
@@ -297,6 +307,8 @@ i.lplay {
 */
 .dlogs {
 	position: absolute;
+	align-items: baseline;
+	justify-content: center;
 	top: 0;
 	left: 0;
 	width: 100%;
@@ -308,18 +320,16 @@ i.lplay {
 	display: none;
 }
 
-#utldlg {
-	min-width: 400px;
-}
-
 
 .modl {
-	position: absolute;
+	/*position: absolute;*/
+	margin-top: 8rem;
 	width: fit-content;
-	top: 120px;
+	height: fit-content;
+	/*top: 120px;*/
 	background-color: lightcyan;
-	left: 50%;
-	transform: translate(-50%, 0);
+	/*left: 50%;
+	transform: translate(-50%, 0);*/
 	padding: 1rem;
 	border: 1px solid #999;
 	border-radius: 5px;
