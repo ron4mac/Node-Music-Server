@@ -54,7 +54,7 @@ module.exports = class MyMPD {
 		} catch (err) {
 			console.error(err);
 			cntrlr.errors.push('Could not connect to MPD daemon');
-			return {};
+			return null;
 		}
 	}
 

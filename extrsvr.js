@@ -138,6 +138,7 @@ const mpdCtrl = async (what, bobj, resp) => {
 	if (!mympd) {
 		mympd = await MyMPD.init();
 	}
+	if (!mympd) return;
 	switch (what) {
 	case 'getVolume':
 		mympd.getVolume()
