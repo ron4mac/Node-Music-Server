@@ -189,13 +189,13 @@ i.lplay {
 }
 
 /* Style the buttons that are used to open the tab content */
-.tab button {
+.tab button, .tabmenu {
 	background-color: #f1f1f1;
 /*	float: left;*/
 	border: none;
 	outline: none;
 	cursor: pointer;
-	padding: 14px 16px;
+	padding: 10px 12px;
 	transition: 0.3s;
 	border: 1px solid #CCC;
 	border-bottom: none;
@@ -209,7 +209,7 @@ i.lplay {
 
 /* Create an active/current tablink class */
 .tab button.active {
-	background-color: #ccc;
+	background-color: lavender;
 }
 
 /* the panels enclosure*/
@@ -352,3 +352,32 @@ i.lplay {
 	float: left;
 }
 
+.tabmenu {
+	position: absolute;
+	height: 2rem;
+	display: none;
+}
+@media screen and (max-width: 680px) {
+	.tabmenu {
+		display: block;
+	}
+	.tab {
+		/*display: none;*/
+		position: absolute;
+		top:2rem;
+		left: -80rem;
+		flex-direction: column;
+		width: fit-content;
+		z-index: 1;
+	}
+	.tab button {
+	/*	display: none;*/
+	}
+	.tab button.active {
+	/*	display: block;*/
+	}
+	.panels {
+		margin-top: 2rem;
+		border-top: 1px solid #CCC;
+	}
+}

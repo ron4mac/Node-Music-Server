@@ -28,8 +28,16 @@ const openTab = (evt, tabName, cb) => {
 	} else if (typeof cb === 'string') {
 		svcPop(cb);
 	}
+	if (tab.parentElement.offsetHeight > 80) {
+		tab.parentElement.style.left = '-80rem';
+	}
 };
 
+const tabMenu = (evt) => {
+	const tabm = document.querySelector('.tab');
+	const lft = tabm.style.left == '0px' ? '-80rem' : '0px';
+	tabm.style.left = lft;
+}
 
 // UI display
 const displayCurrent = (what) => {

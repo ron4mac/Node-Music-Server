@@ -30,7 +30,7 @@ class FavoritesClass {
 		const parms = {what: 'add', bobj: nowPlaying};
 		postAction(this.sr, parms, (data) => {
 			if (data) my.alert(data);
-			services[sr].seen = false;
+			services[this.sr].seen = false;
 		}, 1);
 	}
 
