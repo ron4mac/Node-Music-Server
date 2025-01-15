@@ -357,8 +357,18 @@ i.lplay {
 	height: 2rem;
 	display: none;
 }
+.tabttl {
+	display: none;
+	position: absolute;
+	width: 100%;
+	text-align: center;
+	top: .3rem;
+}
 @media screen and (max-width: 680px) {
 	.tabmenu {
+		display: block;
+	}
+	.tabttl {
 		display: block;
 	}
 	.tab {

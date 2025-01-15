@@ -31,6 +31,9 @@ const openTab = (evt, tabName, cb) => {
 	if (tab.parentElement.offsetHeight > 80) {
 		tab.parentElement.style.left = '-80rem';
 	}
+	// set the TAB title for small devices
+	const tbt = document.querySelector('.tabttl');
+	tbt.innerText = tab.innerText;
 };
 
 const tabMenu = (evt) => {
