@@ -6,8 +6,19 @@ var currentStream = '',
 	laudiosvu = '',
 	nowPlaying = {};
 
+const superAdmin = () => {
+	my.modal('.superAdmin')
+	.then(r=>{
+		console.log(r);
+		if (r.resp!='y') return false;
+		postAction(null, r.data, (data) => {
+			if (data) my.alert(data);
+		}, 1);
+	});
+}
 
 const openTab = (evt, tabName, cb) => {
+	if (evt.metaKey && cb=='fm') return superAdmin();
 	let tab = evt.currentTarget;
 	const pnls = tab.parentElement.nextElementSibling.querySelectorAll(':scope > div.tabcontent');
 	let i;

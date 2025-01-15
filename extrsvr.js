@@ -207,6 +207,20 @@ const reqAction = (parms, resp) => {
 		mpdCtrl(parms.what, parms.bobj??'', resp);
 		return;
 		break;
+	case 'spract':
+		if (parms.spract == 'b') {
+			rmsg = 'Rebooting server ... refresh page in a minute or two';
+			require('child_process').exec('/usr/bin/systemctl reboot',{},(error, stdout, stderr)=>{
+				if (error) { console.error(stderr) } else { console.log(stdout) }
+			});
+		}
+		if (parms.spract == 'r') {
+			rmsg = 'Restarting music server ... refresh page';
+			require('child_process').exec('/usr/bin/systemctl restart ytextr',{},(error, stdout, stderr)=>{
+				if (error) { console.error(stderr) } else { console.log(stdout) }
+			});
+		}
+		break;
 	}
 	resp.end(rmsg);
 }
