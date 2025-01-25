@@ -123,12 +123,12 @@ const f_commands = {
 };
 
 const p_router = (service, parms, resp) => {
-	console.log(service, parms);
+	//console.log(service, parms);
 	f_commands[service](parms.what, parms.bobj??'', resp);
 }
 
 const g_router = (parms, resp) => {
-	console.log(parms);
+	//console.log(parms);
 	f_commands[parms._](parms.act, parms, resp);
 }
 
@@ -179,7 +179,7 @@ const mpdCtrl = async (what, bobj, resp) => {
 
 
 const reqAction = (parms, resp) => {
-	console.log(parms);
+	//console.log(parms);
 	let rmsg = 'NOT YET IMPLEMENTED (FMA)';
 	resp.writeHead(200, {'Content-Type': 'text/plain'});
 	let pbase, fpath, stats;

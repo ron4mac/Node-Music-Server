@@ -33,7 +33,7 @@ module.exports = class Connect {
 		//	this._userLogin(this.partnerInfo.encryptPassword, partner, this.username, this.password, (err, user) => {
 			this._userLogin(this.partnerInfo.encryptPassword, partner, username, password, (err, user) => {
 				if (err) return callback(err);
-				console.log(user);
+				//console.log(user);
 				this.authData = {
 					username: username,
 					userAuthToken: user.userAuthToken,

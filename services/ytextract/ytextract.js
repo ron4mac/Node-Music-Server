@@ -11,6 +11,15 @@ module.exports = class YTExtract {
 		this.tlist = [];
 		this.pwtrk = '';
 		this.progv = 'Scanning playlist ...';
+		this.infoCache = null;
+		this.fmts = {};
+	//	this.agent = null;
+	//	const cf = cntrlr.readFile('services/ytextract/nocookies.json', null);
+	//	if (cf) {
+	//		const agentOptions = {pipelining:5,maxRedirections:0,localAddress:'127.0.0.1'};
+	//		this.agent = ytdl.createAgent(JSON.parse(cf), agentOptions);
+	//		//console.log('agent',this.agent);
+	//	}
 	}
 
 	action (what, parms, resp) {
@@ -107,9 +116,24 @@ module.exports = class YTExtract {
 	getAudioStream (yturl, which, cb) {
 		let rslt = {};
 		let fext = 'mp4';
-		ytdl.getInfo(yturl, {quality: 'highestaudio'})
-		.then(info => {
-			let audioFormats = ytdl.filterFormats(info.formats, 'audioonly');
+
+		if (which.startsWith('s')) {
+			let itag = which.split('.')[1];
+			let tfmt = this.fmts[itag];
+			rslt.fext = tfmt.container;
+			rslt.mimeType = tfmt.mimeType;
+			rslt.contentLength = tfmt.contentLength;
+		//	rslt.stream = ytdl(yturl,{format: tfmt});
+			rslt.stream = ytdl.downloadFromInfo(this.infoCache,{format: tfmt});
+			cb(rslt);
+			return;
+		}
+
+	//	ytdl.getInfo(yturl, {/*quality: 'highestaudio', */playerClients: ['IOS','WEB_CREATOR'], agent: this.agent})
+		ytdl.getInfo(yturl)
+		.then(info => {				//console.log(info);
+			let audioFormats = ytdl.filterFormats(info.formats, 'audioonly');				//console.log(audioFormats);
+		//	console.log(audioFormats);
 			let tfmt = null;
 			switch (which) {
 				case '4':
@@ -129,10 +153,12 @@ module.exports = class YTExtract {
 					}
 					fext = tfmt.container;
 			}
+			//console.log('Audio format:', tfmt);
 			rslt.fext = fext;
 			rslt.mimeType = tfmt.mimeType;
 			rslt.contentLength = tfmt.contentLength;
-			rslt.stream = ytdl(yturl,{format: tfmt});
+		//	rslt.stream = ytdl(yturl,{format: tfmt});	//console.log(rslt.stream);
+			rslt.stream = ytdl.downloadFromInfo(info,{format: tfmt});
 			cb(rslt);
 		})
 		.catch((error) => {
@@ -154,6 +180,11 @@ module.exports = class YTExtract {
 					//console.log('ws-end');
 					resp.end(`<script>parent.YTx.extrFini("sgl","Audio extracted as '${parms.tnam}.${aud.fext}'")</script>`);
 				});
+				aud.stream.on('error', (err) => {
+					console.error(err);
+				//	resp.end('Failed to extract stream: ' + err.message);
+					resp.end(`<script>parent.YTx.extrFini("sgl","Failed to extract stream: ${err.message}")</script>`);
+				});
 				aud.stream.pipe(ws);
 			//	resp.end(`<script>alert("Audio extracted as '${parms.tnam}.${aud.fext}'")</script>`);
 			} else {
@@ -166,8 +197,22 @@ module.exports = class YTExtract {
 	getVideo (yturl, which, vida, cb) {
 		let rslt = {};
 		let fext = 'mp4';
+
+		if (which.startsWith('s')) {
+			let itag = which.split('.')[1];
+			let tfmt = this.fmts[itag];
+			rslt.fext = tfmt.container;
+			rslt.mimeType = tfmt.mimeType;
+			rslt.contentLength = tfmt.contentLength;
+		//	rslt.stream = ytdl(yturl,{format: tfmt});
+			rslt.stream = ytdl.downloadFromInfo(this.infoCache,{format: tfmt});
+			cb(rslt);
+			return;
+		}
+
 		let filter = vida == 'a' ? 'videoandaudio' : 'video';
-		ytdl.getInfo(yturl, {/*quality: 'highestvideo'*/})
+	//	ytdl.getInfo(yturl, {playerClients: ['IOS','WEB_CREATOR'], agent: this.agent/*,quality: 'highestvideo'*/})
+		ytdl.getInfo(yturl)
 		.then(info => {
 			//console.log(info.formats);
 			let videoFormats = ytdl.filterFormats(info.formats, filter);	//console.log(videoFormats);
@@ -194,7 +239,8 @@ module.exports = class YTExtract {
 			rslt.fext = fext;
 			rslt.mimeType = tfmt.mimeType;
 			rslt.contentLength = tfmt.contentLength;
-			rslt.stream = ytdl(yturl,{format: tfmt});
+		//	rslt.stream = ytdl(yturl,{format: tfmt});	//console.log(rslt.stream);
+			rslt.stream = ytdl.downloadFromInfo(info,{format: tfmt});
 			cb(rslt);
 		})
 		.catch((error) => {
@@ -216,6 +262,14 @@ module.exports = class YTExtract {
 					//console.log('ws-end');
 					resp.end(`<script>parent.YTx.extrFini("vid","Video extracted as '${parms.tnam}.${vid.fext}'")</script>`);
 				});
+				vid.stream.on('error', (err) => {
+					console.error('WTF',err);
+					resp.end(`<script>parent.YTx.extrFini("vid","Failed to extract stream: ${err.message}")</script>`);
+				//	const amsg = 'Failed to extract stream: ' + err.statusCode;
+				//	resp.end(`<script>parent.YTx.extrFini("vid","${amsg}")</script>`);
+				//	throw new Error('Failed to extract stream: ' + err.statusCode);
+				//	return;
+				});
 				vid.stream.pipe(ws);
 			//	resp.end(`<script>alert("Video extracted as '${parms.tnam}.${vid.fext}'")</script>`);
 			} else {
@@ -229,9 +283,14 @@ module.exports = class YTExtract {
 		//console.log(parms);
 		let yturl = parms.strms;
 		let whch = parms.whch;
+	//	ytdl.getInfo(yturl, {playerClients: ['IOS','WEB_CREATOR','WEB'], agent: this.agent})
+		ytdl.cache.info.clear();
 		ytdl.getInfo(yturl)
 		.then(info => {
-			let fmts = ytdl.filterFormats(info.formats, whch);
+			this.infoCache = info;
+			this.fmts = {};
+			let fmts = ytdl.filterFormats(info.formats, whch);			//console.log(fmts);
+			fmts.forEach(f => this.fmts[f.itag] = f);
 			let strms = [];
 			if (whch=='audio') {
 				fmts.forEach(f => strms.push({itag: f.itag, mime: f.mimeType, audbr: f.audioBitrate, audsr: f.audioSampleRate}));

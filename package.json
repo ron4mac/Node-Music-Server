@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/ron4mac/Node-Music-Server#readme",
   "dependencies": {
-    "@distube/ytdl-core": "^4.15.1",
+    "@distube/ytdl-core": "^4.15.9",
     "fast-xml-parser": "^4.5.0",
     "formidable": "^2.1.2",
     "mime-lite": "^1.0.3",
