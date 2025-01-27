@@ -123,17 +123,14 @@ module.exports = class YTExtract {
 			rslt.fext = tfmt.container;
 			rslt.mimeType = tfmt.mimeType;
 			rslt.contentLength = tfmt.contentLength;
-		//	rslt.stream = ytdl(yturl,{format: tfmt});
 			rslt.stream = ytdl.downloadFromInfo(this.infoCache,{format: tfmt});
 			cb(rslt);
 			return;
 		}
 
-	//	ytdl.getInfo(yturl, {/*quality: 'highestaudio', */playerClients: ['IOS','WEB_CREATOR'], agent: this.agent})
 		ytdl.getInfo(yturl)
 		.then(info => {				//console.log(info);
 			let audioFormats = ytdl.filterFormats(info.formats, 'audioonly');				//console.log(audioFormats);
-		//	console.log(audioFormats);
 			let tfmt = null;
 			switch (which) {
 				case '4':
@@ -145,19 +142,12 @@ module.exports = class YTExtract {
 					fext = 'webm';
 					break;
 				default:
-					if (which.startsWith('s')) {
-						let itag = which.split('.')[1];
-						tfmt = ytdl.chooseFormat(info.formats, {quality: itag});
-					} else {
-						tfmt = audioFormats[0];
-					}
+					tfmt = ytdl.chooseFormat(info.formats, {quality: 'highestaudio'});
 					fext = tfmt.container;
 			}
-			//console.log('Audio format:', tfmt);
 			rslt.fext = fext;
 			rslt.mimeType = tfmt.mimeType;
 			rslt.contentLength = tfmt.contentLength;
-		//	rslt.stream = ytdl(yturl,{format: tfmt});	//console.log(rslt.stream);
 			rslt.stream = ytdl.downloadFromInfo(info,{format: tfmt});
 			cb(rslt);
 		})
@@ -167,30 +157,32 @@ module.exports = class YTExtract {
 	}
 
 	audioExtract (parms, resp) {
-		//console.log(parms);
-		let yturl = parms.axtr;
-		this.getAudioStream(parms.axtr, parms.wtrk, (aud) => {
-			//console.log(aud);
-			if (aud.error) {
-				let msg = aud.error.message.replace(/"/g,'');
-				resp.end(`<script>parent.YTx.extrFini("sgl","${msg}")</script>`);
-			} else if (cntrlr.config.extr2Intrn) {
-				let ws = fs.createWriteStream(cntrlr.config.baseDir+parms.tnam+'.'+aud.fext);
-				ws.on('finish', () => {
-					//console.log('ws-end');
-					resp.end(`<script>parent.YTx.extrFini("sgl","Audio extracted as '${parms.tnam}.${aud.fext}'")</script>`);
-				});
-				aud.stream.on('error', (err) => {
-					console.error(err);
-				//	resp.end('Failed to extract stream: ' + err.message);
-					resp.end(`<script>parent.YTx.extrFini("sgl","Failed to extract stream: ${err.message}")</script>`);
-				});
-				aud.stream.pipe(ws);
-			//	resp.end(`<script>alert("Audio extracted as '${parms.tnam}.${aud.fext}'")</script>`);
-			} else {
-				resp.writeHead(200, {'Content-Type': aud.mimeType, 'Content-Length': aud.contentLength, 'Content-Disposition': `attachment; filename="${parms.tnam}.${aud.fext}"`});
-				aud.stream.pipe(resp);
-			}
+		console.log(parms);
+		this.getAudioStream(parms.yturl, parms.wtrk, (aud) => {
+// 			if (aud.error) {
+// 				let msg = aud.error.message.replace(/"/g,'');
+// 				resp.end('!!'+msg);
+// 			} else if (cntrlr.config.extr2Intrn) {
+// 				let ws = fs.createWriteStream(cntrlr.config.baseDir+parms.tname+'.'+aud.fext);
+// 				ws.on('error', (err) => {
+// 					console.error(err);
+// 					resp.end(`!!Failed to write file: ${err.message}`);
+// 				});
+// 				ws.on('finish', () => {
+// 					resp.end(`Audio extracted as '${parms.tname}.${aud.fext}`);
+// 				});
+// 				aud.stream.on('error', (err) => {
+// 					console.error(err);
+// 					resp.end(`!!Failed to extract stream: ${err.message}`);
+// 				});
+// 				aud.stream.pipe(ws);
+// 			} else {
+// 				resp.writeHead(200, {'Content-Type': aud.mimeType, 'Content-Length': aud.contentLength, 'Content-Disposition': `attachment; filename="${parms.tname}.${aud.fext}"`});
+// 				aud.stream.pipe(resp);
+// 			}
+			this._stream2storage(aud, parms.tname+'.'+aud.fext)
+			.then(m => resp.end(m), m => resp.end('!!'+m));
+			//.catch(m => resp.end('!!'+m));
 		});
 	}
 
@@ -204,17 +196,14 @@ module.exports = class YTExtract {
 			rslt.fext = tfmt.container;
 			rslt.mimeType = tfmt.mimeType;
 			rslt.contentLength = tfmt.contentLength;
-		//	rslt.stream = ytdl(yturl,{format: tfmt});
 			rslt.stream = ytdl.downloadFromInfo(this.infoCache,{format: tfmt});
 			cb(rslt);
 			return;
 		}
 
 		let filter = vida == 'a' ? 'videoandaudio' : 'video';
-	//	ytdl.getInfo(yturl, {playerClients: ['IOS','WEB_CREATOR'], agent: this.agent/*,quality: 'highestvideo'*/})
 		ytdl.getInfo(yturl)
 		.then(info => {
-			//console.log(info.formats);
 			let videoFormats = ytdl.filterFormats(info.formats, filter);	//console.log(videoFormats);
 			if (!videoFormats.length) throw new Error('No requested format could be located.');
 			let tfmt = null;
@@ -228,18 +217,12 @@ module.exports = class YTExtract {
 					fext = 'webm';
 					break;
 				default:
-					if (which.startsWith('s')) {
-						let itag = which.split('.')[1];
-						tfmt = ytdl.chooseFormat(info.formats, {quality: itag});
-					} else {
-						tfmt = videoFormats[0];
-					}
+					tfmt = ytdl.chooseFormat(info.formats, {quality: 'highestvideo'});
 					fext = tfmt.container;
 			}
 			rslt.fext = fext;
 			rslt.mimeType = tfmt.mimeType;
 			rslt.contentLength = tfmt.contentLength;
-		//	rslt.stream = ytdl(yturl,{format: tfmt});	//console.log(rslt.stream);
 			rslt.stream = ytdl.downloadFromInfo(info,{format: tfmt});
 			cb(rslt);
 		})
@@ -251,31 +234,31 @@ module.exports = class YTExtract {
 	videoExtract (parms, resp) {
 		//console.log(parms);
 		let yturl = parms.vxtr;
-		this.getVideo(parms.vxtr, parms.wtrk, parms.vida, (vid) => {
-			//console.log(vid);
-			if (vid.error) {
-				let msg = vid.error.message.replace(/"/g,'');
-				resp.end(`<script>parent.YTx.extrFini("vid","${msg}")</script>`);
-			} else if (cntrlr.config.extr2Intrn) {
-				let ws = fs.createWriteStream(cntrlr.config.baseDir+parms.tnam+'.'+vid.fext);
-				ws.on('finish', () => {
-					//console.log('ws-end');
-					resp.end(`<script>parent.YTx.extrFini("vid","Video extracted as '${parms.tnam}.${vid.fext}'")</script>`);
-				});
-				vid.stream.on('error', (err) => {
-					console.error('WTF',err);
-					resp.end(`<script>parent.YTx.extrFini("vid","Failed to extract stream: ${err.message}")</script>`);
-				//	const amsg = 'Failed to extract stream: ' + err.statusCode;
-				//	resp.end(`<script>parent.YTx.extrFini("vid","${amsg}")</script>`);
-				//	throw new Error('Failed to extract stream: ' + err.statusCode);
-				//	return;
-				});
-				vid.stream.pipe(ws);
-			//	resp.end(`<script>alert("Video extracted as '${parms.tnam}.${vid.fext}'")</script>`);
-			} else {
-				resp.writeHead(200, {'Content-Type': vid.mimeType, 'Content-Length': vid.contentLength, 'Content-Disposition': `attachment; filename="${parms.tnam}.${vid.fext}"`});
-				vid.stream.pipe(resp);
-			}
+		this.getVideo(parms.yturl, parms.wtrk, parms.vida, (vid) => {
+// 			//console.log(vid);
+// 			if (vid.error) {
+// 				let msg = vid.error.message.replace(/"/g,'');
+// 				resp.end('!!'+msg);
+// 			} else if (cntrlr.config.extr2Intrn) {
+// 				let ws = fs.createWriteStream(cntrlr.config.baseDir+parms.tname+'.'+vid.fext);
+// 				ws.on('error', (err) => {
+// 					console.error(err);
+// 					resp.end(`!!Failed to write file: ${err.message}`);
+// 				});
+// 				ws.on('finish', () => {
+// 					resp.end(`Video extracted as '${parms.tname}.${vid.fext}`);
+// 				});
+// 				vid.stream.on('error', (err) => {
+// 					console.error('WTF',err);
+// 					resp.end(`!!Failed to extract stream: ${err.message}`);
+// 				});
+// 				vid.stream.pipe(ws);
+// 			} else {
+// 				resp.writeHead(200, {'Content-Type': vid.mimeType, 'Content-Length': vid.contentLength, 'Content-Disposition': `attachment; filename="${parms.tname}.${vid.fext}"`});
+// 				vid.stream.pipe(resp);
+// 			}
+			this._stream2storage(vid, parms.tname+'.'+vid.fext)
+			.then(m => resp.end(m), m => resp.end('!!'+m));
 		});
 	}
 
@@ -285,7 +268,7 @@ module.exports = class YTExtract {
 		let whch = parms.whch;
 	//	ytdl.getInfo(yturl, {playerClients: ['IOS','WEB_CREATOR','WEB'], agent: this.agent})
 		ytdl.cache.info.clear();
-		ytdl.getInfo(yturl)
+		ytdl.getInfo(yturl,{playerClients: [/*"WEB_EMBEDDED", "IOS", "ANDROID",*/ 'TV']})
 		.then(info => {
 			this.infoCache = info;
 			this.fmts = {};
@@ -309,6 +292,31 @@ module.exports = class YTExtract {
 			++ix;
 		} while (ix < fmts.length);
 		return 0;
+	}
+
+	_stream2storage (strm, fnam) {
+		return new Promise((resolve, reject) => {
+			if (strm.error) {
+				let msg = strm.error.message.replace(/"/g,'');
+				reject(msg);
+			}
+			const fd = fnam.split('/');
+			if (fd.length>1) {
+			}
+			let ws = fs.createWriteStream(cntrlr.config.baseDir+fnam);
+			ws.on('error', (err) => {
+				console.error(err);
+				reject(`Failed to write file: ${err.message}`);
+			});
+			ws.on('finish', () => {
+				resolve(`Stream extracted as '${fnam}`);
+			});
+			strm.stream.on('error', (err) => {
+				console.error('WTF',err);
+				reject(`Failed to extract stream: ${err.message}`);
+			});
+			strm.stream.pipe(ws);
+		});
 	}
 
 	_emptyDir (dir) {

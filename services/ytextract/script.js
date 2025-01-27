@@ -4,6 +4,7 @@ class YTxClass {
 
 	sr = 'yt';	// service route
 	_pb = null;
+	polli = null;
 
 	extractSelected (elm) {
 		const itag = elm.parentElement.querySelector('input[name="itag"]:checked');
@@ -12,7 +13,7 @@ class YTxClass {
 			const typ = elm.getAttribute('stype');
 			elm.parentElement.style.display = 'none';
 			if (typ=='audio') {
-				this.#getVinfo(document.forms.sglform, val);
+				this.#getAudio(document.forms.sglform, val);
 			} else {
 				this.#getVideo(document.forms.vidform, val);
 			}
@@ -26,7 +27,7 @@ class YTxClass {
 		if (frm.wtrk.value=='s') {
 			this.#streamSelect(frm, 'audio');
 		} else {
-			if (evt.submitter.name=='ginf') this.#getVinfo(frm);
+			if (evt.submitter.name=='ginf') this.#getAudio(frm);
 		}
 	}
 
@@ -44,12 +45,20 @@ class YTxClass {
 		}
 	}
 
-	extrFini (wch, msg) {
-		//console.log(wch, msg);
-		services.fm.seen = false;
-		document.querySelector('#'+wch+'Tab i').style.display = 'none';
-		document.querySelector('#'+wch+'Tab input[type="submit"]').disabled = false;
-		if (msg) setTimeout(()=>my.alert(msg),100);
+	extrFini (wh, msg) {
+		document.querySelector('#'+wh+'Tab i').style.display = 'none';
+		document.querySelector('#'+wh+'Tab input[type="submit"]').disabled = false;
+		let c = 'info';
+		if (msg.startsWith('!!')) {
+			msg = msg.substr(2);
+			c = 'error';
+		}
+		if (msg.startsWith('!')) {
+			msg = msg.substr(1);
+			c = 'warn';
+		}
+		my.alert(msg,{class:c});
+		if (typeof Fileman == 'object') Fileman.refresh();
 	}
 
 
@@ -75,45 +84,49 @@ class YTxClass {
 		});
 	}
 	#getPlaylist (frm) {
+		this._pb = document.getElementById('prog');
 		document.querySelector('#lstTab input[type="submit"]').disabled = true;
 		const yturl = encodeURIComponent(frm.yturl.value.trim());
 		const wtrk = encodeURIComponent(frm.wtrk.value);
 		document.getElementById('dnldf').src = window.location.origin + `?_=yt&act=pxtr&pxtr=${yturl}&wtrk=${wtrk}`;
-		this._pb = document.getElementById('prog');
-		setTimeout(this.#watchP, 1000);
+		this.polli = setInterval(this.#watchP, 1000, this);
 	}
-	#getVinfo (frm, itag=false) {
+	#getAudio (frm, itag=false) {
 		document.querySelector('#sglTab input[type="submit"]').disabled = true;
 		document.querySelector('#sglTab i').style.display = 'inline-block';
-		const yturl = encodeURIComponent(frm.yturl.value.trim());
-		let tname = encodeURIComponent(frm.tname.value.trim());
-		let wtrk = encodeURIComponent(frm.wtrk.value);
+		const yturl = frm.yturl.value.trim();
+		let tname = frm.tname.value.trim();
+		let wtrk = frm.wtrk.value;
 		if (itag) wtrk += '.'+itag;
 		tname = tname ? tname : 'audio_track';
-		document.getElementById('dnldf').src = window.location.origin + `?_=yt&act=axtr&axtr=${yturl}&tnam=${tname}&wtrk=${wtrk}`;
+		postAction(this.sr, {what: 'axtr', bobj: {yturl, tname, wtrk}}, (data) => {
+			this.extrFini('sgl',data);
+		}, 1);
 	}
 	#getVideo (frm, itag=false) {
 		document.querySelector('#vidTab input[type="submit"]').disabled = true;
 		document.querySelector('#vidTab i').style.display = 'inline-block';
-		const yturl = encodeURIComponent(frm.yturl.value.trim());
-		let tname = encodeURIComponent(frm.tname.value.trim());
-		let wtrk = encodeURIComponent(frm.wtrk.value);
+		const yturl = frm.yturl.value.trim();
+		let tname = frm.tname.value.trim();
+		let wtrk = frm.wtrk.value;
 		if (itag) wtrk += '.'+itag;
-		const vida = encodeURIComponent(frm.vida.value);
+		const vida = frm.vida.value;
 		tname = tname ? tname : 'video_track';
-		document.getElementById('dnldf').src = window.location.origin + `?_=yt&act=vxtr&vxtr=${yturl}&tnam=${tname}&wtrk=${wtrk}&vida=${vida}`;
+		postAction(this.sr, {what: 'vxtr', bobj: {yturl, tname, wtrk, vida}}, (data) => {
+			this.extrFini('vid',data);
+		}, 1);
 	}
-	#watchP () {
+	#watchP (self) {
 		fetch('?_=yt&act=prog', {method:'GET'})
 		.then((resp) => resp.text())
 		.then(data => {
 			if (data == '.') {
-				services.fm.seen = false;
-				this._pb.innerHTML = '';
+				clearInterval(self.polli);
+				self._pb.innerHTML = '';
 				document.querySelector('#lstTab input[type="submit"]').disabled = false;
+				if (typeof Fileman == 'object') Fileman.refresh();
 			} else {
-				this._pb.innerHTML = data;
-				setTimeout(this.#watchP, 1200);
+				self._pb.innerHTML = data;
 			}
 		});
 	}

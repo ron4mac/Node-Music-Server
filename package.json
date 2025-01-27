@@ -1,5 +1,5 @@
 {
-  "name": "ytextr",
+  "name": "node-music-server",
   "version": "1.0.0",
   "description": "Node Musice Server - various souces",
   "main": "extrsvr.js",
@@ -11,6 +11,7 @@
     "static"
   ],
   "scripts": {
+    "start": "node --openssl-legacy-provider extrsvr.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

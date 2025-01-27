@@ -21,7 +21,7 @@ class FilemanClass extends ServiceClass {
 				if (scnt==1) {
 					this.#delFiles(slctd);
 				} else {
-					my.confirm('You have multiple files selected. Are you sure you want to delete ALL the selected files?',{yesBtn:'YES'})
+					my.confirm('You have multiple files selected. Are you sure you want to delete ALL the selected files?',{yesBtn:'YES',class:'warn'})
 					.then(y=>{
 						if (y) this.#delFiles(slctd);
 					});
@@ -122,7 +122,7 @@ class FilemanClass extends ServiceClass {
 			Playlists.get();
 			break;
 		case 'drefr':
-			this.#getDirList(this.curDir);
+			this.refresh();
 			break;
 		}
 	}
@@ -162,17 +162,21 @@ class FilemanClass extends ServiceClass {
 						my.alert(data);
 					} else {
 						modal(btn.parentElement, false);
-						this.#getDirList(this.curDir);
+						this.refresh();
 					}
 				}, true);
 		}
+	}
+
+	refresh () {
+		this.#getDirList(this.curDir);
 	}
 
 	fup_done (errs) {
 		if (!errs) {
 			modal(document.getElementById('filupld'), false);
 		}
-		this.#getDirList(this.curDir);
+		this.refresh();
 	}
 
 
@@ -220,7 +224,7 @@ class FilemanClass extends ServiceClass {
 	}
 
 	#postAndRefresh (parms, json=false) {
-		postAction(this.sr, parms, (data) => { if (data) my.alert(data); else this.#getDirList(this.curDir) }, json);
+		postAction(this.sr, parms, (data) => { if (data) my.alert(data); else this.refresh() }, json);
 	}
 
 }
