@@ -62,6 +62,19 @@ class FavoritesClass {
 		dlg.showModal();
 	};
 
+	addDirect () {
+		my.modal(my._Id('fave-direct').innerHTML, {title:'Direct Link to Audio Stream', yesBtn:'Add to Favorites'})
+		.then(r=>{
+			//console.log(r);
+			if (r.resp=='n') return;
+			const parms = {what: 'add', bobj: {name: 'Direct: '+r.data.titl, what: 'Direct', how: r.data.play, url: r.data.surl}};
+			postAction(this.sr, parms, (data) => {
+				if (data) my.alert(data);
+				this.get();
+			}, 1);
+		});
+	}
+
 	get () {
 		const parms = {what: 'home'};
 		postAction(this.sr, parms, (data) => {
@@ -98,3 +111,23 @@ class FavoritesClass {
 }
 // instantiate it
 var Favorites = new FavoritesClass();
+
+/*** an additional class to handle direct urls to streams ***/
+class DirectClass {
+	sr = 'fa';	// service route
+	fave (how, url) {
+		//console.log(how, url);
+		const parms = {act:'direct', what: how, bobj: url};
+		postAction(this.sr, parms, (data) => {
+			displayCurrent(currentStream);
+			if (data) {
+				showLocalAudio(this.sr);
+				laudioelm.src = data;
+				laudioelm.play();
+			}
+		}, 1);
+	}
+}
+// instantiate it
+var Direct = new DirectClass();
+

@@ -9,7 +9,7 @@ var currentStream = '',
 const superAdmin = () => {
 	my.modal('.superAdmin')
 	.then(r=>{
-		console.log(r);
+		//console.log(r);
 		if (r.resp!='y') return false;
 		postAction(null, r.data, (data) => {
 			if (data) my.alert(data);

@@ -1,6 +1,6 @@
 <script src="services/favorites/script.js"></script>
 <style>
-#faves .local:after, #faves .lplay:after {
+#faves .lplay:after, #faves .lplayd:after  {
 	font-family: 'FontAwesome';
 	content: '\f025';
 	font-size: small;
@@ -13,7 +13,14 @@
 	color: #888;
 	margin-right: 5px;
 }
+.modl-body .txflds label {
+	display: block;
+}
+.modl-body .txflds input {
+	width: 20rem;
+}
 </style>
+<i class="fa fa-plus-square-o" onclick="Favorites.addDirect()"></i>
 <div id="faves" onclick="Favorites.play(event)"></div>
 <dialog id="fave-more">
 <div class="closex" onclick="this.parentElement.close()">
@@ -21,4 +28,13 @@
 </div>
 <h3>Favoritee</h3>
 <div><button onclick="Favorites.delete(event)">Delete this Favorite</button></div>
+</dialog>
+<dialog id="fave-direct">
+<span>Add a direct link to a streaming source.</span>
+<div class="txflds">
+	<label>Title: <input type="text" name="titl" required></label>
+	<label>URL: <input type="text" name="surl" required></label>
+</div>
+<label><input type="radio" name="play" value="lplayd" required>Local play</label>
+<label><input type="radio" name="play" value="playd" required>Server play</label>
 </dialog>

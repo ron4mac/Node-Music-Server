@@ -27,15 +27,19 @@ module.exports = class Favorites {
 			this.#add(bobj /*{...{what: bobj}, ...cntrlr.currentPlaying}*/, resp);
 			break;
 		case 'delete':
-			console.log('delete',bobj);
+			//console.log('delete',bobj);
 			resp.end();
 			this.#delete(bobj, resp);
 			break;
 		case 'play':
 			resp.end(JSON.stringify(this.faves[bobj]));
 			break;
-		case 'lplay':
-			this.lplay(bobj, resp);
+		case 'playd':
+			this.#startFave(bobj);
+			resp.end();
+			break;
+		case 'lplayd':
+			resp.end(bobj);
 			break;
 		case 'clear':
 			this.mpdc.clear();
@@ -68,9 +72,10 @@ module.exports = class Favorites {
 			console.error(error);
 		}
 	}
-
+/*
 	play (url, resp) {
-		resp.end(JSON.stringify(this.faves[url]));
+		this.#startFave(url);
+		resp.end();
 		return;
 		let dat = '';
 		http.get(url, (r) => {
@@ -86,6 +91,9 @@ module.exports = class Favorites {
 	}
 
 	lplay (url, resp) {
+		resp.end(url);
+		return;
+
 		let dat = '';
 		http.get(url, (r) => {
 			r.on('data', (chunk) => {
@@ -98,5 +106,6 @@ module.exports = class Favorites {
 			});
 		}).end();
 	}
+*/
 
 };
