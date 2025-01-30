@@ -1,12 +1,11 @@
 'use strict';
-const cntrlr = require('../../controller');
-const http = require('http');
-//const https = require('https');
-const { XMLParser } = require('fast-xml-parser');
+import cntrlr from '../../controller.js';
+import http from 'http';
+import { XMLParser } from 'fast-xml-parser';
 
 const baseUrl = 'http://opml.radiotime.com/';
 
-module.exports = class TuneIn {
+export default class TuneIn {
 
 	constructor (mympd) {
 		this.mpdc = mympd;

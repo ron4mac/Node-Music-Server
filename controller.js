@@ -1,8 +1,8 @@
 'use strict';
-const config = require('./config');
-const https = require('https');
-const http = require('http');
-const fs = require('fs');
+import config from './config';
+import https from 'https';
+import http from 'http';
+import fs from 'fs';
 
 const settingsFile = 'settings.json';
 
@@ -78,4 +78,4 @@ class Controller {
 	}
 }
 
-module.exports = new Controller();
+export default new Controller();

@@ -1,7 +1,7 @@
 'use strict';
-const cntrlr = require('../../controller');
+import cntrlr from '../../controller.js';
 
-module.exports = class Favorites {
+export default class Favorites {
 
 	constructor (mympd) {
 		this.mpdc = mympd;

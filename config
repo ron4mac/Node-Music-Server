@@ -2,11 +2,9 @@ var config = {
 	port: 6680,
 	socket: 6683,
 	pandora_socket: 6681,
-	baseDir: '/media/YTx/',
+	baseDir: '/media/nodems/',
 	upldTmpDir: '/tmp/',
 	playlistDir: 'playlists/',
 	extr2Intrn: true
 }; 
-if (typeof module === 'object') {
-	module.exports = config;
-}
+export default config;

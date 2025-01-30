@@ -1,11 +1,11 @@
 'use strict';
-const cntrlr = require('../../controller');
-const fs = require('fs');
-const path = require('path');
-const formidable = require('formidable');
+import cntrlr from '../../controller.js';
+import fs from 'fs';
+import path from 'path';
+import formidable from 'formidable';
 const formidableErrors = formidable.errors;
 
-module.exports = class Fileman {
+export default class Fileman {
 
 	constructor () {
 		this.debug = true;
@@ -252,6 +252,5 @@ module.exports = class Fileman {
 			return (num / 1073741824).toFixed(1) + 'G';
 		}
 	}
-
 
 }

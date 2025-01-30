@@ -1,11 +1,9 @@
 'use strict';
-const cntrlr = require('../../controller');
-//const http = require('http');
-//const https = require('https');
-const ytdl = require('@distube/ytdl-core');
-const fs = require('fs');
+import cntrlr from '../../controller.js';
+import ytdl from '@distube/ytdl-core';
+import fs from 'fs';
 
-module.exports = class YTExtract {
+export default class YTExtract {
 
 	constructor () {
 		this.tlist = [];

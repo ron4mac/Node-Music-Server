@@ -1,10 +1,9 @@
 'use strict'
-
-const http = require('http');
-const https = require('https');
-const querystring = require('querystring');
-const _ = require('underscore');
-const crypto = require('crypto');
+import http from 'http';
+import https from 'https';
+import querystring from 'querystring';
+import _ from 'underscore';
+import crypto from 'crypto';
 const iOSpartnerInfo = {
 		username: 'iphone',
 		password: 'P2E4FC0EAD3*878N92B2CDp34I0B1@388137C',
@@ -14,7 +13,7 @@ const iOSpartnerInfo = {
 		version: '5'
 	};
 
-module.exports = class Connect {
+export default class Connect {
 
 	static hostname = 'ios-tuner.pandora.com';
 	static path = '/services/json/';
@@ -230,6 +229,5 @@ module.exports = class Connect {
 			}
 		};
 	}
-
 
 };

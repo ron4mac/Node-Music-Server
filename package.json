@@ -2,9 +2,10 @@
   "name": "node-music-server",
   "version": "1.0.0",
   "description": "Node Musice Server - various souces",
-  "main": "extrsvr.js",
+  "type": "module",
+  "main": "server.js",
   "files": [
-    "extrsvr.js",
+    "server.js",
     "index.html",
     "404.html",
     "favicon.ico",

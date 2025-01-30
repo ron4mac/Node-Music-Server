@@ -1,9 +1,10 @@
 'use strict';
-const cntrlr = require('../../controller');
-const Connect = require('./connect');
-const WebSocket = require('ws');
+import cntrlr from '../../controller.js';
+import Connect from './connect.js';
+//import WebSocket from 'ws';
+import WebSocket, { WebSocketServer } from 'ws';
 
-module.exports = class Pandora {
+export default class Pandora {
 
 	constructor (client, mpdc, full=false) {
 		this.client = client;
@@ -11,7 +12,7 @@ module.exports = class Pandora {
 		this.queue = {};
 		this.queuel = [];
 		if (full) {
-			this.ws = new WebSocket.Server({port:cntrlr.config.pandora_socket});
+			this.ws = new WebSocketServer({port:cntrlr.config.pandora_socket});
 			this.ws.on('connection', (sc) => {
 				sc.on('error', console.error);
 				sc.on('message', (data) => {

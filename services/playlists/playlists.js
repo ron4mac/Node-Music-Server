@@ -1,8 +1,8 @@
 'use strict';
-const cntrlr = require('../../controller');
-const fs = require('fs');
+import cntrlr from '../../controller.js';
+import fs from 'fs';
 
-module.exports = class Playlists {
+export default class Playlists {
 
 	constructor (mympd) {
 		this.mpdc = mympd;
