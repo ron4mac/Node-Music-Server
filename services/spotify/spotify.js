@@ -349,6 +349,7 @@ export default class Spotify {
 		if (data.offset + data.limit < data.total) {
 			resp.write('<div class="sheader"><h4>PLAYLISTS</h4><a href="#" data-next="pll.'+data.next+'">More</a></div>');
 		}
+		if (!data.items) return;
 		data.items.forEach((itm) => {
 			if (itm) {
 				resp.write('<div class="spot-link" data-url="pll.'+itm.id+'">');

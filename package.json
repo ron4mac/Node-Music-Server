@@ -29,7 +29,7 @@
     "extract"
   ],
   "author": "ron4mac",
-  "license": "ISC",
+  "license": "(ISC OR GPL-3.0)",
   "bugs": {
     "url": "https://github.com/ron4mac/Node-Music-Server/issues"
   },

@@ -140,7 +140,8 @@ class FilemanClass extends ServiceClass {
 				} else {
 					document.querySelector('#fvewd span').innerHTML = fpath;
 					document.getElementById('fvewd').style.display = 'block';
-					document.getElementById('fvewf').src = '/?_=fm&act=sndf&sndf='+data.f64+'&v=1';
+				//	document.getElementById('fvewf').src = '/?_=fm&act=sndf&sndf='+data.f64+'&v=1';
+					document.getElementById('fvewf').src = '/?_=fm&act=fpxy&sndf='+data.fp;
 				}
 			} else { my.alert('not available'); }
 		}, 2);

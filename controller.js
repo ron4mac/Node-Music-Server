@@ -1,8 +1,9 @@
 'use strict';
-import config from './config';
+import {config} from './config.js';
 import https from 'https';
 import http from 'http';
 import fs from 'fs';
+//import Mime from 'mime-lite';
 
 const settingsFile = 'settings.json';
 
@@ -59,8 +60,27 @@ class Controller {
 		}
 	}
 
-	mimeType (path) {
-		return (require('mime-lite')).getType(path);
+	// get the mime type for a file
+	async mimeType (path) {
+		//return (require('mime-lite')).getType(path);
+//		import('mime-lite')
+//		.then(m=>{
+	//		console.log(m);
+//			return m.default.getType(path);
+//		});
+	//	import * from 'mime-lite';
+	//	return Mime.getType(path);
+		const m = await import('mime-lite');
+		return m.default.getType(path);
+	}
+
+	// execute a shell command
+	async execute (cmd) {
+		const x = await import('child_process');
+		x.exec(cmd, {}, (error, stdout, stderr)=>{
+			console.error(error);
+			return error ? String(error) : null;
+		});
 	}
 
 	/* PRIVATE METHODS */

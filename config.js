@@ -1,4 +1,4 @@
-var config = {
+export var config = {
 	port: 6680,
 	socket: 6683,
 	pandora_socket: 6681,
@@ -6,5 +6,6 @@ var config = {
 	upldTmpDir: '/tmp/',
 	playlistDir: 'playlists/',
 	extr2Intrn: true
-}; 
-export default config;
+};
+// when used in the client context
+if (typeof window == 'object') window.config = config;

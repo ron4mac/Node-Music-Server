@@ -418,6 +418,6 @@ http.createServer(function (request, response) {
 	serveFile(url, response);
 
 }).listen(config.port, hostname, () => {
-	console.log(`YT Audio Extraction Server (http://${hostname}:${config.port}) started`);
+	console.log(`Node Music Server (http://${hostname}:${config.port}) started`);
 });
 

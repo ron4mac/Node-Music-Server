@@ -35,13 +35,18 @@ export default class Fileman {
 			if (parms.files.length > 1) eprms += ' -codec copy';
 			eprms += ` "${pbase+parms.asfile}"`;
 			//console.log(eprms);
-			require('child_process').exec('ffmpeg -loglevel 16 -n'+eprms,{},(error, stdout, stderr)=>{
+			cntrlr.execute('ffmpeg -loglevel 16 -n'+eprms)
+			.then(m=>resp.end(m));
+			return;
+			import('child_process')
+			.then(x=>{
+				x.exec('ffmpeg -loglevel 16 -n'+eprms,{},(error, stdout, stderr)=>{
 					console.error(error);
 					rmsg = error ? String(error) : null;
 					resp.end(rmsg);
 				});
+			});
 			return;
-			rmsg = null;
 			break;
 		case 'fdele':
 			pbase = this.baseDir+parms.dir+(parms.dir==''?'':'/');
@@ -123,11 +128,25 @@ export default class Fileman {
 			break;
 		case 'fview':
 			fpath = this.baseDir+parms.fpath;
+			stats = fs.statSync(fpath);
+			let fp = {fpath, size:stats.size};
+			cntrlr.mimeType(fpath)
+			.then(m=>{ fp.mtype = m; })
+			.then(()=>{
+				const fpm = btoa(JSON.stringify(fp));
+				console.log(fpm);
+				resp.end(JSON.stringify({err: '', fp: fpm}));
+			});
+			return;
 	// @@@@@@@@@@
 	// could get file type here and send to client for display adjustments
 	//		stats = fs.statSync(fpath);
 	//		console.log(stats);
 			rmsg = JSON.stringify({err: '', f64: btoa(fpath)});
+			break;
+		case 'fpxy':
+			this.#sendFile2(parms.sndf, resp);
+			return;
 			break;
 		case 'sndf':
 			this.sendFile(parms, resp);
@@ -203,13 +222,14 @@ export default class Fileman {
 		resp.write(nav+'</div>');
 	}
 
-	sendFile (parms, resp) {
-		//console.log('[Info] Sending zip file');
+	async sendFile (parms, resp) {
+		console.log('[Info] Sending zip file');
 		let filePath = atob(parms.sndf);
 		let stats = fs.statSync(filePath);
+		const fmime = await cntrlr.mimeType(filePath);			//console.log(fmime);console.trace();
 		resp.setHeader('Content-Length', stats.size);
 		if (parms.v) {
-			const mtyp = cntrlr.mimeType(filePath) || 'audio/mp4';
+			const mtyp = fmime || 'audio/mp4';
 			resp.setHeader('Content-Type', mtyp);
 		} else {
 			resp.setHeader('Content-Type', 'application/octet-stream');
@@ -239,6 +259,22 @@ export default class Fileman {
 			}
 		});
 	};
+
+
+	#sendFile2 (parms, resp) {
+		console.log('proxy file send');
+		const fp = JSON.parse(atob(parms));
+		resp.setHeader('Content-Length', fp.size);
+		resp.setHeader('Content-Type', fp.mtype);
+		let stream = fs.createReadStream(fp.fpath);
+		stream.on('open', () => {
+			stream.pipe(resp);
+		});
+		stream.on('error', () => {
+			resp.setHeader('Content-Type','text/plain');
+			resp.status(404).end('Not found');
+		});
+	}
 
 
 	#formatNumber (num) {
