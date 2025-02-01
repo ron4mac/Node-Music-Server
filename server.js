@@ -1,4 +1,4 @@
-import config from './config';
+import {config} from './config.js';
 import cntrlr from './controller.js';
 import http from 'http';
 import https from'https';
