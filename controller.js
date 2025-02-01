@@ -2,7 +2,7 @@
 import {config} from './config.js';
 import https from 'https';
 import http from 'http';
-import fs from 'fs';
+import {readFileSync,writeFileSync} from 'fs';
 //import Mime from 'mime-lite';
 
 const settingsFile = 'settings.json';
@@ -43,7 +43,7 @@ class Controller {
 	// read a file (sync) or return default data
 	readFile (path, dflt) {
 		try {
-			return fs.readFileSync(path,{encoding:'utf8'});
+			return readFileSync(path,{encoding:'utf8'});
 		} catch (err) {
 			console.error(err);
 			return dflt;
@@ -53,7 +53,7 @@ class Controller {
 	// write a file (sync)
 	writeFile (path, data) {
 		try {
-			return fs.writeFileSync(path, data);
+			return writeFileSync(path, data);
 		} catch (err) {
 			console.error(err);
 			return err.code;
@@ -87,14 +87,14 @@ class Controller {
 
 	#readSettings () {
 		try {
-			return JSON.parse(fs.readFileSync(settingsFile,{encoding:'utf8'}));
+			return JSON.parse(readFileSync(settingsFile,{encoding:'utf8'}));
 		} catch (err) {
 			console.error(err);
 			return {};
 		}
 	}
 	#saveSettings () {
-		fs.writeFileSync(settingsFile, JSON.stringify(this.settings, null, "\t"));
+		writeFileSync(settingsFile, JSON.stringify(this.settings, null, "\t"));
 	}
 }
 

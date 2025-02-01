@@ -1,10 +1,10 @@
 import {config} from './config.js';
 import cntrlr from './controller.js';
-import http from 'http';
-import https from'https';
+import {createServer} from 'http';
+//import https from'https';
 import process from 'process';
 import {parse} from 'querystring';
-import fs from 'fs';
+import {existsSync,readFile,readFileSync,unlinkSync} from 'fs';
 import path from 'path';
 import MyMPD from './mpd.js';
 
@@ -199,19 +199,19 @@ const reqAction = (parms, resp) => {
 	//	let plst = '';
 	//	for (const file of parms.files) {
 	//		plst += config.playlistDir+file + "\n";
-	//		fs.unlinkSync(fpath);
+	//		unlinkSync(fpath);
 	//	}
 		rmsg = null;
 		break;
 	case 'pldel':
 		for (const file of parms.files) {
 			fpath = config.playlistDir+file;
-			fs.unlinkSync(fpath);
+			unlinkSync(fpath);
 		}
 		rmsg = null;
 		break;
 	case 'plvue':
-		rmsg = JSON.stringify({err:'', pl:fs.readFileSync(config.playlistDir+parms.file,{encoding:'utf8'})});
+		rmsg = JSON.stringify({err:'', pl:readFileSync(config.playlistDir+parms.file,{encoding:'utf8'})});
 		break;
 	case 'mpd':
 		mpdCtrl(parms.what, parms.bobj??'', resp);
@@ -220,15 +220,19 @@ const reqAction = (parms, resp) => {
 	case 'spract':
 		if (parms.spract == 'b') {
 			rmsg = 'Rebooting server ... refresh page in a minute or two';
-			require('child_process').exec('/usr/bin/systemctl reboot',{},(error, stdout, stderr)=>{
-				if (error) { console.error(stderr) } else { console.log(stdout) }
-			});
+			cntrlr.execute('/usr/bin/systemctl reboot')
+			.then(m=>console.log('rebooting: '+m));
+		//	require('child_process').exec('/usr/bin/systemctl reboot',{},(error, stdout, stderr)=>{
+		//		if (error) { console.error(stderr) } else { console.log(stdout) }
+		//	});
 		}
 		if (parms.spract == 'r') {
 			rmsg = 'Restarting music server ... refresh page';
-			require('child_process').exec('/usr/bin/systemctl restart ytextr',{},(error, stdout, stderr)=>{
-				if (error) { console.error(stderr) } else { console.log(stdout) }
-			});
+			cntrlr.execute('/usr/bin/systemctl restart nodems')
+			.then(m=>console.log('restarting: '+m));
+		//	require('child_process').exec('/usr/bin/systemctl restart ytextr',{},(error, stdout, stderr)=>{
+		//		if (error) { console.error(stderr) } else { console.log(stdout) }
+		//	});
 		}
 		break;
 	}
@@ -300,10 +304,10 @@ const serveFile = (url, response) => {
 	}
 
 	// Serve static files
-	fs.readFile(filePath, function(error, content) {
+	readFile(filePath, function(error, content) {
 		if (error) {
 			if (error.code === 'ENOENT') {
-				fs.readFile(documentRoot + '/404.html', function(error, content) {
+				readFile(documentRoot + '/404.html', function(error, content) {
 					if (error) { console.error(error); }
 					else {
 						response.writeHead(404, { 'Content-Type': 'text/html' });
@@ -313,8 +317,8 @@ const serveFile = (url, response) => {
 					}
 				});
 			}
-			else if (error.code === 'EISDIR' && fs.existsSync(filePath+'/index.html')) {
-				fs.readFile(filePath+'/index.html', 'utf8', function(error, content) {
+			else if (error.code === 'EISDIR' && existsSync(filePath+'/index.html')) {
+				readFile(filePath+'/index.html', 'utf8', function(error, content) {
 					if (error) { console.error(error); }
 					else {
 						let errs = '';
@@ -364,7 +368,7 @@ pre_init();
 
 
 // Web server
-http.createServer(function (request, response) {
+createServer(function (request, response) {
 	const {method, url} = request;
 
 	if (url.startsWith('/?upld')) {
