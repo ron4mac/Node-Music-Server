@@ -218,21 +218,19 @@ const reqAction = (parms, resp) => {
 		return;
 		break;
 	case 'spract':
+		if (!settings.spauth || parms.spauth!==settings.spauth) {
+			rmsg = 'Not authorized';
+			break;
+		}
 		if (parms.spract == 'b') {
 			rmsg = 'Rebooting server ... refresh page in a minute or two';
 			cntrlr.execute('/usr/bin/systemctl reboot')
 			.then(m=>console.log('rebooting: '+m));
-		//	require('child_process').exec('/usr/bin/systemctl reboot',{},(error, stdout, stderr)=>{
-		//		if (error) { console.error(stderr) } else { console.log(stdout) }
-		//	});
 		}
 		if (parms.spract == 'r') {
 			rmsg = 'Restarting music server ... refresh page';
 			cntrlr.execute('/usr/bin/systemctl restart nodems')
 			.then(m=>console.log('restarting: '+m));
-		//	require('child_process').exec('/usr/bin/systemctl restart ytextr',{},(error, stdout, stderr)=>{
-		//		if (error) { console.error(stderr) } else { console.log(stdout) }
-		//	});
 		}
 		break;
 	}
