@@ -20,6 +20,16 @@ class MyClass {
 
 	alert (msg, options={}) {
 		const opts = Object.assign({}, {noBtn:''}, options);
+		if (!opts.class) {
+			if (msg.startsWith('!!')) {
+				msg = msg.substr(2);
+				opts.class = 'error';
+			}
+			if (msg.startsWith('!')) {
+				msg = msg.substr(1);
+				opts.class = 'warn';
+			}
+		}
 		return this._macp(msg, opts);
 	}
 
@@ -29,7 +39,13 @@ class MyClass {
 	}
 
 	prompt (msg, def='', options={}) {
-		const opts = Object.assign({}, {text:def}, options);
+		let txt = '';
+		if (typeof def == 'object') {
+			options = def;
+		} else {
+			txt = def;
+		}
+		const opts = Object.assign({}, {text:txt}, options);
 		return this._macp(msg, opts);
 	}
 

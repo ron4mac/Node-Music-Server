@@ -39,7 +39,7 @@ class FilemanClass extends ServiceClass {
 						} else {
 							document.getElementById('dnldf').src = '/?_=fm&act=sndf&sndf='+data.f64;
 						}
-					} else { my.alert('download not available'); }
+					} else { my.alert('!download not available'); }
 				}, 2);
 			}
 			break;
@@ -54,7 +54,7 @@ class FilemanClass extends ServiceClass {
 				evt.target.firstElementChild.innerHTML = `(${files.length})`;
 			} else {
 				if (!sessionStorage.nfm_mvto) {
-					my.alert('Nothing previously selected to move');
+					my.alert('!Nothing previously selected to move');
 					break;
 				}
 				let parms = JSON.parse(sessionStorage.nfm_mvto);
@@ -110,7 +110,7 @@ class FilemanClass extends ServiceClass {
 			let psel = dlg.querySelector('select').value;
 			let pnam = dlg.querySelector('input').value.trim();
 			if (psel=='' && !pnam) {
-				my.alert('Please provide a playlist name');
+				my.alert('!Please provide a playlist name');
 				break;
 			}
 			evt.target.parentElement.querySelector('i').style.display = 'inline-block';
@@ -143,7 +143,7 @@ class FilemanClass extends ServiceClass {
 				//	document.getElementById('fvewf').src = '/?_=fm&act=sndf&sndf='+data.f64+'&v=1';
 					document.getElementById('fvewf').src = '/?_=fm&act=fpxy&sndf='+data.fp;
 				}
-			} else { my.alert('not available'); }
+			} else { my.alert('!not available'); }
 		}, 2);
 	}
 

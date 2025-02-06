@@ -22,7 +22,7 @@ export default class Fileman {
 		switch (what) {
 		case 'fcomb':
 			if (!existsSync('/usr/bin/ffmpeg') && !existsSync('/usr/local/bin/ffmpeg')) {
-				rmsg = 'Required ffmpeg is not present';
+				rmsg = '!Required ffmpeg is not present';
 				break;
 			}
 			pbase = this.baseDir+parms.dir+(parms.dir==''?'':'/');
@@ -37,15 +37,6 @@ export default class Fileman {
 			//console.log(eprms);
 			cntrlr.execute('ffmpeg -loglevel 16 -n'+eprms)
 			.then(m=>resp.end(m));
-			return;
-			import('child_process')
-			.then(x=>{
-				x.exec('ffmpeg -loglevel 16 -n'+eprms,{},(error, stdout, stderr)=>{
-					console.error(error);
-					rmsg = error ? String(error) : null;
-					resp.end(rmsg);
-				});
-			});
 			return;
 			break;
 		case 'fdele':
@@ -63,13 +54,13 @@ export default class Fileman {
 			break;
 		case 'fdnld':
 			if (parms.files.length>1) {
-				rmsg = JSON.stringify({err: 'Multiple file download not yet implemented'});
+				rmsg = JSON.stringify({err: '!Multiple file download not yet implemented'});
 				break;
 			}
 			fpath = this.baseDir+parms.dir+parms.files[0];
 			stats = statSync(fpath);
 			if (stats.isDirectory()) {
-				rmsg = JSON.stringify({err: 'Multiple file (i.e. folder) download not yet implemented'});
+				rmsg = JSON.stringify({err: '!Multiple file (i.e. folder) download not yet implemented'});
 				break;
 			}
 			rmsg = JSON.stringify({err: '', fnam: parms.files[0], f64: btoa(fpath)});

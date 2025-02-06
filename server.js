@@ -219,7 +219,7 @@ const reqAction = (parms, resp) => {
 		break;
 	case 'spract':
 		if (!settings.spauth || parms.spauth!==settings.spauth) {
-			rmsg = 'Not authorized';
+			rmsg = '!Not authorized';
 			break;
 		}
 		if (parms.spract == 'b') {

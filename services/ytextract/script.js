@@ -48,16 +48,7 @@ class YTxClass {
 	extrFini (wh, msg) {
 		document.querySelector('#'+wh+'Tab i').style.display = 'none';
 		document.querySelector('#'+wh+'Tab input[type="submit"]').disabled = false;
-		let c = 'info';
-		if (msg.startsWith('!!')) {
-			msg = msg.substr(2);
-			c = 'error';
-		}
-		if (msg.startsWith('!')) {
-			msg = msg.substr(1);
-			c = 'warn';
-		}
-		my.alert(msg,{class:c});
+		my.alert(msg);
 		if (typeof Fileman == 'object') Fileman.refresh();
 	}
 
