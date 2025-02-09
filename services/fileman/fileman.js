@@ -2,8 +2,7 @@
 import cntrlr from '../../controller.js';
 import {createReadStream,existsSync,mkdirSync,readdir,readFileSync,readlinkSync,renameSync,rmSync,statSync,unlinkSync,writeFileSync} from 'fs';
 import path from 'path';
-import formidable from 'formidable';
-const formidableErrors = formidable.errors;
+import formidable, {errors as formidableErrors} from 'formidable';
 
 export default class Fileman {
 
@@ -17,7 +16,7 @@ export default class Fileman {
 
 	action (what, parms, resp) {
 		//console.log(what,parms);
-		let rmsg = 'NOT YET IMPLEMENTED';
+		let rmsg = '!NOT YET IMPLEMENTED';
 		let pbase, fpath, stats;
 		switch (what) {
 		case 'fcomb':
@@ -237,14 +236,15 @@ export default class Fileman {
 	}
 
 	async receiveUpload (req, res) {
-		const form = new formidable.IncomingForm({uploadDir: cntrlr.config.upldTmpDir, maxFileSize: 2147483648});
+		const form = formidable({uploadDir: cntrlr.config.upldTmpDir, maxFileSize: 2147483648});
 		return await form.parse(req, (err, fields, files) => {
 			if (err) {
 				console.error(err);
 				res.writeHead(err.httpCode || 400, {'Content-Type': 'text/plain'});
 				res.end(String(err));
 			} else {
-				renameSync(files.upld.filepath, path.join(this.baseDir+fields.dir, files.upld.originalFilename));
+				const fats = files.upld[0].toJSON();
+				renameSync(fats.filepath, path.join(this.baseDir+fields.dir[0], fats.originalFilename));
 				res.writeHead(200, {'Content-Type': 'text/plain'});
 				res.end(JSON.stringify({ fields, files }, null, 2));
 			}
