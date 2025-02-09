@@ -1,15 +1,21 @@
 {
   "name": "node-music-server",
   "version": "1.0.0",
-  "description": "Node Musice Server - various souces",
+  "description": "Node Musice Server - various sources",
   "type": "module",
   "main": "server.js",
   "files": [
-    "server.js",
     "index.html",
     "404.html",
     "favicon.ico",
-    "static"
+    "server.js",
+    "config.js",
+    "controller.js",
+    "mpd.js",
+    "nodems.service",
+    "librespot.service",
+    "static",
+    "services"
   ],
   "scripts": {
     "start": "node --openssl-legacy-provider extrsvr.js",
@@ -24,6 +30,7 @@
     "server",
     "Tunein",
     "Pandora",
+    "Spotify",
     "YouTube",
     "audio",
     "extract"
