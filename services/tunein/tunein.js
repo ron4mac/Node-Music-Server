@@ -1,5 +1,5 @@
 'use strict';
-import cntrlr from '../../controller.js';
+import cntrlr from '../../lib/controller.js';
 import http from 'http';
 import { XMLParser } from 'fast-xml-parser';
 

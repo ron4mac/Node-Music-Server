@@ -1,5 +1,5 @@
 'use strict';
-import cntrlr from '../../controller.js';
+import cntrlr from '../../lib/controller.js';
 import Connect from './connect.js';
 //import WebSocket from 'ws';
 import WebSocket, { WebSocketServer } from 'ws';

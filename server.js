@@ -1,12 +1,12 @@
-import {config} from './config.js';
-import cntrlr from './controller.js';
+import {config} from './lib/config.js';
+import cntrlr from './lib/controller.js';
 import {createServer} from 'http';
 //import https from'https';
 import process from 'process';
 import {parse} from 'querystring';
 import {existsSync,readFile,readFileSync,unlinkSync} from 'fs';
 import path from 'path';
-import MyMPD from './mpd.js';
+import MyMPD from './lib/mpd.js';
 
 // service modules
 import Favorites from './services/favorites/favorites.js';

@@ -1,5 +1,5 @@
 'use strict';
-import cntrlr from '../../controller.js';
+import cntrlr from '../../lib/controller.js';
 import {createReadStream,createWriteStream,readdir,unlinkSync} from 'fs';
 
 export default class Playlists {

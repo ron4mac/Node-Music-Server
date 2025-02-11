@@ -1,5 +1,5 @@
 'use strict';
-import cntrlr from '../../controller.js';
+import cntrlr from '../../lib/controller.js';
 
 export default class Favorites {
 
@@ -11,7 +11,7 @@ export default class Favorites {
 	action (what, bobj, resp) {
 		switch (what) {
 		case 'home':
-			this.faves = JSON.parse(cntrlr.readFile('services/favorites/favorites.json', '[]'));
+			this.faves = JSON.parse(cntrlr.readFile('favorites.json', '[]'));
 			if (this.faves.length) {
 				this.faves.forEach((fave, index) => {
 					resp.write(`<div class="${fave.how}" data-fid="${index}">`);
@@ -53,13 +53,13 @@ export default class Favorites {
 
 	#add (fave, resp) {
 		this.faves.push(fave);
-		let rslt = cntrlr.writeFile('services/favorites/favorites.json', JSON.stringify(this.faves, null, "\t"));
+		let rslt = cntrlr.writeFile('favorites.json', JSON.stringify(this.faves, null, "\t"));
 		resp.end(rslt ? ('Error: '+rslt) : 'Added to favorites');
 	}
 
 	#delete (fave, resp) {
 		this.faves.splice(fave,1);
-		let rslt = cntrlr.writeFile('services/favorites/favorites.json', JSON.stringify(this.faves, null, "\t"));
+		let rslt = cntrlr.writeFile('favorites.json', JSON.stringify(this.faves, null, "\t"));
 		resp.end();
 	}
 

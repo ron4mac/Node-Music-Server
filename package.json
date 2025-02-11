@@ -9,11 +9,9 @@
     "404.html",
     "favicon.ico",
     "server.js",
-    "config.js",
-    "controller.js",
-    "mpd.js",
     "nodems.service",
     "librespot.service",
+    "lib",
     "static",
     "services"
   ],

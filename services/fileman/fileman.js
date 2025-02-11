@@ -1,5 +1,5 @@
 'use strict';
-import cntrlr from '../../controller.js';
+import cntrlr from '../../lib/controller.js';
 import {createReadStream,existsSync,mkdirSync,readdir,readFileSync,readlinkSync,renameSync,rmSync,statSync,unlinkSync,writeFileSync} from 'fs';
 import path from 'path';
 import formidable, {errors as formidableErrors} from 'formidable';

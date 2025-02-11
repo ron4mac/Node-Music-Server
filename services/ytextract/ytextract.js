@@ -1,5 +1,5 @@
 'use strict';
-import cntrlr from '../../controller.js';
+import cntrlr from '../../lib/controller.js';
 import ytdl from '@distube/ytdl-core';
 import {createReadStream,createWriteStream,mkdirSync,readdir,statSync,unlink} from 'fs';
 
@@ -74,17 +74,17 @@ export default class YTExtract {
 	}
 
 	async getPlaylist (parms, resp) {
-		const ytpl = require('ytpl');
+		const ytpl = await import('ytpl');
 		unlink('playlist.zip', (err) => 1);
 	//	this._emptyDir(playlistDir);
 		let plurl = parms.pxtr;
 		let list;
 		try {
-			list = await ytpl(plurl, {limit:Infinity});
+			list = await ytpl.default(plurl, {limit:Infinity});
 			resp.end();
 		} catch (err) {
 			let msg = err.message.replace(/"/g,'');
-			resp.end(`<script>my.alert("${msg}")</script>`);
+			resp.end(`<script>alert("${msg}")</script>`);
 			return;
 		}
 		this.tlist = list.items;

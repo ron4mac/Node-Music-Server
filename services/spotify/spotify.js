@@ -1,5 +1,5 @@
 'use strict';
-import cntrlr from '../../controller.js';
+import cntrlr from '../../lib/controller.js';
 import SpotifyWebApi from './spotify-web-api/server.cjs';
 
 const auth_perms = [
