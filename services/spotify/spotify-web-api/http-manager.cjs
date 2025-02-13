@@ -6,7 +6,7 @@ const qs = require('querystring');
 const {URL} = require('url');
 
 
-var { TimeoutError, WebapiError, WebapiRegularError, WebapiAuthenticationError, WebapiPlayerError } = require('./response-error');
+var { TimeoutError, WebapiError, WebapiRegularError, WebapiAuthenticationError, WebapiPlayerError } = require('./response-error.cjs');
 
 var HttpManager = {};
 

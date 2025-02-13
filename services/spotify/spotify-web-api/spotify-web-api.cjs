@@ -1,8 +1,8 @@
 'use strict';
 /*eslint no-prototype-builtins: 'off'*/
-var AuthenticationRequest = require('./authentication-request'),
-  WebApiRequest = require('./webapi-request'),
-  HttpManager = require('./http-manager');
+var AuthenticationRequest = require('./authentication-request.cjs'),
+  WebApiRequest = require('./webapi-request.cjs'),
+  HttpManager = require('./http-manager.cjs');
 
 function SpotifyWebApi(credentials) {
   this._credentials = credentials || {};

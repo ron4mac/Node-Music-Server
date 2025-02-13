@@ -1,6 +1,6 @@
 'use strict';
 
-var Request = require('./base-request');
+var Request = require('./base-request.cjs');
 
 var DEFAULT_HOST = 'api.spotify.com',
   DEFAULT_PORT = 443,

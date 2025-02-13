@@ -1,7 +1,7 @@
 'use strict';
 
-var AuthenticationRequest = require('./authentication-request');
-var HttpManager = require('./http-manager');
+var AuthenticationRequest = require('./authentication-request.cjs');
+var HttpManager = require('./http-manager.cjs');
 
 module.exports = {
 

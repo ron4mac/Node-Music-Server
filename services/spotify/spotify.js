@@ -1,8 +1,6 @@
 'use strict';
-const cntrlr = require('../../controller');
-//const https = require('https');
-//const qs = require('querystring');
-const SpotifyWebApi = require('./spotify-web-api/server');
+import cntrlr from '../../lib/controller.js';
+import SpotifyWebApi from './spotify-web-api/server.cjs';
 
 const auth_perms = [
 	'user-read-private',
@@ -12,9 +10,9 @@ const auth_perms = [
 	'user-modify-playback-state'
 ];
 
-module.exports = class Spotify {
+export default class Spotify {
 
-	constructor (client, mympd) {
+	constructor (client, mympd, full=false) {
 		this.mpdc = mympd;
 		this.client = client;
 		this.client.setClientId(cntrlr.getSetting('spotify_ClientId', null));
@@ -351,6 +349,7 @@ module.exports = class Spotify {
 		if (data.offset + data.limit < data.total) {
 			resp.write('<div class="sheader"><h4>PLAYLISTS</h4><a href="#" data-next="pll.'+data.next+'">More</a></div>');
 		}
+		if (!data.items) return;
 		data.items.forEach((itm) => {
 			if (itm) {
 				resp.write('<div class="spot-link" data-url="pll.'+itm.id+'">');

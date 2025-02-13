@@ -1,14 +1,19 @@
 {
   "name": "node-music-server",
   "version": "1.0.0",
-  "description": "Node Musice Server - various souces",
-  "main": "extrsvr.js",
+  "description": "Node Musice Server - various sources",
+  "type": "module",
+  "main": "server.js",
   "files": [
-    "extrsvr.js",
     "index.html",
     "404.html",
     "favicon.ico",
-    "static"
+    "server.js",
+    "nodems.service",
+    "librespot.service",
+    "lib",
+    "static",
+    "services"
   ],
   "scripts": {
     "start": "node --openssl-legacy-provider extrsvr.js",
@@ -23,12 +28,13 @@
     "server",
     "Tunein",
     "Pandora",
+    "Spotify",
     "YouTube",
     "audio",
     "extract"
   ],
   "author": "ron4mac",
-  "license": "ISC",
+  "license": "(ISC OR GPL-3.0)",
   "bugs": {
     "url": "https://github.com/ron4mac/Node-Music-Server/issues"
   },
@@ -36,16 +42,11 @@
   "dependencies": {
     "@distube/ytdl-core": "^4.15.9",
     "fast-xml-parser": "^4.5.0",
-    "formidable": "^2.1.2",
+    "formidable": "^3.5.2",
     "mime-lite": "^1.0.3",
     "mpd2": "^1.0.5",
     "underscore": "^1.13.7",
     "ws": "^8.18.0",
     "ytpl": "^2.3.0"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.17.0",
-    "eslint": "^9.17.0",
-    "globals": "^15.14.0"
   }
 }

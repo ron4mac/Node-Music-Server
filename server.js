@@ -1,12 +1,22 @@
-const config = require('./config');
-const cntrlr = require('./controller');
-const http = require('http');
-const https = require('https');
-const process = require('process');
-const {parse} = require('querystring');
-const fs = require('fs');
-const path = require('path');
-const MyMPD = require('./mpd.js');
+import {config} from './lib/config.js';
+import cntrlr from './lib/controller.js';
+import {createServer} from 'http';
+//import https from'https';
+import process from 'process';
+import {parse} from 'querystring';
+import {existsSync,readFile,readFileSync,unlinkSync} from 'fs';
+import path from 'path';
+import MyMPD from './lib/mpd.js';
+
+// service modules
+import Favorites from './services/favorites/favorites.js';
+import Tunein from './services/tunein/tunein.js';
+import CalmRadio from './services/calmradio/calmradio.js';
+import Pandora from './services/pandora/pandora.js';
+import Spotify from './services/spotify/spotify.js';
+import Fileman from './services/fileman/fileman.js';
+import YTExtract from './services/ytextract/ytextract.js';
+import Playlists from './services/playlists/playlists.js';
 
 const hostname = process.env.NODE_WEB_HOST || '0.0.0.0';
 const debugMode = false;
@@ -40,7 +50,7 @@ const webFavorites = async (what, bobj, resp) => {
 		if (!mympd) {
 			mympd = await MyMPD.init();
 		}
-		favorites = new (require('./services/favorites/favorites'))(mympd);
+		favorites = new Favorites(mympd);
 	}
 	favorites.action(what, bobj, resp);
 };
@@ -50,7 +60,7 @@ const webRadio = async (what, bobj, resp) => {
 		if (!mympd) {
 			mympd = await MyMPD.init();
 		}
-		tunein = new (require('./services/tunein/tunein'))(mympd);
+		tunein = new Tunein(mympd);
 	}
 	tunein.action(what, bobj, resp);
 };
@@ -60,7 +70,7 @@ const webCalm = async (what, bobj, resp) => {
 		if (!mympd) {
 			mympd = await MyMPD.init();
 		}
-		calmradio = new (require('./services/calmradio/calmradio'))(mympd);
+		calmradio = new CalmRadio(mympd);
 	}
 	calmradio.action(what, bobj, resp);
 };
@@ -70,7 +80,7 @@ const webPandora = async (what, bobj, resp) => {
 		if (!mympd) {
 			mympd = await MyMPD.init();
 		}
-		pandora = await (require('./services/pandora/pandora')).init(mympd, settings);
+		pandora = await Pandora.init(mympd, settings);
 	}
 	pandora.action(what, bobj, resp);
 };
@@ -80,21 +90,21 @@ const webSpotify = async (what, bobj, resp) => {
 		if (!mympd) {
 			mympd = await MyMPD.init();
 		}
-		spotify = await (require('./services/spotify/spotify')).init(mympd, settings);
+		spotify = await Spotify.init(mympd, settings);
 	}
 	spotify.action(what, bobj, resp);
 };
 
 const webFileman = async (what, bobj, resp) => {
 	if (!fileman) {
-		fileman = new (require('./services/fileman/fileman'))();
+		fileman = new Fileman();
 	}
 	fileman.action(what, bobj, resp);
 };
 
 const webYtextr = async (what, bobj, resp) => {
 	if (!ytextract) {
-		ytextract = new (require('./services/ytextract/ytextract'))();
+		ytextract = new YTExtract();
 	}
 	ytextract.action(what, bobj, resp);
 };
@@ -104,7 +114,7 @@ const webLists = async (what, bobj, resp) => {
 		if (!mympd) {
 			mympd = await MyMPD.init();
 		}
-		playlists = new (require('./services/playlists/playlists'))(mympd);
+		playlists = new Playlists(mympd);
 	}
 	playlists.action(what, bobj, resp);
 };
@@ -189,36 +199,38 @@ const reqAction = (parms, resp) => {
 	//	let plst = '';
 	//	for (const file of parms.files) {
 	//		plst += config.playlistDir+file + "\n";
-	//		fs.unlinkSync(fpath);
+	//		unlinkSync(fpath);
 	//	}
 		rmsg = null;
 		break;
 	case 'pldel':
 		for (const file of parms.files) {
 			fpath = config.playlistDir+file;
-			fs.unlinkSync(fpath);
+			unlinkSync(fpath);
 		}
 		rmsg = null;
 		break;
 	case 'plvue':
-		rmsg = JSON.stringify({err:'', pl:fs.readFileSync(config.playlistDir+parms.file,{encoding:'utf8'})});
+		rmsg = JSON.stringify({err:'', pl:readFileSync(config.playlistDir+parms.file,{encoding:'utf8'})});
 		break;
 	case 'mpd':
 		mpdCtrl(parms.what, parms.bobj??'', resp);
 		return;
 		break;
 	case 'spract':
+		if (!settings.spauth || parms.spauth!==settings.spauth) {
+			rmsg = '!Not authorized';
+			break;
+		}
 		if (parms.spract == 'b') {
 			rmsg = 'Rebooting server ... refresh page in a minute or two';
-			require('child_process').exec('/usr/bin/systemctl reboot',{},(error, stdout, stderr)=>{
-				if (error) { console.error(stderr) } else { console.log(stdout) }
-			});
+			cntrlr.execute('/usr/bin/systemctl reboot')
+			.then(m=>console.log('rebooting: '+m));
 		}
 		if (parms.spract == 'r') {
 			rmsg = 'Restarting music server ... refresh page';
-			require('child_process').exec('/usr/bin/systemctl restart ytextr',{},(error, stdout, stderr)=>{
-				if (error) { console.error(stderr) } else { console.log(stdout) }
-			});
+			cntrlr.execute('/usr/bin/systemctl restart nodems')
+			.then(m=>console.log('restarting: '+m));
 		}
 		break;
 	}
@@ -290,10 +302,10 @@ const serveFile = (url, response) => {
 	}
 
 	// Serve static files
-	fs.readFile(filePath, function(error, content) {
+	readFile(filePath, function(error, content) {
 		if (error) {
 			if (error.code === 'ENOENT') {
-				fs.readFile(documentRoot + '/404.html', function(error, content) {
+				readFile(documentRoot + '/404.html', function(error, content) {
 					if (error) { console.error(error); }
 					else {
 						response.writeHead(404, { 'Content-Type': 'text/html' });
@@ -303,8 +315,8 @@ const serveFile = (url, response) => {
 					}
 				});
 			}
-			else if (error.code === 'EISDIR' && fs.existsSync(filePath+'/index.html')) {
-				fs.readFile(filePath+'/index.html', 'utf8', function(error, content) {
+			else if (error.code === 'EISDIR' && existsSync(filePath+'/index.html')) {
+				readFile(filePath+'/index.html', 'utf8', function(error, content) {
 					if (error) { console.error(error); }
 					else {
 						let errs = '';
@@ -354,7 +366,7 @@ pre_init();
 
 
 // Web server
-http.createServer(function (request, response) {
+createServer(function (request, response) {
 	const {method, url} = request;
 
 	if (url.startsWith('/?upld')) {
@@ -408,6 +420,6 @@ http.createServer(function (request, response) {
 	serveFile(url, response);
 
 }).listen(config.port, hostname, () => {
-	console.log(`YT Audio Extraction Server (http://${hostname}:${config.port}) started`);
+	console.log(`Node Music Server (http://${hostname}:${config.port}) started`);
 });
 

@@ -1,28 +1,27 @@
 'use strict';
-const cntrlr = require('../../controller');
-const fs = require('fs');
-const path = require('path');
-const formidable = require('formidable');
-const formidableErrors = formidable.errors;
+import cntrlr from '../../lib/controller.js';
+import {createReadStream,existsSync,mkdirSync,readdir,readFileSync,readlinkSync,renameSync,rmSync,statSync,unlinkSync,writeFileSync} from 'fs';
+import path from 'path';
+import formidable, {errors as formidableErrors} from 'formidable';
 
-module.exports = class Fileman {
+export default class Fileman {
 
 	constructor () {
 		this.debug = true;
 		this.baseDir = cntrlr.config.baseDir;
-		if (!fs.existsSync(this.baseDir)) {
-			fs.mkdirSync(this.baseDir, {recursive:true});
+		if (!existsSync(this.baseDir)) {
+			mkdirSync(this.baseDir, {recursive:true});
 		}
 	}
 
 	action (what, parms, resp) {
 		//console.log(what,parms);
-		let rmsg = 'NOT YET IMPLEMENTED';
+		let rmsg = '!NOT YET IMPLEMENTED';
 		let pbase, fpath, stats;
 		switch (what) {
 		case 'fcomb':
-			if (!fs.existsSync('/usr/bin/ffmpeg') && !fs.existsSync('/usr/local/bin/ffmpeg')) {
-				rmsg = 'Required ffmpeg is not present';
+			if (!existsSync('/usr/bin/ffmpeg') && !existsSync('/usr/local/bin/ffmpeg')) {
+				rmsg = '!Required ffmpeg is not present';
 				break;
 			}
 			pbase = this.baseDir+parms.dir+(parms.dir==''?'':'/');
@@ -30,41 +29,37 @@ module.exports = class Fileman {
 			for (const file of parms.files) {
 				fpath = pbase+file;
 				eprms += ` -i "${fpath}"`;
-				stats = fs.statSync(fpath);
+				stats = statSync(fpath);
 			}
 			if (parms.files.length > 1) eprms += ' -codec copy';
 			eprms += ` "${pbase+parms.asfile}"`;
 			//console.log(eprms);
-			require('child_process').exec('ffmpeg -loglevel 16 -n'+eprms,{},(error, stdout, stderr)=>{
-					console.error(error);
-					rmsg = error ? String(error) : null;
-					resp.end(rmsg);
-				});
+			cntrlr.execute('ffmpeg -loglevel 16 -n'+eprms)
+			.then(m=>resp.end(m));
 			return;
-			rmsg = null;
 			break;
 		case 'fdele':
 			pbase = this.baseDir+parms.dir+(parms.dir==''?'':'/');
 			for (const file of parms.files) {
 				fpath = pbase+file;
-				stats = fs.statSync(fpath);
+				stats = statSync(fpath);
 				if (stats.isDirectory()) {
-					fs.rmSync(fpath, {recursive: true, force: true});
+					rmSync(fpath, {recursive: true, force: true});
 				} else {
-					fs.unlinkSync(fpath);
+					unlinkSync(fpath);
 				}
 			}
 			rmsg = null;
 			break;
 		case 'fdnld':
 			if (parms.files.length>1) {
-				rmsg = JSON.stringify({err: 'Multiple file download not yet implemented'});
+				rmsg = JSON.stringify({err: '!Multiple file download not yet implemented'});
 				break;
 			}
 			fpath = this.baseDir+parms.dir+parms.files[0];
-			stats = fs.statSync(fpath);
+			stats = statSync(fpath);
 			if (stats.isDirectory()) {
-				rmsg = JSON.stringify({err: 'Multiple file (i.e. folder) download not yet implemented'});
+				rmsg = JSON.stringify({err: '!Multiple file (i.e. folder) download not yet implemented'});
 				break;
 			}
 			rmsg = JSON.stringify({err: '', fnam: parms.files[0], f64: btoa(fpath)});
@@ -73,18 +68,18 @@ module.exports = class Fileman {
 			let fdir = this.baseDir+parms.fdir;
 			let tdir = this.baseDir+parms.tdir;
 			for (const file of parms.files) {
-				fs.renameSync(fdir+file, tdir+file);
+				renameSync(fdir+file, tdir+file);
 			}
 			rmsg = null;
 			break;
 		case 'fnewf':
 			let pdir = this.baseDir+parms.dir;
-			fs.mkdirSync(path.join(pdir, parms.newf));
+			mkdirSync(path.join(pdir, parms.newf));
 			rmsg = null;
 			break;
 		case 'frnam':
 			pbase = this.baseDir+parms.dir+(parms.dir==''?'':'/');
-			fs.renameSync(pbase+parms.file, pbase+parms.to);
+			renameSync(pbase+parms.file, pbase+parms.to);
 			rmsg = null;
 			break;
 		case 'funzp':
@@ -108,14 +103,14 @@ module.exports = class Fileman {
 			let clst = '';
 			rmsg = 'Playlist saved (huh?)';
 			try {
-				fs.mkdirSync(pld, {recursive:true});
+				mkdirSync(pld, {recursive:true});
 				if (parms.plsel) {
 					fpath += parms.plsel;
-					clst = fs.readFileSync(fpath, 'utf8')
+					clst = readFileSync(fpath, 'utf8')
 				} else {
 					fpath += btoa(parms.plnam);
 				}
-				fs.writeFileSync(fpath, clst+plst);
+				writeFileSync(fpath, clst+plst);
 			} catch (err) {
 				console.error(err);
 				rmsg = 'Failed to write playlist';
@@ -123,11 +118,25 @@ module.exports = class Fileman {
 			break;
 		case 'fview':
 			fpath = this.baseDir+parms.fpath;
+			stats = statSync(fpath);
+			let fp = {fpath, size:stats.size};
+			cntrlr.mimeType(fpath)
+			.then(m=>{ fp.mtype = m; })
+			.then(()=>{
+				const fpm = btoa(JSON.stringify(fp));
+				console.log(fpm);
+				resp.end(JSON.stringify({err: '', fp: fpm}));
+			});
+			return;
 	// @@@@@@@@@@
 	// could get file type here and send to client for display adjustments
-	//		stats = fs.statSync(fpath);
+	//		stats = statSync(fpath);
 	//		console.log(stats);
 			rmsg = JSON.stringify({err: '', f64: btoa(fpath)});
+			break;
+		case 'fpxy':
+			this.#sendFile2(parms.sndf, resp);
+			return;
 			break;
 		case 'sndf':
 			this.sendFile(parms, resp);
@@ -149,7 +158,7 @@ module.exports = class Fileman {
 
 	getDirList (dir, resp) {
 		const idtf = new Intl.DateTimeFormat('en-US',{year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hour12:false,timeZoneName:'short'});
-		fs.readdir(this.baseDir+dir, {withFileTypes: true}, (err, files) => {
+		readdir(this.baseDir+dir, {withFileTypes: true}, (err, files) => {
 			if (err) throw err;
 			let rows = ['<thead><td></td><th>Name</th><th>Size </th><th> Date</th></thead>'];
 			let pdir = dir == '' ? dir : (dir+'/');
@@ -164,13 +173,13 @@ module.exports = class Fileman {
 				}
 				if (file.isSymbolicLink()) {
 					lnk = ' <i class="fa fa-arrow-right fa-fw" aria-hidden="true"></i>';
-					let lnk2 = fs.readlinkSync(this.baseDir+dir+'/'+file.name);
-				//	if (fs.statSync(lnk2).isDirectory()) {
+					let lnk2 = readlinkSync(this.baseDir+dir+'/'+file.name);
+				//	if (statSync(lnk2).isDirectory()) {
 				//		fcl = 'isdir" data-dpath="'+lnk2;
 				//	}
 					lnk += lnk2;
 				}
-				const fstat = fs.statSync(this.baseDir+dir+'/'+file.name);
+				const fstat = statSync(this.baseDir+dir+'/'+file.name);
 				rows.push('<td><input type="checkbox" class="fsel" name="files[]" value="'+file.name+'"></td>'
 					+'<td class="'+fcl+'">'+icn+file.name+lnk+'</td>'
 					+'<td>'+this.#formatNumber(fstat.size)+' </td>'
@@ -203,19 +212,20 @@ module.exports = class Fileman {
 		resp.write(nav+'</div>');
 	}
 
-	sendFile (parms, resp) {
-		//console.log('[Info] Sending zip file');
+	async sendFile (parms, resp) {
+		console.log('[Info] Sending zip file');
 		let filePath = atob(parms.sndf);
-		let stats = fs.statSync(filePath);
+		let stats = statSync(filePath);
+		const fmime = await cntrlr.mimeType(filePath);			//console.log(fmime);console.trace();
 		resp.setHeader('Content-Length', stats.size);
 		if (parms.v) {
-			const mtyp = cntrlr.mimeType(filePath) || 'audio/mp4';
+			const mtyp = fmime || 'audio/mp4';
 			resp.setHeader('Content-Type', mtyp);
 		} else {
 			resp.setHeader('Content-Type', 'application/octet-stream');
 			resp.setHeader('Content-Disposition', 'attachment; filename="'+path.basename(filePath)+'"');
 		}
-		let stream = fs.createReadStream(filePath);
+		let stream = createReadStream(filePath);
 		stream.on('open', () => {
 			stream.pipe(resp);
 		});
@@ -226,19 +236,36 @@ module.exports = class Fileman {
 	}
 
 	async receiveUpload (req, res) {
-		const form = new formidable.IncomingForm({uploadDir: cntrlr.config.upldTmpDir, maxFileSize: 2147483648});
+		const form = formidable({uploadDir: cntrlr.config.upldTmpDir, maxFileSize: 2147483648});
 		return await form.parse(req, (err, fields, files) => {
 			if (err) {
 				console.error(err);
 				res.writeHead(err.httpCode || 400, {'Content-Type': 'text/plain'});
 				res.end(String(err));
 			} else {
-				fs.renameSync(files.upld.filepath, path.join(this.baseDir+fields.dir, files.upld.originalFilename));
+				const fats = files.upld[0].toJSON();
+				renameSync(fats.filepath, path.join(this.baseDir+fields.dir[0], fats.originalFilename));
 				res.writeHead(200, {'Content-Type': 'text/plain'});
 				res.end(JSON.stringify({ fields, files }, null, 2));
 			}
 		});
 	};
+
+
+	#sendFile2 (parms, resp) {
+		console.log('proxy file send');
+		const fp = JSON.parse(atob(parms));
+		resp.setHeader('Content-Length', fp.size);
+		resp.setHeader('Content-Type', fp.mtype);
+		let stream = createReadStream(fp.fpath);
+		stream.on('open', () => {
+			stream.pipe(resp);
+		});
+		stream.on('error', () => {
+			resp.setHeader('Content-Type','text/plain');
+			resp.status(404).end('Not found');
+		});
+	}
 
 
 	#formatNumber (num) {
@@ -252,6 +279,5 @@ module.exports = class Fileman {
 			return (num / 1073741824).toFixed(1) + 'G';
 		}
 	}
-
 
 }

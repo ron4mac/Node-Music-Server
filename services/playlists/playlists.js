@@ -1,8 +1,8 @@
 'use strict';
-const cntrlr = require('../../controller');
-const fs = require('fs');
+import cntrlr from '../../lib/controller.js';
+import {createReadStream,createWriteStream,readdir,unlinkSync} from 'fs';
 
-module.exports = class Playlists {
+export default class Playlists {
 
 	constructor (mympd) {
 		this.mpdc = mympd;
@@ -14,7 +14,7 @@ module.exports = class Playlists {
 		switch (what) {
 		case 'home':
 			resp.write('<section>');
-			fs.readdir(this.playlistDir, (err, files) => {
+			readdir(this.playlistDir, (err, files) => {
 				if (err) {
 					if (err.code=='ENOENT') {
 						console.info('playlist directory not found');
@@ -41,7 +41,7 @@ module.exports = class Playlists {
 		case 'pldel':
 			for (const file of params.files) {
 				const fpath = this.playlistDir+file;
-				fs.unlinkSync(fpath);
+				unlinkSync(fpath);
 			}
 			resp.end();
 			break;
@@ -76,7 +76,7 @@ module.exports = class Playlists {
 
 	#playlistMenu (resp) {
 		resp.write('<select onchange="Playlists.plselchg(this)"><option value="">- New Playlist -</option>');
-		fs.readdir(this.playlistDir, (err, files) => {
+		readdir(this.playlistDir, (err, files) => {
 			if (err) {
 				if (err.code=='ENOENT') {
 					console.info('playlist directory not found');
@@ -93,14 +93,14 @@ module.exports = class Playlists {
 	}
 
 	#queMPD (files) {
-		const writeStream = fs.createWriteStream('/var/lib/mpd/playlists/ytextrsvr.m3u');
+		const writeStream = createWriteStream('/var/lib/mpd/playlists/ytextrsvr.m3u');
 		writeStream.on('finish', () => {
 			this.mpdc.sendCommands(['load ytextrsvr','play'], (err, status) => {console.log(err, status)});
 		});
 
 		let fcnt = files.length - 1;
 		files.forEach((file, ix) => {
-			const readStream = fs.createReadStream(this.playlistDir+file);
+			const readStream = createReadStream(this.playlistDir+file);
 			if (ix < fcnt) {
 				readStream.pipe(writeStream, { end: false });
 			} else {

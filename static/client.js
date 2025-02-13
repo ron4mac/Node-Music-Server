@@ -329,3 +329,12 @@ const postAction = (tos, parms={}, cb=()=>{}, json=false) => {
 	.then(data => cb(data))
 	.catch(err => my.alert(err,{class:'error'}));
 };
+
+// open the MPD socket
+// have to wait for the config module before firing up the MPD socket
+const wait = setInterval(() => {
+	if (typeof config == 'object') {
+		clearInterval(wait);
+		mpdSocket();
+	}
+}, 100);

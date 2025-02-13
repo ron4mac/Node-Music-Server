@@ -1,9 +1,7 @@
 'use strict';
-const cntrlr = require('../../controller');
-const https = require('https');
-const qs = require('querystring');
-
-//const fs = require('fs');
+import cntrlr from '../../lib/controller.js';
+import https from 'https';
+import qs from 'querystring';
 
 const CRURLS = {
 		metadata: 'https://api.calmradio.com/v2/metadata.json',
@@ -16,7 +14,7 @@ const CRURLS = {
 		check: 'https://api.calmradio.com/check'
 	};
 
-module.exports = class CalmRadio {
+export default class CalmRadio {
 
 	constructor (mympd) {
 		this.mpdc = mympd;
@@ -276,6 +274,5 @@ module.exports = class CalmRadio {
 			}
 		});
 	}
-
 
 }

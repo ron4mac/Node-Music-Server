@@ -16,7 +16,7 @@
 	margin-left: .3rem;
 }
 .fmnav .isdir {
-	color: gray;
+	color: green;
 }
 table {
 	line-height: 1rem;
@@ -46,7 +46,7 @@ table .fa {
 	position: absolute;
 	/*width: 480px;
 	height: 294px;*/
-	min-width: 600px;
+	min-width: 400px;
 	width: 90%;
 	height: 90%;
 	top: 0;

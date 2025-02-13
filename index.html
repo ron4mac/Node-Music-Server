@@ -7,11 +7,11 @@
 <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <!-- <link rel="stylesheet" href="//rjcrans.net/rjlibs/dlog/dialog.css"> -->
 <link href="static/style.css" rel="stylesheet">
+<script src="lib/config.js" type="module"></script>
 <script src="static/classes.js"></script>
 <script src="static/client.js"></script>
 <!-- <script src="//rjcrans.net/rjlibs/dlog/dialog.js" type="text/javascript"></script> -->
 <!-- <script src="static/upload.js"></script> -->
-<script src="config" type="text/javascript"></script>
 </head>
 <body>%%ERRORS%%
 	<div class="content">
@@ -106,8 +106,11 @@
 	</dialog>
 	<div class="dlogs">
 		<div class="superAdmin">
-		<label><input type="radio" name="spract" value="r" required>Restart App</label>
-		<label><input type="radio" name="spract" value="b">Reboot Server</label>
+		<label>Auth code: <input type="text" name="spauth" required></label>
+		<div>
+			<label><input type="radio" name="spract" value="r" required>Restart App</label>
+			<label><input type="radio" name="spract" value="b">Reboot Server</label>
+		</div>
 		<input type="hidden" name="act" value="spract">
 		</div>
 	</div>
@@ -116,8 +119,6 @@
 	var xtrLocal='XTRLOCALV';
 	// Show the default tab
 	document.getElementById('defaultOpen').click();
-	// open the MPD socket
-	mpdSocket();
 	</script>
 </body>
 </html>

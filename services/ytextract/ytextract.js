@@ -1,11 +1,9 @@
 'use strict';
-const cntrlr = require('../../controller');
-//const http = require('http');
-//const https = require('https');
-const ytdl = require('@distube/ytdl-core');
-const fs = require('fs');
+import cntrlr from '../../lib/controller.js';
+import ytdl from '@distube/ytdl-core';
+import {createReadStream,createWriteStream,mkdirSync,readdir,statSync,unlink} from 'fs';
 
-module.exports = class YTExtract {
+export default class YTExtract {
 
 	constructor () {
 		this.tlist = [];
@@ -58,7 +56,7 @@ module.exports = class YTExtract {
 				console.error(aud.error.message);
 				errs.push(aud.error);
 			} else {
-				aud.stream.pipe(fs.createWriteStream(dest+'/'+trk.title+'.'+aud.fext));
+				aud.stream.pipe(createWriteStream(dest+'/'+trk.title+'.'+aud.fext));
 			}
 			if (this.tlist.length) {
 				this.getTrack(this.tlist.shift(), dest);
@@ -76,34 +74,34 @@ module.exports = class YTExtract {
 	}
 
 	async getPlaylist (parms, resp) {
-		const ytpl = require('ytpl');
-		fs.unlink('playlist.zip', (err) => 1);
+		const ytpl = await import('ytpl');
+		unlink('playlist.zip', (err) => 1);
 	//	this._emptyDir(playlistDir);
 		let plurl = parms.pxtr;
 		let list;
 		try {
-			list = await ytpl(plurl, {limit:Infinity});
+			list = await ytpl.default(plurl, {limit:Infinity});
 			resp.end();
 		} catch (err) {
 			let msg = err.message.replace(/"/g,'');
-			resp.end(`<script>my.alert("${msg}")</script>`);
+			resp.end(`<script>alert("${msg}")</script>`);
 			return;
 		}
 		this.tlist = list.items;
 	//console.log(this.tlist.length+' tracks');
 		this.pwtrk = parms.wtrk;
 		let _dd = cntrlr.config.baseDir+'playlist_'+Date.now();
-		fs.mkdirSync(_dd);
+		mkdirSync(_dd);
 		this.getTrack(this.tlist.shift(), _dd);
 	}
 
 	sendzip (filePath, resp) {
 		//console.log('[Info] Sending zip file');
-		let stats = fs.statSync(filePath);
+		let stats = statSync(filePath);
 		resp.setHeader('Content-Type', 'application/zip');
 		resp.setHeader('Content-Length', stats.size);
 		resp.setHeader('Content-Disposition', 'attachment; filename="playlist.zip"');
-		let stream = fs.createReadStream(filePath);
+		let stream = createReadStream(filePath);
 		stream.on('open', () => {
 			stream.pipe(resp);
 		});
@@ -159,27 +157,6 @@ module.exports = class YTExtract {
 	audioExtract (parms, resp) {
 		console.log(parms);
 		this.getAudioStream(parms.yturl, parms.wtrk, (aud) => {
-// 			if (aud.error) {
-// 				let msg = aud.error.message.replace(/"/g,'');
-// 				resp.end('!!'+msg);
-// 			} else if (cntrlr.config.extr2Intrn) {
-// 				let ws = fs.createWriteStream(cntrlr.config.baseDir+parms.tname+'.'+aud.fext);
-// 				ws.on('error', (err) => {
-// 					console.error(err);
-// 					resp.end(`!!Failed to write file: ${err.message}`);
-// 				});
-// 				ws.on('finish', () => {
-// 					resp.end(`Audio extracted as '${parms.tname}.${aud.fext}`);
-// 				});
-// 				aud.stream.on('error', (err) => {
-// 					console.error(err);
-// 					resp.end(`!!Failed to extract stream: ${err.message}`);
-// 				});
-// 				aud.stream.pipe(ws);
-// 			} else {
-// 				resp.writeHead(200, {'Content-Type': aud.mimeType, 'Content-Length': aud.contentLength, 'Content-Disposition': `attachment; filename="${parms.tname}.${aud.fext}"`});
-// 				aud.stream.pipe(resp);
-// 			}
 			this._stream2storage(aud, parms.tname+'.'+aud.fext)
 			.then(m => resp.end(m), m => resp.end('!!'+m));
 			//.catch(m => resp.end('!!'+m));
@@ -235,28 +212,6 @@ module.exports = class YTExtract {
 		//console.log(parms);
 		let yturl = parms.vxtr;
 		this.getVideo(parms.yturl, parms.wtrk, parms.vida, (vid) => {
-// 			//console.log(vid);
-// 			if (vid.error) {
-// 				let msg = vid.error.message.replace(/"/g,'');
-// 				resp.end('!!'+msg);
-// 			} else if (cntrlr.config.extr2Intrn) {
-// 				let ws = fs.createWriteStream(cntrlr.config.baseDir+parms.tname+'.'+vid.fext);
-// 				ws.on('error', (err) => {
-// 					console.error(err);
-// 					resp.end(`!!Failed to write file: ${err.message}`);
-// 				});
-// 				ws.on('finish', () => {
-// 					resp.end(`Video extracted as '${parms.tname}.${vid.fext}`);
-// 				});
-// 				vid.stream.on('error', (err) => {
-// 					console.error('WTF',err);
-// 					resp.end(`!!Failed to extract stream: ${err.message}`);
-// 				});
-// 				vid.stream.pipe(ws);
-// 			} else {
-// 				resp.writeHead(200, {'Content-Type': vid.mimeType, 'Content-Length': vid.contentLength, 'Content-Disposition': `attachment; filename="${parms.tname}.${vid.fext}"`});
-// 				vid.stream.pipe(resp);
-// 			}
 			this._stream2storage(vid, parms.tname+'.'+vid.fext)
 			.then(m => resp.end(m), m => resp.end('!!'+m));
 		});
@@ -303,7 +258,7 @@ module.exports = class YTExtract {
 			const fd = fnam.split('/');
 			if (fd.length>1) {
 			}
-			let ws = fs.createWriteStream(cntrlr.config.baseDir+fnam);
+			let ws = createWriteStream(cntrlr.config.baseDir+fnam);
 			ws.on('error', (err) => {
 				console.error(err);
 				reject(`Failed to write file: ${err.message}`);
@@ -320,15 +275,14 @@ module.exports = class YTExtract {
 	}
 
 	_emptyDir (dir) {
-		fs.readdir(dir, (err, files) => {
+		readdir(dir, (err, files) => {
 			if (err) throw err;
 			for (const file of files) {
-				fs.unlink(path.join(dir, file), (err) => {
+				unlink(path.join(dir, file), (err) => {
 					if (err) throw err;
 				});
 			}
 		});
 	}
-
 
 }
