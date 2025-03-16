@@ -4,6 +4,7 @@ class TuneinClass {
 
 	sr = 'ti';	// service route
 	last = '';
+	stats = null;
 
 	play (evt) {
 		const elm = evt.target;
@@ -83,11 +84,30 @@ class TuneinClass {
 		postAction(this.sr, parms, (data) => {
 			displayCurrent(currentStream);
 			if (data) {
+				// clear any current icecasting
+				if (this.stats) {
+					this.stats.stop();
+					this.stats = null;
+				}
 				showLocalAudio(this.sr);
 				laudioelm.src = data;
 				laudioelm.play();
+				// start icecasting for this stream
+				this.stats = new IcecastMetadataStats(data, {onStats: this.#onStats, sources: ['icestats','icy'], interval: 5});
+				this.stats.start();
 			}
 		}, 1);
+	}
+
+	#onStats (stats) {
+		let ttl = '';
+		//console.log(stats);
+		if (stats.icy) {
+			ttl = stats.icy.StreamTitle;
+		} else if (stats.icestats) {
+			ttl = stats.icestats.source.title;
+		}
+		displayCurrentTrack(ttl);
 	}
 
 }
