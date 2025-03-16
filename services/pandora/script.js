@@ -195,7 +195,7 @@ class PandClass {
 	#nextLocal (sid, snam, aude) {
 		const bobj = {sid: sid, snam: snam};
 		const parms = {what: 'lplay', bobj: bobj};
-		postAction(sr, parms, (data) => {
+		postAction(this.sr, parms, (data) => {
 			if (data) {
 				this.#showTrackArt(data, false);
 				aude.src = data.audioUrl;
