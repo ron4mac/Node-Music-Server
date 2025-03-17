@@ -1,6 +1,6 @@
 {
   "name": "node-music-server",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Node Musice Server - various sources",
   "type": "module",
   "main": "server.js",

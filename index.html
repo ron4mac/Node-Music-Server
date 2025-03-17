@@ -28,6 +28,7 @@
 			<button class="tablinks nompd" onclick="openTab(event, 'filemanTab', 'fm')">Manage File Storage</button>
 			<button class="tablinks nompd" onclick="openTab(event, 'ytxTab', 'yt')">YouTube Extraction</button>
 		</div>
+		<div id="nms_version"></div>
 		<div class="panels">
 			<div id="mpdcontrols" class="mpdcontrols">
 				<i class="fa fa-arrow-left" onclick="mpdCmd('prev')"></i>
@@ -119,6 +120,12 @@
 	var xtrLocal='XTRLOCALV';
 	// Show the default tab
 	document.getElementById('defaultOpen').click();
+	fetch('./package.json')
+	.then(res => res.json())
+	.then(json => {
+		console.log(json);
+		document.getElementById('nms_version').innerText = 'v'+json.version;
+	});
 	</script>
 </body>
 </html>
