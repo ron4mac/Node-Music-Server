@@ -84,19 +84,45 @@ class TuneinClass {
 		postAction(this.sr, parms, (data) => {
 			displayCurrent(currentStream);
 			if (data) {
+				// try to get any track metadata
+				this.#getAnyMeta(data);
+				// play the local audio
+				showLocalAudio(this.sr);
+				laudioelm.src = data;
+				laudioelm.play();
+			}
+		}, 1);
+	}
+
+	#getAnyMeta (surl) {
+		const stobj = new IcecastMetadataStats(surl, {sources: ['icy','ogg','icestats','stats','nextsongs','sevenhtml']});
+		stobj.fetch()
+		.then(s=>{
+			//console.log(s);
+			let src = '';
+			if (s.icestats) {
+				src = 'icestats';
+			} else if (s.ogg) {
+				src = 'ogg';
+			} else if (s.stats) {
+				src = 'stats';
+			} else if (s.nextsongs) {
+				src = 'nextsongs';
+			} else if (s.sevenhtml) {
+				src = 'sevenhtml';
+			} else if (s.icy) {
+				src = 'icy';
+			}
+			if (src) {
 				// clear any current icecasting
 				if (this.stats) {
 					this.stats.stop();
 					this.stats = null;
 				}
-				showLocalAudio(this.sr);
-				laudioelm.src = data;
-				laudioelm.play();
-				// start icecasting for this stream
-				this.stats = new IcecastMetadataStats(data, {onStats: this.#onStats, sources: ['icestats','icy'], interval: 5});
+				this.stats = new IcecastMetadataStats(surl, {onStats: this.#onStats, sources: [src], interval: 8});
 				this.stats.start();
 			}
-		}, 1);
+		});
 	}
 
 	#onStats (stats) {
