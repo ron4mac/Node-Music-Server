@@ -13,7 +13,7 @@
 <!-- <script src="//rjcrans.net/rjlibs/dlog/dialog.js" type="text/javascript"></script> -->
 <!-- <script src="static/upload.js"></script> -->
 </head>
-<body>%%ERRORS%%
+<body>
 	<div class="content">
 		<!-- Tab links -->
 		<span class="tabttl">Favorites</span>
@@ -28,7 +28,6 @@
 			<button class="tablinks nompd" onclick="openTab(event, 'filemanTab', 'fm')">Manage File Storage</button>
 			<button class="tablinks nompd" onclick="openTab(event, 'ytxTab', 'yt')">YouTube Extraction</button>
 		</div>
-		<div id="nms_version"></div>
 		<div class="panels">
 			<div id="mpdcontrols" class="mpdcontrols">
 				<i class="fa fa-arrow-left" onclick="mpdCmd('prev')"></i>
@@ -78,6 +77,7 @@
 			</div>
 		</div>
 	</div>
+	<div id="nms_version"></div>
 	<dialog id="myacpd">
 		<div class="macp-msg"></div>
 		<form method="dialog">
@@ -117,12 +117,14 @@
 	</div>
 	<iframe id="dnldf" style="display:none"></iframe>
 	<script>
+	var ERRS = '%%ERRORS%%';
 	var xtrLocal='XTRLOCALV';
 	// Show the default tab
 	document.getElementById('defaultOpen').click();
 	fetch('./package.json')
 	.then(res => res.json())
 	.then(json => { document.getElementById('nms_version').innerText = 'v'+json.version; });
+	if (ERRS) my.alert(ERRS,{class:'error'});
 	</script>
 </body>
 </html>

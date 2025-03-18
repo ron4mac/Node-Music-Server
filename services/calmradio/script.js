@@ -20,7 +20,7 @@ class CalmClass {
 		}
 		const url = elmwurl.dataset.url;
 		const how = elm.nodeName=='I' ? 'lplay' : 'play';
-		currentStream = 'Calm Radio: '+elmwurl.parentElement.querySelector('a').innerHTML;
+		currentStream = 'Calm Radio: '+elm.parentElement.querySelector('a').innerHTML;
 		this.#startPlay(how, url);
 		nowPlaying = {name: currentStream, what:'Calm', how: how, url: url};
 	}

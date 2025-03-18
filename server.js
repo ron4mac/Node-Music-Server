@@ -320,12 +320,12 @@ const serveFile = (url, response) => {
 					if (error) { console.error(error); }
 					else {
 						let errs = '';
-						if (cntrlr.errors) {
-							errs += '<div class="errors">';
+						if (cntrlr.errors.length) {
+							//errs += '<div class="errors">';
 							cntrlr.errors.forEach((e)=>{
 								errs += '<p>'+e+'</p>';
 							});
-							errs += '</div>'
+							//errs += '</div>'
 						}
 						content = content.replace('%%ERRORS%%', errs);
 						response.setHeader('Cache-Control', ['no-cache','no-store','must-revalidate']);
