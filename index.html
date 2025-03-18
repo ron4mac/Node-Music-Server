@@ -122,10 +122,7 @@
 	document.getElementById('defaultOpen').click();
 	fetch('./package.json')
 	.then(res => res.json())
-	.then(json => {
-		console.log(json);
-		document.getElementById('nms_version').innerText = 'v'+json.version;
-	});
+	.then(json => { document.getElementById('nms_version').innerText = 'v'+json.version; });
 	</script>
 </body>
 </html>
