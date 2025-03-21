@@ -165,12 +165,18 @@ class CalmClass {
 		const parms = {what: how, bobj: url};
 		postAction(this.sr, parms, (data) => {
 			displayCurrent(currentStream);
+			displayCurrentTrack('');
 			if (data) {
-				showLocalAudio(this.sr);
-				laudioelm.src = data;
-				laudioelm.play();
+				if (data.error) {
+					my.alert(data.error,{class:'warn'});
+				}
+				if (data.url) {
+					showLocalAudio(this.sr);
+					laudioelm.src = data.url;
+					laudioelm.play();
+				}
 			}
-		}, 1);
+		}, 2);
 	}
 
 }

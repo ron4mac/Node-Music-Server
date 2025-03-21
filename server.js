@@ -148,7 +148,11 @@ const mpdCtrl = async (what, bobj, resp) => {
 	if (!mympd) {
 		mympd = await MyMPD.init();
 	}
-	if (!mympd) return;
+	if (!mympd || !mympd.mpdc) {
+		console.log(mympd);
+		resp.end();
+		return;
+	}
 	switch (what) {
 	case 'getVolume':
 		mympd.getVolume()
@@ -275,6 +279,7 @@ const serveFile = (url, response) => {
 		'.jpeg': 'image/jpeg',
 		'.jpg': 'image/jpeg',
 		'.png': 'image/png',
+		'.svg': 'image/svg+xml',
 		'.json': 'application/json',
 		'.mp4': 'audio/mp4',
 		'.zip': 'application/zip',
@@ -320,11 +325,14 @@ const serveFile = (url, response) => {
 					if (error) { console.error(error); }
 					else {
 						let errs = '';
-						if (cntrlr.errors.length) {
+						if (cntrlr.errors) {
 							//errs += '<div class="errors">';
-							cntrlr.errors.forEach((e)=>{
-								errs += '<p>'+e+'</p>';
-							});
+							//cntrlr.errors.forEach((e)=>{
+							//	errs += '<p>'+e+'</p>';
+							//});
+							for (let [key, value] of Object.entries(cntrlr.errors)) {
+								errs += '<p>'+key+': '+value+'</p>';
+							}
 							//errs += '</div>'
 						}
 						content = content.replace('%%ERRORS%%', errs);

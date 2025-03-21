@@ -8,17 +8,19 @@ class PandClass {
 
 	play (evt) {
 		evt.preventDefault();
-		let elm = evt.target.closest('[data-sid]');
+		const elm = evt.target.closest('[data-sid]');
 		const sid = elm.dataset.sid;
 		const chnam = elm.querySelector('a').innerHTML;
 		const bobj = {sid: sid, snam: chnam};
 		currentStream = 'Pandora: '+chnam;
 		const parms = {what: 'play', bobj: bobj};
 		postAction(this.sr, parms, (data) => {
-			//console.log('PPlay',data);
-			//displayCurrent('Pandora: '+evt.target.closest('[data-sid]').querySelector('a').innerHTML);
-		}, 1);
-		nowPlaying = {name: currentStream, what:'Pand', how: 'play', url: bobj};
+			if (data.error) {
+				my.alert(data.error,{class:'warn'});
+			} else {
+				nowPlaying = {name: currentStream, what:'Pand', how: 'play', url: bobj};
+			}
+		}, 2);
 	}
 
 	lplay (evt) {

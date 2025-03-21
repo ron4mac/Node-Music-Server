@@ -33,7 +33,11 @@ export default class CalmRadio {
 			this.search(bobj, resp);
 			break;
 		case 'play':
-			this.play(bobj, resp);
+			if (this.mpdc) {
+				this.play(bobj, resp);
+			} else {
+				resp.end(JSON.stringify({error:'Can not play audio at the server'}));
+			}
 			break;
 		case 'lplay':
 			this.lplay(bobj, resp);
@@ -135,7 +139,7 @@ export default class CalmRadio {
 				console.error(error);
 			}
 		});
-		resp.end();
+		resp.end('{}');
 	}
 
 	lplay (which, resp) {
@@ -152,7 +156,7 @@ export default class CalmRadio {
 				stream = chan.free[0].streams[128];
 				//console.log(stream);
 			}
-			resp.end(stream);
+			resp.end(JSON.stringify({url: stream}));
 		});
 		//resp.end();
 	}

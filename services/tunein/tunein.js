@@ -21,7 +21,11 @@ export default class TuneIn {
 			this.search(bobj, resp);
 			break;
 		case 'play':
-			this.play(bobj, resp);
+			if (this.mpdc) {
+				this.play(bobj, resp);
+			} else {
+				resp.end(JSON.stringify({error:'Can not play audio at the server'}));
+			}
 			break;
 		case 'lplay':
 			this.lplay(bobj, resp);
@@ -95,7 +99,7 @@ export default class TuneIn {
 				let surl = dat.replace(/[\r\n]+/gm, '');
 				this.startRadio(surl);
 			//	cntrlr.currentPlaying = {lr: 'remote', f:'webRadio', a:'play', p:url};
-				resp.end();
+				resp.end('{}');
 			});
 		}).end();
 	}
@@ -110,7 +114,7 @@ export default class TuneIn {
 				let surl = dat.replace(/[\r\n]+/gm, '');
 				//this.startRadio(surl);
 			//	cntrlr.currentPlaying = {lr: 'local', f:'webRadio', a:'lplay', p:url};
-				resp.end(surl);
+				resp.end(JSON.stringify({url: surl}));
 			});
 		}).end();
 	}

@@ -84,14 +84,21 @@ class TuneinClass {
 		postAction(this.sr, parms, (data) => {
 			displayCurrent(currentStream);
 			if (data) {
-				// try to get any track metadata
-				this.#getAnyMeta(data);
-				// play the local audio
-				showLocalAudio(this.sr);
-				laudioelm.src = data;
-				laudioelm.play();
+				if (data.error) {
+					my.alert(data.error,{class:'warn'});
+				}
+				if (data.url) {
+					// clear the current track display
+					displayCurrentTrack('');
+					// try to get any track metadata
+					this.#getAnyMeta(data.url);
+					// play the local audio
+					showLocalAudio(this.sr);
+					laudioelm.src = data.url;
+					laudioelm.play();
+				}
 			}
-		}, 1);
+		}, 2);
 	}
 
 	#getAnyMeta (surl) {
