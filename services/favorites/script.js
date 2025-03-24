@@ -36,7 +36,7 @@ class FavoritesClass {
 
 	delete (evt) {
 		evt.preventDefault();
-		my.confirm('Are you sure that you want to delete this favorite?')
+		my.confirm('!Are you sure that you want to delete this favorite?')
 		.then(y=>{
 			if (!y) return;
 			const fid = evt.target.closest('[data-fid]').dataset.fid;

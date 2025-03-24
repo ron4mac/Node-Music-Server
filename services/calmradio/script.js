@@ -70,7 +70,7 @@ class CalmClass {
 
 	logout (evt,elm) {
 		//console.log(evt);
-		my.confirm('Are you suuuure you want to logout?',{noBtn:'Cancel'})
+		my.confirm('!Are you suuuure you want to logout?',{noBtn:'Cancel'})
 		.then(yn=>{
 			if (!yn) return;
 			const parms = {what: 'lllogout'};
@@ -120,7 +120,7 @@ class CalmClass {
 	#useract (dlg, resp, data) {
 		//console.log(dlg,'11',resp,'22',data);
 		if (resp=='y') {
-			my.confirm('Are you sure you want to logout?',{yesBtn:'Yes',noBtn:'Cancel'})
+			my.confirm('!Are you sure you want to logout?',{yesBtn:'Yes',noBtn:'Cancel'})
 			.then(y=>{
 				if (!y) return;
 				const parms = {what: 'logout'};

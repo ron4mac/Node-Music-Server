@@ -20,21 +20,13 @@ class MyClass {
 
 	alert (msg, options={}) {
 		const opts = Object.assign({}, {noBtn:''}, options);
-		if (!opts.class) {
-			if (msg.startsWith('!!')) {
-				msg = msg.substr(2);
-				opts.class = 'error';
-			}
-			if (msg.startsWith('!')) {
-				msg = msg.substr(1);
-				opts.class = 'warn';
-			}
-		}
+		msg = this._msgClass(msg, opts);
 		return this._macp(msg, opts);
 	}
 
 	confirm (msg, options={}) {
 		const opts = Object.assign({}, options);
+		msg = this._msgClass(msg, opts);
 		return this._macp(msg, opts);
 	}
 
@@ -46,6 +38,7 @@ class MyClass {
 			txt = def;
 		}
 		const opts = Object.assign({}, {text:txt}, options);
+		msg = this._msgClass(msg, opts);
 		return this._macp(msg, opts);
 	}
 
@@ -183,6 +176,19 @@ class MyClass {
 		return obj;
 	}
 
+	_msgClass (msg, opts) {
+		if (!opts.class) {
+			if (msg.startsWith('!!')) {
+				opts.class = 'error';
+				return msg.substr(2);
+			} else if (msg.startsWith('!')) {
+				opts.class = 'warn';
+				return msg.substr(1);
+			}
+		}
+		return msg;
+	}
+
 }
 // instantiate it
 const my = new MyClass();
@@ -192,14 +198,14 @@ const my = new MyClass();
 class ServiceClass {
 
 	oneItem (n) {
-		if (!n) { my.alert('An item needs to be selected',{class:'warn'}) }
-		else if (n>1) { my.alert('Please select only one item.',{class:'warn'}) }
+		if (!n) { my.alert('!An item needs to be selected') }
+		else if (n>1) { my.alert('!Please select only one item.') }
 		else { return true }
 		return false;
 	}
 	hasSome (n) {
 		if (n) return true;
-		my.alert('Some items need to be selected',{class:'warn'});
+		my.alert('!Some items need to be selected');
 		return false;
 	}
 

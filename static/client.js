@@ -76,7 +76,11 @@ const showLocalAudio = (svc, pn=false) => {
 	document.getElementById('mpdvolume').value = v100;
 	// listen for player controls
 	document.addEventListener('playctl', laudioEvent);
-	
+	// handle errors
+	laudioelm.addEventListener('error', evt => {
+		my.alert('!!Could not load audio source: '+decodeURI(laudioelm.src))
+		.then(yn=>svc.lerror(yn));
+	});
 };
 
 const laudioEvent = (evt) => {
@@ -106,7 +110,7 @@ const laudioEvent = (evt) => {
 };
 
 const laudioAction = (evt) => {
-	//console.log(evt);
+	console.log(evt);
 	const telm = evt.target;
 	if (telm.nodeName=='I' && telm.hasAttribute('step')) {
 		//console.log(telm.getAttribute('step'));

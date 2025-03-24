@@ -17,7 +17,7 @@ class PlaylistsClass extends ServiceClass {
 				if (scnt==1) {
 					this.#delFiles(slctd);
 				} else {
-					my.confirm('You have multiple files selected. Are you sure you want to delete ALL the selected files?',{yesBtn:'YES'})
+					my.confirm('!You have multiple files selected. Are you sure you want to delete ALL the selected files?',{yesBtn:'YES'})
 					.then(y=>{
 						if (y) this.#delFiles(slctd);
 					});
@@ -61,13 +61,13 @@ class PlaylistsClass extends ServiceClass {
 			//console.log(this.lclplylst);
 			const cnt = this.lclplylst.length;
 			if (!cnt) return;
-			showLocalAudio(this.sr,true);
+			showLocalAudio(this,true);
 			this.lcix = 0;
 			laudioelm.addEventListener('ended', (evt) => {
 				if (this.lcix < cnt) {
 					//console.log(this.lclplylst[this.lcix]);
 					displayCurrentTrack(this.lclplylst[this.lcix].split('/').pop());
-					laudioelm.src = this.lclplylst[this.lcix++];
+					laudioelm.src = encodeURI(this.lclplylst[this.lcix++]);
 					laudioelm.play();
 				}
 			});
@@ -79,14 +79,14 @@ class PlaylistsClass extends ServiceClass {
 						if (this.lcix>1) {
 							this.lcix-=2;
 							displayCurrentTrack(this.lclplylst[this.lcix].split('/').pop());
-							laudioelm.src = this.lclplylst[this.lcix++];
+							laudioelm.src = encodeURI(this.lclplylst[this.lcix++]);
 							laudioelm.play();
 						}
 						break;
 					case 'next':
 						if (this.lcix<cnt) {
 							displayCurrentTrack(this.lclplylst[this.lcix].split('/').pop());
-							laudioelm.src = this.lclplylst[this.lcix++];
+							laudioelm.src = encodeURI(this.lclplylst[this.lcix++]);
 							laudioelm.play();
 						}
 						break;
@@ -95,9 +95,18 @@ class PlaylistsClass extends ServiceClass {
 				this.tcl = true;
 			}
 			displayCurrentTrack(this.lclplylst[0].split('/').pop());
-			laudioelm.src = this.lclplylst[this.lcix++];
+			laudioelm.src = encodeURI(this.lclplylst[this.lcix++]);
 			laudioelm.play();
 		}, 2);
+	}
+
+	lerror () {
+		const cnt = this.lclplylst.length;
+		if (this.lcix<cnt) {
+			displayCurrentTrack(this.lclplylst[this.lcix].split('/').pop());
+			laudioelm.src = encodeURI(this.lclplylst[this.lcix++]);
+			laudioelm.play();
+		}
 	}
 
 	plselchg (sel) {

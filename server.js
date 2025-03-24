@@ -281,6 +281,7 @@ const serveFile = (url, response) => {
 		'.png': 'image/png',
 		'.svg': 'image/svg+xml',
 		'.json': 'application/json',
+		'.mp3': 'audio/mp3',
 		'.mp4': 'audio/mp4',
 		'.zip': 'application/zip',
 		'.webm': 'video/mp4'

@@ -98,7 +98,7 @@ class PandClass {
 
 	logout (evt,elm) {
 		//console.log(evt);
-		my.confirm('Are you sure you want to logout?')
+		my.confirm('!Are you sure you want to logout?')
 		.then(y=>{
 			if (!y) return;
 			const parms = {what: 'logout'};
@@ -106,7 +106,7 @@ class PandClass {
 				if (data) {
 					my.alert(data);
 				} else {
-					my.alert('You have been logged out from Pandora');
+					my.alert('!You have been logged out from Pandora');
 					elm.closest('dialog').close();
 					this.get();
 				}
@@ -155,7 +155,7 @@ class PandClass {
 
 	delete (evt) {
 		evt.preventDefault();
-		my.confirm('Are you sure that you want to delete this station?')
+		my.confirm('!Are you sure that you want to delete this station?')
 		.then(y=>{
 			if (!y) return;
 			const sid = evt.target.closest('[data-sid]').dataset.sid;

@@ -21,7 +21,7 @@ class FilemanClass extends ServiceClass {
 				if (scnt==1) {
 					this.#delFiles(slctd);
 				} else {
-					my.confirm('You have multiple files selected. Are you sure you want to delete ALL the selected files?',{yesBtn:'YES',class:'warn'})
+					my.confirm('!You have multiple files selected. Are you sure you want to delete ALL the selected files?',{yesBtn:'YES'})
 					.then(y=>{
 						if (y) this.#delFiles(slctd);
 					});
@@ -115,7 +115,7 @@ class FilemanClass extends ServiceClass {
 			}
 			evt.target.parentElement.querySelector('i').style.display = 'inline-block';
 			const files = Array.from(slctd).map(el => el.value);
-			this.#postAndRefresh({what:'faddl', bobj:{plsel: psel, plnam: pnam, dir:(this.curDir?this.curDir:''), 'files': files}}, 1);
+			this.#postAndRefresh({what:'faddl', bobj:{plsel: psel, plnam: pnam, dir:(this.curDir?(this.curDir+'/'):''), 'files': files}}, 1);
 			modal(dlg, false);
 			evt.target.parentElement.querySelector('i').style.display = 'none';
 			//services.pl.seen = false;
