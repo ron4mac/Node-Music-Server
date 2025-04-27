@@ -317,7 +317,7 @@ const serveFile = (url, response) => {
 						response.writeHead(404, { 'Content-Type': 'text/html' });
 						response.end(content, 'utf-8');
 						// log served 404 page
-						console.log('[Info] Served 404 page.');
+						console.log('[Info] Served 404 page. '+filePath);
 					}
 				});
 			}

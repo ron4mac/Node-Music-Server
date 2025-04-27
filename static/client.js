@@ -76,6 +76,8 @@ const showLocalAudio = (svc, pn=false) => {
 	document.getElementById('mpdvolume').value = v100;
 	// listen for player controls
 	document.addEventListener('playctl', laudioEvent);
+	// register what service is using the local audio
+	laudiosvu = svc.sr;
 	// handle errors
 	laudioelm.addEventListener('error', evt => {
 		my.alert('!!Could not load audio source: '+decodeURI(laudioelm.src))
@@ -105,6 +107,10 @@ const laudioEvent = (evt) => {
 		laudioelm.src='';
 		document.removeEventListener('playctl', laudioEvent);
 		laudioelm = null;
+		break;
+	case 'next':
+	case 'prev':
+		document.dispatchEvent(new CustomEvent(laudiosvu+'-laudact', {bubbles: true, detail: what}));
 		break;
 	}
 };

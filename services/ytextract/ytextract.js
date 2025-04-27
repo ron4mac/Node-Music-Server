@@ -74,7 +74,7 @@ export default class YTExtract {
 	}
 
 	async getPlaylist (parms, resp) {
-		const ytpl = await import('ytpl');
+		const ytpl = await import('@distube/ytpl');
 		unlink('playlist.zip', (err) => 1);
 	//	this._emptyDir(playlistDir);
 		let plurl = parms.pxtr;
@@ -221,9 +221,9 @@ export default class YTExtract {
 		//console.log(parms);
 		let yturl = parms.strms;
 		let whch = parms.whch;
-	//	ytdl.getInfo(yturl, {playerClients: ['IOS','WEB_CREATOR','WEB'], agent: this.agent})
 		ytdl.cache.info.clear();
-		ytdl.getInfo(yturl,{playerClients: [/*"WEB_EMBEDDED", "IOS", "ANDROID",*/ 'TV']})
+		ytdl.getInfo(yturl, {playerClients: ['IOS','WEB_CREATOR','WEB'], agent: this.agent})
+	//	ytdl.getInfo(yturl,{playerClients: [/*"WEB_EMBEDDED", "IOS", "ANDROID",*/ 'TV']})
 		.then(info => {
 			this.infoCache = info;
 			this.fmts = {};
