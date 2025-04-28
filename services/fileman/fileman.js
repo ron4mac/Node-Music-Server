@@ -1,6 +1,7 @@
 'use strict';
 import cntrlr from '../../lib/controller.js';
 import {createReadStream,existsSync,mkdirSync,readdir,readFileSync,readlinkSync,renameSync,rmSync,statSync,unlinkSync,writeFileSync} from 'fs';
+import {readdir as readdirp} from 'fs/promises';
 import path from 'path';
 import formidable, {errors as formidableErrors} from 'formidable';
 
@@ -134,6 +135,11 @@ export default class Fileman {
 	//		console.log(stats);
 			rmsg = JSON.stringify({err: '', f64: btoa(fpath)});
 			break;
+		case 'audfls':
+			this.#getAllAudioFiles(parms)
+			.then((lst)=>resp.end(JSON.stringify(lst)));
+			return;
+			break;
 		case 'fpxy':
 			this.#sendFile2(parms.sndf, resp);
 			return;
@@ -160,7 +166,8 @@ export default class Fileman {
 		const idtf = new Intl.DateTimeFormat('en-US',{year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hour12:false,timeZoneName:'short'});
 		readdir(this.baseDir+dir, {withFileTypes: true}, (err, files) => {
 			if (err) throw err;
-			let rows = ['<thead><td></td><th>Name</th><th>Size </th><th> Date</th></thead>'];
+			resp.write('<table>');
+			let rows = ['<thead><tr><td><input type="checkbox"onchange="Fileman.selectAll(this)"></td><th>Name</th><th>Size</th><th>Date</th></tr></thead>'];
 			let pdir = dir == '' ? dir : (dir+'/');
 			for (const file of files) {
 				let fcl, icn, lnk='';
@@ -180,13 +187,13 @@ export default class Fileman {
 					lnk += lnk2;
 				}
 				const fstat = statSync(this.baseDir+dir+'/'+file.name);
-				rows.push('<td><input type="checkbox" class="fsel" name="files[]" value="'+file.name+'"></td>'
+				rows.push('<tr><td><input type="checkbox" class="fsel" name="files[]" value="'+file.name+'"></td>'
 					+'<td class="'+fcl+'">'+icn+file.name+lnk+'</td>'
 					+'<td>'+this.#formatNumber(fstat.size)+' </td>'
-					+'<td> '+idtf.format(fstat.mtimeMs)+'</td>');
+					+'<td> '+idtf.format(fstat.mtimeMs)+'</td></tr>');
 			}
-			resp.write('<table><tr>'+rows.join('</tr><tr>')+'</tr></table>');
-			resp.end();
+			resp.write(rows.join('\n'));
+			resp.end('</table>');
 		});
 	}
 
@@ -250,6 +257,40 @@ export default class Fileman {
 			}
 		});
 	};
+
+	async #getAllAudioFiles (parms) {
+		let flist = [], fpath, stats;
+		const pbase = this.baseDir+parms.dir+(parms.dir==''?'':'/');
+		for (const file of parms.files) {
+			fpath = pbase+file;
+			stats = statSync(fpath);
+			if (stats.isDirectory()) {
+				let fils = await this.#getFilesRecursively(fpath,async (fp)=>{
+					const m = await cntrlr.mimeType(fp);
+					console.log(m);
+					return (m && m.startsWith('audio'));
+					});
+				flist.push(...fils);
+			} else {
+				const m = await cntrlr.mimeType(fpath);
+				if (m && m.startsWith('audio')) flist.push(fpath);
+			}
+		}
+		return flist;
+	}
+
+	async #getFilesRecursively (dirPath, filter=(_f)=>true, fileList = []) {
+		const files = await readdirp(dirPath, { withFileTypes: true });
+		for (const file of files) {
+			const filePath = path.join(dirPath, file.name);
+			if (file.isDirectory()) {
+				await this.#getFilesRecursively(filePath, filter, fileList);
+			} else {
+				if (await filter(filePath)) fileList.push(filePath);
+			}
+		}
+		return fileList;
+	}
 
 
 	#sendFile2 (parms, resp) {

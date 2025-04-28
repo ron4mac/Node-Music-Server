@@ -104,6 +104,11 @@ class FilemanClass extends ServiceClass {
 			//.then(()=>add2Playlist());
 			this.#add2Playlist();
 			break;
+		case 'playa':
+			if (super.hasSome(scnt)) {
+				this.#getAudioFiles(slctd);
+			}
+			break;
 		case 'faddl':
 			//console.log(evt);
 			let dlg = document.getElementById('plmnu');
@@ -180,6 +185,54 @@ class FilemanClass extends ServiceClass {
 		this.refresh();
 	}
 
+	selectAll (elm) {
+		let ck = elm.checked?'checked':'';
+		let xbs = document.querySelectorAll('.fsel');
+		// make up for no array returned if there is only one item
+		//if (!xbs.length) xbs = [xbs];
+		for (let i = 0; i < xbs.length; i++) {
+			xbs[i].checked = ck;
+		}
+	}
+
+	#playFiles (data) {
+		this.plist = data;
+			const cnt = this.plist.length;
+			if (!cnt) return;
+			document.getElementById('mpdcontrols').style.display = 'block';
+			showLocalAudio(this,true);
+			this.lcix = 0;
+			laudioelm.addEventListener('ended', (evt) => {
+				if (this.lcix < cnt) {
+					this.#playFromList();
+				}
+			});
+			if (!this.tcl) {
+				document.addEventListener('fm-laudact', (e) => {
+					switch(e.detail) {
+					case 'prev':
+						if (this.lcix>1) {
+							this.lcix-=2;
+							this.#playFromList();
+						}
+						break;
+					case 'next':
+						if (this.lcix<cnt) {
+							this.#playFromList();
+						}
+						break;
+					}
+				});
+				this.tcl = true;
+			}
+			this.#playFromList();
+	}
+
+	#playFromList () {
+		displayCurrentTrack(this.plist[this.lcix].split('/').pop().split('.').slice(0, -1).join('.'));
+		laudioelm.src = encodeURI(this.plist[this.lcix++]);
+		laudioelm.play();
+	}
 
 	#delFiles (lst) {
 		const files = Array.from(lst).map(el => el.value);
@@ -222,6 +275,12 @@ class FilemanClass extends ServiceClass {
 			modal(dlg, true);
 			svcPop('pl');
 		}, true);
+	}
+
+	#getAudioFiles (lst) {
+		const files = Array.from(lst).map(el => el.value);
+		const parms = {what:'audfls', bobj:{'dir': this.curDir, 'files': files}};
+		postAction(this.sr, parms, (data) => { this.#playFiles(data) }, 2);
 	}
 
 	#postAndRefresh (parms, json=false) {
