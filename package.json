@@ -43,7 +43,6 @@
     "@distube/ytdl-core": "^4.16.8",
     "@distube/ytpl": "^1.2.1",
     "fast-xml-parser": "^4.5.0",
-    "formidable": "^3.5.2",
     "mime-lite": "^1.0.3",
     "mpd2": "^1.0.5",
     "underscore": "^1.13.7",

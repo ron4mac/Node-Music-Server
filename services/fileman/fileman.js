@@ -1,9 +1,10 @@
 'use strict';
 import cntrlr from '../../lib/controller.js';
-import {createReadStream,existsSync,mkdirSync,readdir,readFileSync,readlinkSync,renameSync,rmSync,statSync,unlinkSync,writeFileSync} from 'fs';
+import {createReadStream,createWriteStream,existsSync,mkdirSync,readdir,readFileSync,readlinkSync,renameSync,rmSync,statSync,unlinkSync,writeFileSync} from 'fs';
 import {readdir as readdirp} from 'fs/promises';
 import path from 'path';
-import formidable, {errors as formidableErrors} from 'formidable';
+//import formidable, {errors as formidableErrors} from 'formidable';
+import Busboy from './busboy/lib/main.js';
 
 export default class Fileman {
 
@@ -85,11 +86,13 @@ export default class Fileman {
 			break;
 		case 'funzp':
 			pbase  = this.baseDir+parms.dir+(parms.dir==''?'':'/');
-			require('child_process').exec('unzip -d "'+pbase+'" "'+pbase+parms.file+'"',{},(error, stdout, stderr)=>{
-					console.error(error);
-					rmsg = error ? String(error) : null;
-					resp.end(rmsg);
-				});
+			cntrlr.execute('unzip -d "'+pbase+'" "'+pbase+parms.file+'"')
+			.then(m=>resp.end(m));
+			//require('child_process').exec('unzip -d "'+pbase+'" "'+pbase+parms.file+'"',{},(error, stdout, stderr)=>{
+			//		console.error(error);
+			//		rmsg = error ? String(error) : null;
+			//		resp.end(rmsg);
+			//	});
 			return;
 			break;
 		case 'faddl':
@@ -243,7 +246,7 @@ export default class Fileman {
 	}
 
 	async receiveUpload (req, res) {
-		const form = formidable({uploadDir: cntrlr.config.upldTmpDir, maxFileSize: 2147483648});
+/*		const form = formidable({uploadDir: cntrlr.config.upldTmpDir, maxFileSize: 2147483648});
 		return await form.parse(req, (err, fields, files) => {
 			if (err) {
 				console.error(err);
@@ -255,7 +258,32 @@ export default class Fileman {
 				res.writeHead(200, {'Content-Type': 'text/plain'});
 				res.end(JSON.stringify({ fields, files }, null, 2));
 			}
-		});
+		});*/
+
+	/* uses fs.createWriteStream above */
+	let flds = {};
+	const busboy = new Busboy({ headers: req.headers });
+	busboy.on('field', (fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) => {
+		//console.log(`Field [${fieldname}]: value: ${val}`);
+		flds[fieldname] = val;
+	});
+	busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+		//console.log(fieldname, file, filename, encoding, mimetype, this.baseDir);
+		flds.ofn = filename;
+		flds.tmpnm = fieldname+Date.now();
+		var saveTo = path.join(this.baseDir, flds.tmpnm);
+		file.pipe(createWriteStream(saveTo));
+	});
+	busboy.on('finish', () => {
+		renameSync(path.join(this.baseDir, flds.tmpnm), path.join(this.baseDir+flds.dir, flds.ofn));
+		res.writeHead(200, { 'Connection': 'close' });
+		res.end("That's all folks!");
+	});
+	return req.pipe(busboy);
+
+
+
+
 	};
 
 	async #getAllAudioFiles (parms) {

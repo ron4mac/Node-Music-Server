@@ -271,6 +271,9 @@ class FilemanClass extends ServiceClass {
 		postAction('pl', parms, (data) => {
 			document.querySelector('#plmnu i').style.display = 'none';
 			const dlg = document.getElementById('plmnu');
+			const tv = dlg.querySelector('input');
+			tv.value = '';
+			tv.style.removeProperty('visibility');
 			dlg.querySelector('div').innerHTML = data;
 			modal(dlg, true);
 			svcPop('pl');

@@ -46,7 +46,15 @@ export default class Playlists {
 			resp.end();
 			break;
 		case 'plvue':
-			resp.end(JSON.stringify({err:'', pl: cntrlr.readFile(this.playlistDir+params.file, 'FAILURE READING FILE')}));
+			let plst = cntrlr.readFile(this.playlistDir+params.file, 'FAILURE READING FILE').split('\n');
+			const bd = cntrlr.config.baseDir;
+			const _l = bd.length;
+			plst.forEach((itm, ix) => {
+				if (itm.startsWith(bd)) {
+					plst[ix] = itm.slice(_l);
+				}
+			});
+			resp.end(JSON.stringify({err:'', pl: plst.join('\n')}));
 			break;
 		case 'plply':
 			this.#queMPD(params.files);

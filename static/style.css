@@ -101,6 +101,8 @@ dialog .btns button, .modl-btns button {font-size: unset; position: relative}
 	margin-top: .5rem;
 	line-height: normal;
 	font-size: large;
+	max-height: 75vh;
+	overflow-y: scroll;
 }
 .modl-hedr {
 	margin-top: .5rem;
