@@ -6,7 +6,7 @@ StartLimitBurst=3
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/node <INSTALL DIRECTORY>/extrsvr.js
+ExecStart=/usr/bin/node <INSTALL DIRECTORY>/server.js
 WorkingDirectory=<INSTALL DIRECTORY>
 Restart=on-failure
 # needed for Pandora authentication
