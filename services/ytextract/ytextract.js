@@ -2,6 +2,7 @@
 import cntrlr from '../../lib/controller.js';
 import ytdl from '@distube/ytdl-core';
 import {createReadStream,createWriteStream,mkdirSync,readdir,statSync,unlink} from 'fs';
+import WebSocket, {WebSocketServer} from 'ws';
 
 export default class YTExtract {
 
@@ -18,6 +19,53 @@ export default class YTExtract {
 	//		this.agent = ytdl.createAgent(JSON.parse(cf), agentOptions);
 	//		//console.log('agent',this.agent);
 	//	}
+		this.ws = new WebSocketServer({port:6688});
+		this.ws.on('connection', (sc) => {
+			sc.on('error', console.error);
+			sc.on('message', (data) => {
+				console.log(data);
+				console.log('received: %s', data);
+				sc.send('PROCESSING...');
+				this.pyExtract(data.toString(), sc);
+			});
+		});
+	}
+
+	async pyExtract (parms, sc) {
+		const frm = JSON.parse(parms);
+		const dest = frm.tname ? (cntrlr.config.baseDir+frm.tname+'.%(ext)s') : (cntrlr.config.baseDir+'%(title)s-%(id)s.%(ext)s');
+		const format = ' -f '+frm.format;
+		const url = ' "'+frm.yturl+'"';
+		const x = await import('child_process');
+
+		const spawn = x.spawn('python', ['-u','services/ytextract/youtube-dl','-o',dest,'-f',frm.format,frm.yturl]);
+		spawn.stdout.on('data', (data) => {
+			//console.log(data.toString());
+			sc.send('<br>'+data.toString());
+		});
+
+		spawn.stderr.on('data', (data) => {
+			//console.error(data.toString());
+			sc.send('<br>'+data.toString());
+		});
+
+		spawn.on('close', (code) => {
+			console.log(`child process exited with code ${code}`);
+			sc.send('<br>=- DONE -=');
+		}); 
+/*
+		x.exec('python -u services/ytextract/youtube-dl -o '+dest+format+url,{},(error, stdout, stderr)=>{
+			if (error) {
+				console.error(stderr);
+				sc.send(stdout);
+			} else {
+				sc.send(stdout);
+			}
+			if (stderr) {
+				sc.send(stderr);
+			}
+		});
+*/
 	}
 
 	action (what, parms, resp) {

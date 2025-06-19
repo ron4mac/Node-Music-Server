@@ -52,6 +52,33 @@ class YTxClass {
 		if (typeof Fileman == 'object') Fileman.refresh();
 	}
 
+	pyXtract (evt, frm) {
+		evt.preventDefault();
+		let socket = new WebSocket('ws://'+window.location.hostname+':6688');
+		let msgs = document.getElementById('pyinfov');
+		msgs.className = 'hasom';
+		msgs.innerHTML = '';
+
+		socket.onopen = (e) => {
+			let parms = {'yturl': frm.yturl.value.trim(), tname: frm.tname.value.trim(), format: frm.format.value};
+			socket.send(JSON.stringify(parms));
+		};
+
+		socket.onmessage = (event) => {
+			//console.log(event.data);
+		//	msgs.innerHTML += event.data.replace(/\[/g,'<br>[');
+			msgs.innerHTML += event.data;
+		};
+
+		socket.onerror = (event) => {
+			//console.log(event);
+		//	msgs.innerHTML += event.replace(/\[/g,'<br>[');
+			msgs.innerHTML += '<br>'+event.message;
+		};
+		socket.onclose = (event) => {
+			console.log('socket-closed');
+		};
+	}
 
 	#streamSelect (frm, type) {
 		let selt = document.querySelector('#sseld table tbody');

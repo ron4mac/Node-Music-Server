@@ -11,11 +11,17 @@
 .tabcontent.ytx .asfile input {flex-grow: 1;}
 .tabcontent.ytx label {white-space: nowrap;}
 #sseld {display:none}
+#pyinfov.hasom {
+	background-color: white;
+	border: 1px solid #BBB;
+	padding: .5rem;
+}
 </style>
 <div class="tab">
 	<button class="tablinks active nompd" onclick="openTab(event, 'sglTab')">Extract Audio from a Single File</button>
 	<button class="tablinks nompd" onclick="openTab(event, 'lstTab')">Extract Audio from an Entire Playlist</button>
 	<button class="tablinks nompd" onclick="openTab(event, 'vidTab')">Get YT Video</button>
+	<button class="tablinks nompd" onclick="openTab(event, 'pyTab')">Get via Python App</button>
 </div>
 <div class="panels">
 	<div id="sglTab" class="tabcontent ytx" style="display:block">
@@ -75,6 +81,29 @@
 			</div>
 		</form>
 		<div id="vinfov"></div>
+	</div>
+	<div id="pyTab" class="tabcontent ytx">
+		<form action="#" name="pyform" method="post" onsubmit="YTx.pyXtract(event, this)">
+			<div>
+				<input class="yturl" type="text" name="yturl" placeholder="YT URL" value="" spellcheck="false" autocomplete="off" required>
+				<div class="asfile"><span>as:&nbsp;</span><input class="tname" type="text" name="tname" value="" spellcheck="false" autocomplete="off"></div>
+				<div>
+					<label>Format: 
+					<select name="format">
+						<option value="worstaudio">-default-</option>
+						<option value="bestaudio">Best Audio</option>
+						<option></option>
+						<option></option>
+					</select>
+					</label>
+				</div>
+				<div>
+				<input type="submit" name="ginf" value="Extract via Python App">
+				<i class="fa fa-spinner fa-pulse fa-lg"></i>
+				</div>
+			</div>
+		</form>
+		<div id="pyinfov"></div>
 	</div>
 </div>
 <div id="sseld">
