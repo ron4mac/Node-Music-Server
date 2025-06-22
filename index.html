@@ -27,6 +27,7 @@
 			<button class="tablinks" onclick="openTab(event, 'plstsTab', 'pl')">Playlists</button>
 			<button class="tablinks nompd" onclick="openTab(event, 'filemanTab', 'fm')">Manage File Storage</button>
 			<button class="tablinks nompd" onclick="openTab(event, 'ytxTab', 'yt')">YouTube Extraction</button>
+			<span class="seticon"><img src="static/settings.svg" onclick="settings()"></span>
 		</div>
 		<div class="panels">
 			<div id="mpdcontrols" class="mpdcontrols">
@@ -82,7 +83,7 @@
 		<div class="macp-msg"></div>
 		<form method="dialog">
 			<div class="macp-pmpt">
-				<input type="text" name="txt">
+				<input type="text" name="txt" autofocus>
 			</div>
 			<div class="macp-btns">
 				<button class="YB" name="YB" value="y">Submit</button>
@@ -106,15 +107,25 @@
 		</form>
 	</dialog>
 	<div class="dlogs">
+		<div class="settings">
+			<button value="svr"><i class="fa fa-power-off" aria-hidden="true"></i> Server</button>
+			<button value="blu"><i class="fa fa-bluetooth-b" aria-hidden="true"></i> Bluetooth</button>
+			<!-- <button value="se">Something</button> -->
+		</div>
 		<div class="superAdmin">
 		<label>Auth code: <input type="text" name="spauth" required></label>
 		<div>
 			<label><input type="radio" name="spract" value="r" required>Restart App</label>
 			<label><input type="radio" name="spract" value="b">Reboot Server</label>
+			<label><input type="radio" name="spract" value="d">Shutdown Server</label>
 		</div>
 		<input type="hidden" name="act" value="spract">
 		</div>
 	</div>
+	<dialog id="bluetool">
+		<div class="closex" onclick="this.parentElement.close()"><i class="fa fa-times"></i></div>
+		<iframe frameBorder="0"></iframe>
+	</dialog>
 	<iframe id="dnldf" style="display:none"></iframe>
 	<script>
 	var ERRS = '%%ERRORS%%';

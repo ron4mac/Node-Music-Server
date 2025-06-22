@@ -55,7 +55,7 @@ class PlaylistsClass extends ServiceClass {
 	lplay (evt) {
 		//console.log(evt);
 		const plfn = evt.target.closest('[data-plfn]')?.dataset.plfn;
-		const parms = {what:'plvue', bobj: {file: plfn}};
+		const parms = {what:'plget', bobj: {file: plfn}};
 		postAction(this.sr, parms, (data) => {
 			this.lclplylst = data.pl.trim().split("\n");
 			//console.log(this.lclplylst);

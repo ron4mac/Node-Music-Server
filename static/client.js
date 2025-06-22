@@ -6,6 +6,22 @@ var currentStream = '',
 	laudiosvu = '',
 	nowPlaying = {};
 
+const settings = () => {
+	my.modal('.settings',{hasX:true,yesBtn:false,noBtn:false})
+	.then(r=>{
+		console.log(r);
+		if (r.resp=='svr') superAdmin();
+		if (r.resp=='blu') {
+			let dlg = document.getElementById('bluetool');
+			dlg.showModal();
+			dlg.querySelector('iframe').src = 'blue';
+		}
+	//	if (r.resp!='y') return false;
+	//	postAction(null, r.data, (data) => {
+	//		if (data) my.alert(data);
+	//	}, 1);
+	});
+}
 const superAdmin = () => {
 	my.modal('.superAdmin')
 	.then(r=>{
@@ -18,7 +34,7 @@ const superAdmin = () => {
 }
 
 const openTab = (evt, tabName, cb) => {
-	if (evt.metaKey && cb=='fm') return superAdmin();
+//	if (evt.metaKey && cb=='fm') return superAdmin();
 	let tab = evt.currentTarget;
 	const pnls = tab.parentElement.nextElementSibling.querySelectorAll(':scope > div.tabcontent');
 	let i;

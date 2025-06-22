@@ -45,6 +45,10 @@ export default class Playlists {
 			}
 			resp.end();
 			break;
+		case 'plget':
+			const _plst = cntrlr.readFile(this.playlistDir+params.file, 'FAILURE READING FILE');
+			resp.end(JSON.stringify({err:'', pl: _plst}));
+			break;
 		case 'plvue':
 			let plst = cntrlr.readFile(this.playlistDir+params.file, 'FAILURE READING FILE').split('\n');
 			const bd = cntrlr.config.baseDir;
@@ -63,9 +67,9 @@ export default class Playlists {
 		case 'play':
 			resp.end(JSON.stringify(this.lists[params]));
 			break;
-		case 'lplay':
-			this.lplay(params, resp);
-			break;
+		//case 'lplay':
+		//	this.lplay(params, resp);
+		//	break;
 		case 'clear':
 			this.mpdc.clear();
 			resp.end();

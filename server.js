@@ -236,6 +236,11 @@ const reqAction = (parms, resp) => {
 			cntrlr.execute('/usr/bin/systemctl restart nodems')
 			.then(m=>console.log('restarting: '+m));
 		}
+		if (parms.spract == 'd') {
+			rmsg = 'Shutting down the music server ...';
+			cntrlr.execute('/usr/sbin/shutdown -h now')
+			.then(m=>console.log('shutting down: '+m));
+		}
 		break;
 	}
 	resp.end(rmsg);
@@ -423,6 +428,9 @@ createServer(function (request, response) {
 	if (url.startsWith('/?_')) {
 		g_router(parse(url.substring(2)), response);
 		return;
+	}
+	if (url == '/blue') {
+		import('./blue/blue.js');
 	}
 
 	// serve the file
