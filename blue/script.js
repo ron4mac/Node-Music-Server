@@ -21,3 +21,16 @@ socket.onerror = (event) => {
 socket.onclose = (event) => {
 	console.log('socket-closed');
 };
+
+const doact = (evt, elm) => {
+	socket.send(JSON.stringify(elm.dataset));
+}
+
+// receive message from containing dialog
+// clear display and send message to stop discovery
+window.addEventListener('message', (evt) => {
+	disp.innerHTML = '';
+	// send a bogus action to stop the adapter discovery
+	socket.send('{"mac":"00:00:00:00:00:00","act":"xxx"}');
+	socket.close();
+});

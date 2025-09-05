@@ -13,6 +13,10 @@ const settings = () => {
 		if (r.resp=='svr') superAdmin();
 		if (r.resp=='blu') {
 			let dlg = document.getElementById('bluetool');
+			dlg.addEventListener('close', (evt) => {
+				dlg.querySelector('iframe').contentWindow.postMessage({ action: "greet", data: "Hello, iFrame!" });
+				dlg.querySelector('iframe').src = '';
+			});
 			dlg.showModal();
 			dlg.querySelector('iframe').src = 'blue';
 		}

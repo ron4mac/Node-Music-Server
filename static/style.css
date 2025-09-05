@@ -334,6 +334,13 @@ i.lplay {
 	color: sienna;;
 }
 
+/* bluetooth tool */
+#bluetool {
+	min-width: 30rem;
+}
+#bluetool iframe {
+	width: 100%;
+}
 
 /* ============================ file combine/convert dialog
 */
