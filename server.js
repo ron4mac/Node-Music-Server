@@ -4,7 +4,7 @@ import {createServer} from 'http';
 //import https from'https';
 import process from 'process';
 import {parse} from 'querystring';
-import {existsSync,readFile,readFileSync,unlinkSync} from 'fs';
+import {existsSync,statSync,createReadStream,readFile,readFileSync,unlinkSync} from 'fs';
 import path from 'path';
 import MyMPD from './lib/mpd.js';
 
@@ -265,7 +265,7 @@ const runScript = (file, url, response) => {
 };
 
 // serve a file
-const serveFile = (url, response) => {
+const serveFile = (url, response, request=null) => {
 	let filePath = parse(url.substring(1));
 	// Correct root path
 	if (filePath === '/') {
@@ -312,6 +312,31 @@ const serveFile = (url, response) => {
 		return;
 	}
 
+	//console.log(request.headers,url);
+	const stat = statSync(filePath);
+	const fileSize = stat.size;
+	const range = request.headers['content-range'];
+
+	// manage a byte-range request (makes Safari happy) -- found out later not absolutely necessary, but leaving in
+	if (range) {
+		const parts = range.replace(/bytes=/, '').split('-');
+		const start = parseInt(parts[0], 10);
+		const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+		const chunksize = (end - start) + 1;
+
+		const head = {
+			'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+			'Accept-Ranges': 'bytes',
+			'Content-Length': chunksize,
+			'Content-Type': contentType
+		};
+
+		response.writeHead(206, head);
+		const fileStream = createReadStream(filePath, { start, end });
+		fileStream.pipe(response);
+		return;
+	}
+
 	// Serve static files
 	readFile(filePath, function(error, content) {
 		if (error) {
@@ -319,7 +344,7 @@ const serveFile = (url, response) => {
 				readFile(documentRoot + '/404.html', function(error, content) {
 					if (error) { console.error(error); }
 					else {
-						response.writeHead(404, { 'Content-Type': 'text/html' });
+						response.writeHead(404, {'Content-Type': 'text/html'});
 						response.end(content, 'utf-8');
 						// log served 404 page
 						console.log('[Info] Served 404 page. '+filePath);
@@ -344,7 +369,7 @@ const serveFile = (url, response) => {
 						content = content.replace('%%ERRORS%%', errs);
 						response.setHeader('Cache-Control', ['no-cache','no-store','must-revalidate']);
 						response.setHeader('Pragma', 'no-cache');
-						response.writeHead(200, { 'Content-Type':'text/html' });
+						response.writeHead(200, {'Content-Type':'text/html', 'Content-Length':content.length});
 						response.end(content);
 						// log served page
 						console.log('[Info] Served:', url);
@@ -362,7 +387,7 @@ const serveFile = (url, response) => {
 			if (contentType=='text/html') {
 				response.setHeader('Cache-Control', ['no-cache','max-age=0']);
 			}
-			response.writeHead(200, {'Content-Type':contentType});
+			response.writeHead(200, {'Content-Type':contentType, 'Content-Length':fileSize});
 			response.end(content, 'utf-8');
 			// log served response
 			//console.log('[Info] Served:', url);
@@ -434,7 +459,7 @@ createServer(function (request, response) {
 	}
 
 	// serve the file
-	serveFile(url, response);
+	serveFile(url, response, request);
 
 }).listen(config.port, hostname, () => {
 	console.log(`Node Music Server (http://${hostname}:${config.port}) started`);

@@ -86,7 +86,7 @@ const displayCurrentTrack = (what) => {
 const showLocalAudio = (svc, pn=false) => {
 	// remove any existing listener and audio element
 	document.removeEventListener('playctl', laudioEvent);
-	if (laudioelm) laudioelm.src='';
+//	if (laudioelm) laudioelm.src='';
 	laudioelm = null;
 	// create the audio element
 	laudioelm = document.createElement('audio');
@@ -98,15 +98,18 @@ const showLocalAudio = (svc, pn=false) => {
 	document.addEventListener('playctl', laudioEvent);
 	// register what service is using the local audio
 	laudiosvu = svc.sr;
+	// when it's ready, play it
+	laudioelm.addEventListener('canplay', () => { laudioelm.play(); })
 	// handle errors
 	laudioelm.addEventListener('error', evt => {
+		console.log(evt);
 		my.alert('!!Could not load audio source: '+decodeURI(laudioelm.src))
 		.then(yn=>svc.lerror(yn));
 	});
 };
 
 const laudioEvent = (evt) => {
-//console.log(evt);
+console.log(evt);
 	const [what, val] = evt.detail.split(' ', 2);
 	switch(what) {
 	case 'vset':

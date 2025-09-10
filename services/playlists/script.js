@@ -53,41 +53,41 @@ class PlaylistsClass extends ServiceClass {
 	}
 
 	lplay (evt) {
-		//console.log(evt);
+		//console.log('a',evt);
 		const plfn = evt.target.closest('[data-plfn]')?.dataset.plfn;
 		const parms = {what:'plget', bobj: {file: plfn}};
 		postAction(this.sr, parms, (data) => {
 			this.lclplylst = data.pl.trim().split("\n");
-			//console.log(this.lclplylst);
+			//console.log('b',this.lclplylst);
 			const cnt = this.lclplylst.length;
 			if (!cnt) return;
 			showLocalAudio(this,true);
 			this.lcix = 0;
 			laudioelm.addEventListener('ended', (evt) => {
 				if (this.lcix < cnt) {
-					//console.log(this.lclplylst[this.lcix]);
+					//console.log('c',this.lclplylst[this.lcix]);
 					displayCurrentTrack(this.lclplylst[this.lcix].split('/').pop());
 					laudioelm.src = encodeURI(this.lclplylst[this.lcix++]);
-					laudioelm.play();
+//					laudioelm.play();
 				}
 			});
 			if (!this.tcl) {
 				document.addEventListener('pl-laudact', (e) => {
-					//console.log('pl-laudact',e.detail);
+					//console.log('d','pl-laudact',e.detail);
 					switch(e.detail) {
 					case 'prev':
 						if (this.lcix>1) {
 							this.lcix-=2;
 							displayCurrentTrack(this.lclplylst[this.lcix].split('/').pop());
 							laudioelm.src = encodeURI(this.lclplylst[this.lcix++]);
-							laudioelm.play();
+//							laudioelm.play();
 						}
 						break;
 					case 'next':
 						if (this.lcix<cnt) {
 							displayCurrentTrack(this.lclplylst[this.lcix].split('/').pop());
 							laudioelm.src = encodeURI(this.lclplylst[this.lcix++]);
-							laudioelm.play();
+//							laudioelm.play();
 						}
 						break;
 					}
@@ -96,16 +96,17 @@ class PlaylistsClass extends ServiceClass {
 			}
 			displayCurrentTrack(this.lclplylst[0].split('/').pop());
 			laudioelm.src = encodeURI(this.lclplylst[this.lcix++]);
-			laudioelm.play();
+//			laudioelm.play();
 		}, 2);
 	}
 
 	lerror () {
 		const cnt = this.lclplylst.length;
+		//console.log('e',this.lclplylst);
 		if (this.lcix<cnt) {
 			displayCurrentTrack(this.lclplylst[this.lcix].split('/').pop());
 			laudioelm.src = encodeURI(this.lclplylst[this.lcix++]);
-			laudioelm.play();
+//			laudioelm.play();
 		}
 	}
 

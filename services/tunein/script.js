@@ -92,10 +92,16 @@ class TuneinClass {
 					displayCurrentTrack('');
 					// try to get any track metadata
 					this.#getAnyMeta(data.url);
+					// stop any current audio
+					if (laudioelm) {
+						laudioelm.pause();
+						laudioelm.currentTime = 0;
+					}
 					// play the local audio
 					showLocalAudio(this.sr);
+//					laudioelm.src = '';
 					laudioelm.src = data.url;
-					laudioelm.play();
+//					laudioelm.play();
 				}
 			}
 		}, 2);
