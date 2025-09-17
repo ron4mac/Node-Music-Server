@@ -61,11 +61,12 @@ export default class Playlists {
 			resp.end(JSON.stringify({err:'', pl: plst.join('\n')}));
 			break;
 		case 'plply':
+			this.mpdc.realm = params.realm;
 			this.#queMPD(params.files);
 			resp.end();
 			break;
 		case 'play':
-			resp.end(JSON.stringify(this.lists[params]));
+			resp.end(JSON.stringify(this.lists[params.files]));
 			break;
 		//case 'lplay':
 		//	this.lplay(params, resp);

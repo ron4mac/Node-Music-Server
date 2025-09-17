@@ -11,8 +11,8 @@ class PandClass {
 		const elm = evt.target.closest('[data-sid]');
 		const sid = elm.dataset.sid;
 		const chnam = elm.querySelector('a').innerHTML;
-		const bobj = {sid: sid, snam: chnam};
 		currentStream = 'Pandora: '+chnam;
+		const bobj = {sid: sid, snam: chnam, realm: currentStream};
 		const parms = {what: 'play', bobj: bobj};
 		postAction(this.sr, parms, (data) => {
 			if (data.error) {

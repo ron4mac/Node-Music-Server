@@ -52,6 +52,7 @@ const webFavorites = async (what, bobj, resp) => {
 		}
 		favorites = new Favorites(mympd);
 	}
+	mympd.service = 'fa';
 	favorites.action(what, bobj, resp);
 };
 
@@ -62,6 +63,7 @@ const webRadio = async (what, bobj, resp) => {
 		}
 		tunein = new Tunein(mympd);
 	}
+	mympd.service = 'ti';
 	tunein.action(what, bobj, resp);
 };
 
@@ -72,6 +74,7 @@ const webCalm = async (what, bobj, resp) => {
 		}
 		calmradio = new CalmRadio(mympd);
 	}
+	mympd.service = 'cr';
 	calmradio.action(what, bobj, resp);
 };
 
@@ -82,6 +85,7 @@ const webPandora = async (what, bobj, resp) => {
 		}
 		pandora = await Pandora.init(mympd, settings);
 	}
+	mympd.service = 'pd';
 	pandora.action(what, bobj, resp);
 };
 
@@ -92,6 +96,7 @@ const webSpotify = async (what, bobj, resp) => {
 		}
 		spotify = await Spotify.init(mympd, settings);
 	}
+	mympd.service = 'sp';
 	spotify.action(what, bobj, resp);
 };
 
@@ -116,6 +121,7 @@ const webLists = async (what, bobj, resp) => {
 		}
 		playlists = new Playlists(mympd);
 	}
+	mympd.service = 'pl';
 	playlists.action(what, bobj, resp);
 };
 
@@ -313,8 +319,8 @@ const serveFile = (url, response, request=null) => {
 	}
 
 	//console.log(request.headers,url);
-	const stat = statSync(filePath);
-	const fileSize = stat.size;
+	const stat = statSync(filePath,{throwIfNoEntry:false});
+	const fileSize = stat ? stat.size : 0;
 	const range = request.headers['content-range'];
 
 	// manage a byte-range request (makes Safari happy) -- found out later not absolutely necessary, but leaving in

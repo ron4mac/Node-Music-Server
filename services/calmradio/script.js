@@ -162,7 +162,7 @@ class CalmClass {
 	}
 
 	#startPlay (how, url) {
-		const parms = {what: how, bobj: url};
+		const parms = {what: how, bobj: {url: url, realm: currentStream}};
 		postAction(this.sr, parms, (data) => {
 			displayCurrent(currentStream);
 			displayCurrentTrack('');

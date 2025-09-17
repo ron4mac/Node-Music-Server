@@ -120,7 +120,7 @@ export default class CalmRadio {
 	play (which, resp) {
 		this._getChanData()
 		.then(() => {
-			const chan = this.chns[which];
+			const chan = this.chns[which.url];
 			let stream;
 			if (this.userToken) {
 				const cred = '?' + qs.stringify({user: this.user, pass: this.userToken});
@@ -135,6 +135,7 @@ export default class CalmRadio {
 				this.mpdc.sendCommand('clear');
 				this.mpdc.sendCommand('add "'+stream+'"');
 				this.mpdc.sendCommand('play');
+				this.mpdc.realm = which.realm;
 			} catch (error) {
 				console.error(error);
 			}
@@ -145,7 +146,7 @@ export default class CalmRadio {
 	lplay (which, resp) {
 		this._getChanData()
 		.then(() => {
-			const chan = this.chns[which];
+			const chan = this.chns[which.url];
 			let stream;
 			if (this.userToken) {
 				const cred = '?' + qs.stringify({user: this.user, pass: this.userToken});

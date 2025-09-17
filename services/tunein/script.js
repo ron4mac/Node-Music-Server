@@ -80,7 +80,7 @@ class TuneinClass {
 
 
 	#startPlay (how, url) {
-		const parms = {act:'radio', what: how, bobj: url};
+		const parms = {act:'radio', what: how, bobj: {url: url, realm: currentStream}};
 		postAction(this.sr, parms, (data) => {
 			displayCurrent(currentStream);
 			if (data) {

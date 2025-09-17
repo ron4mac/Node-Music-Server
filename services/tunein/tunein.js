@@ -22,13 +22,14 @@ export default class TuneIn {
 			break;
 		case 'play':
 			if (this.mpdc) {
-				this.play(bobj, resp);
+				this.play(bobj.url, resp);
+				this.mpdc.realm = bobj.realm;
 			} else {
 				resp.end(JSON.stringify({error:'Can not play audio at the server'}));
 			}
 			break;
 		case 'lplay':
-			this.lplay(bobj, resp);
+			this.lplay(bobj.url, resp);
 			break;
 		case 'clear':
 			this.mpdc.clear();

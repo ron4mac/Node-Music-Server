@@ -30,12 +30,12 @@ class PlaylistsClass extends ServiceClass {
 				//console.log(files);
 				//postAndRefreshPL({act:'plply','files':files}, 1);
 				document.addEventListener('mpdchg', (e) => console.log('mpdchg',e.detail));
-				const parms = {what:'plply',bobj:{files:files}};
+				let plnam = 'Playlist: ' + (files.length>1 ? '[ multiple ]' : atob(files[0]));
+				const parms = {what:'plply',bobj:{realm:plnam, files:files}};
 				postAction(this.sr, parms, (data) => {
 					if (data) my.alert(data);
 					slctd.forEach((cb)=>{cb.checked=false});
-					let plnam = files.length>1 ? '[ multiple ]' : atob(files[0]);
-					displayCurrent('Playlist: '+plnam);
+					displayCurrent(plnam);
 				}, 1);
 			}
 			break;

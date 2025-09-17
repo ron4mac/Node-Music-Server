@@ -296,9 +296,16 @@ const mpdSocket = () => {
 		if (data.track) {
 			displayCurrentTrack(data.track);
 		}
+		if (data.realm) {
+			displayCurrent(data.realm);
+		}
 		if (data.state=='stop') {
 			displayCurrent('');
 			displayCurrentTrack('');
+		}
+		if (data.service) {
+			console.log(data.service);
+			document.getElementById('tb-'+data.service).click();
 		}
 	});
 };

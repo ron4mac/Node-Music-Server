@@ -7,6 +7,7 @@
 <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <!-- <link rel="stylesheet" href="//rjcrans.net/rjlibs/dlog/dialog.css"> -->
 <link href="static/style.css" rel="stylesheet">
+<link href="static/apple_icon.png" rel="apple-touch-icon"/>
 <script src="lib/config.js" type="module"></script>
 <script src="static/classes.js"></script>
 <script src="static/client.js"></script>
@@ -19,12 +20,12 @@
 		<span class="tabttl">Favorites</span>
 		<button class="tabmenu" onclick="tabMenu(event)"><i class="fa fa-bars"></i></button>
 		<div class="tab">
-			<button class="tablinks" onclick="openTab(event, 'favesTab', 'fa')" id="defaultOpen">Favorites</button>
-			<button class="tablinks" onclick="openTab(event, 'tuninTab', 'ti')">Internet Radio</button>
-			<button class="tablinks" onclick="openTab(event, 'calmradioTab', 'cr')">Calm Radio</button>
-			<button class="tablinks" onclick="openTab(event, 'pandoraTab', 'pd')">Pandora</button>
-			<button class="tablinks" onclick="openTab(event, 'spotifyTab', 'sp')">Spotify</button>
-			<button class="tablinks" onclick="openTab(event, 'plstsTab', 'pl')">Playlists</button>
+			<button class="tablinks" onclick="openTab(event, 'favesTab', 'fa')" id="tb-fa">Favorites</button>
+			<button class="tablinks" onclick="openTab(event, 'tuninTab', 'ti')" id="tb-ti">Internet Radio</button>
+			<button class="tablinks" onclick="openTab(event, 'calmradioTab', 'cr')" id="tb-cr">Calm Radio</button>
+			<button class="tablinks" onclick="openTab(event, 'pandoraTab', 'pd')" id="tb-pd">Pandora</button>
+			<button class="tablinks" onclick="openTab(event, 'spotifyTab', 'sp')" id="tb-sp">Spotify</button>
+			<button class="tablinks" onclick="openTab(event, 'plstsTab', 'pl')" id="tb-pl">Playlists</button>
 			<button class="tablinks nompd" onclick="openTab(event, 'filemanTab', 'fm')">Manage File Storage</button>
 			<button class="tablinks nompd" onclick="openTab(event, 'ytxTab', 'yt')">YouTube Extraction</button>
 			<span class="seticon"><img src="static/settings.svg" onclick="settings()"></span>
@@ -131,7 +132,7 @@
 	var ERRS = '%%ERRORS%%';
 	var xtrLocal='XTRLOCALV';
 	// Show the default tab
-	document.getElementById('defaultOpen').click();
+//	document.getElementById('defaultOpen').click();
 	fetch('./package.json')
 	.then(res => res.json())
 	.then(json => { document.getElementById('nms_version').innerText = 'v'+json.version; });

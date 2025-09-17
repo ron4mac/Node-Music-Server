@@ -178,6 +178,7 @@ export default class Pandora {
 
 	play (station, resp) {
 		this.mpdc.sendCommand('clear');
+		this.mpdc.realm = station.realm;
 		this.stationid = station.sid;
 		this.stationName = station.snam;
 		this.#getTracks();
@@ -326,6 +327,8 @@ export default class Pandora {
 					//console.log(stat.song+'/'+stat.playlistlength);
 					let msg;
 					if (stat.songid && this.queue[stat.songid]) {
+						const tinfo = this.queue[stat.songid];
+						this.mpdc.ttitle = tinfo.artistName + ' - ' + tinfo.songName;
 						msg = {...{state: stat.state}, ...{snam: this.stationName}, ...this.queue[stat.songid]};
 						if (stat.playlistlength-stat.song < 2) {
 							this.#getTracks();
