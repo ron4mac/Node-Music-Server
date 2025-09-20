@@ -11,6 +11,8 @@
     "server.js",
     "nodems.service",
     "librespot.service",
+    "update.sh",
+    "blue",
     "lib",
     "static",
     "services"
