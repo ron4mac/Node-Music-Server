@@ -232,24 +232,11 @@ const reqAction = (parms, resp) => {
 			rmsg = '!Not authorized';
 			break;
 		}
-		if (parms.spract == 'b') {
-			rmsg = 'Rebooting server ... refresh page in a minute or two';
-			cntrlr.execute('/usr/bin/systemctl reboot')
-			.then(m=>console.log('rebooting: '+m));
-		}
-		if (parms.spract == 'r') {
-			rmsg = 'Restarting music server ... refresh page';
-			cntrlr.execute('/usr/bin/systemctl restart nodems')
-			.then(m=>console.log('restarting: '+m));
-		}
-		if (parms.spract == 'd') {
-			rmsg = 'Shutting down the music server ...';
-			cntrlr.execute('/usr/sbin/shutdown -h now')
-			.then(m=>console.log('shutting down: '+m));
-		}
+		rmsg = '';
+		import('./lib/admin.js').then(mod => mod.default.action(parms, resp));
 		break;
 	}
-	resp.end(rmsg);
+	if (rmsg) resp.end(rmsg);
 }
 
 const runScript = (file, url, response) => {
@@ -373,6 +360,7 @@ const serveFile = (url, response, request=null) => {
 							//errs += '</div>'
 						}
 						content = content.replace('%%ERRORS%%', errs);
+						content = content.replace('%%VERSION%%', cntrlr.nmsversion);
 						response.setHeader('Cache-Control', ['no-cache','no-store','must-revalidate']);
 						response.setHeader('Pragma', 'no-cache');
 						response.writeHead(200, {'Content-Type':'text/html', 'Content-Length':content.length});

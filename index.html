@@ -115,8 +115,9 @@
 		</div>
 		<div class="superAdmin">
 		<label>Auth code: <input type="text" name="spauth" required></label>
-		<div>
-			<label><input type="radio" name="spract" value="r" required>Restart App</label>
+		<div class="flxcol">
+			<label><input type="radio" name="spract" value="u" required>Update App</label>
+			<label><input type="radio" name="spract" value="r">Restart App</label>
 			<label><input type="radio" name="spract" value="b">Reboot Server</label>
 			<label><input type="radio" name="spract" value="d">Shutdown Server</label>
 		</div>
@@ -130,12 +131,11 @@
 	<iframe id="dnldf" style="display:none"></iframe>
 	<script>
 	var ERRS = '%%ERRORS%%';
+	var VERSION = '%%VERSION%%';
 	var xtrLocal='XTRLOCALV';
 	// Show the default tab
 //	document.getElementById('defaultOpen').click();
-	fetch('./package.json')
-	.then(res => res.json())
-	.then(json => { document.getElementById('nms_version').innerText = 'v'+json.version; });
+	document.getElementById('nms_version').innerText = 'v'+VERSION;
 	if (ERRS) my.alert(ERRS,{class:'error'});
 	</script>
 </body>

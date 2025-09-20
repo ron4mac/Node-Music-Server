@@ -22,6 +22,11 @@ body {
 	color: #555;
 	z-index: -1;
 }
+.flxcol {
+	display: flex;
+	flex-direction: column;
+}
+
 /* various colorations */
 .warning {
 	color: coral;
