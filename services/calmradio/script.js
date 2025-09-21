@@ -3,6 +3,7 @@
 class CalmClass {
 
 	sr = 'cr';	// service route
+	crumbs = ['<a href="#" data-url="" data-ix="0">Home</a>'];
 
 	constructor () {
 		this.pdiv = document.getElementById('calm');
@@ -31,18 +32,31 @@ class CalmClass {
 
 	nav (evt, elm) {
 		evt.preventDefault();
-		const url = elm.closest('[data-url]').dataset.url;
+		let url = elm.closest('[data-url]').dataset.url;
 		const parms = {what: 'home', bobj: url};
 		postAction(this.sr, parms, (data) => {
 		//	const el = document.getElementById('calm');
 		//	el.innerHTML = data;
 			this.pdiv.innerHTML = data;
+			const bt = elm.closest('a').innerHTML;
+			this.crumbs.push('<a href="#" data-url="'+url+'" data-ix="'+this.crumbs.length+'">'+bt+'</a>');
+			this.#showCrumbs();
 		}, 1);
 	}
 
 	back (evt) {
 		//console.log(evt);
-		this.nav(evt, evt.target);
+	//	this.nav(evt, evt.target);
+		evt.preventDefault();
+		if (evt.target.nodeName != 'A') return;
+		let cix = +evt.target.dataset.ix;
+		const url = evt.target.dataset.url;
+		const parms = {what: 'home', bobj: url};
+		postAction(this.sr, parms, (data) => {
+			this.pdiv.innerHTML = data;
+			this.crumbs = this.crumbs.slice(0,cix+1);
+			this.#showCrumbs();
+		}, 1);
 	}
 
 	get () {
@@ -117,6 +131,11 @@ class CalmClass {
 	}
 
 
+	#showCrumbs () {
+		const el = document.getElementById('calmcrumbs');
+		el.innerHTML = this.crumbs.join('::');
+	}
+
 	#useract (dlg, resp, data) {
 		//console.log(dlg,'11',resp,'22',data);
 		if (resp=='y') {
@@ -172,7 +191,8 @@ class CalmClass {
 				}
 				if (data.url) {
 					showLocalAudio(this.sr);
-					laudioelm.src = data.url;
+					// bit of a quirk workaround needed
+					laudioelm.src = data.url + '&_ic2=' + Date.now();
 					laudioelm.play();
 				}
 			}

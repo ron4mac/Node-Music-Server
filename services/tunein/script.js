@@ -5,6 +5,7 @@ class TuneinClass {
 	sr = 'ti';	// service route
 	last = '';
 	stats = null;
+	crumbs = ['<a href="#" data-bobj="" data-ix="0">Home</a>'];
 
 	play (evt) {
 		const elm = evt.target;
@@ -29,7 +30,7 @@ class TuneinClass {
 
 	nav (evt, elm) {
 		evt.preventDefault();
-		const bobj = elm.closest('[data-url]').dataset.url;
+		let bobj = elm.closest('[data-url]').dataset.url;
 		const parms = {act:'radio', what: 'home', bobj: bobj};
 		postAction(this.sr, parms, (data) => {
 			if (!data) {
@@ -39,9 +40,8 @@ class TuneinClass {
 			let el = document.getElementById('radio');
 			el.innerHTML = data;
 			const bt = elm.closest('a').innerHTML;
-			el = document.getElementById('radcrumbs');
-			if (el.innerHTML) el.innerHTML += '::';
-			el.innerHTML += '<a href="#" data-bobj="'+bobj+'">'+bt+'</a>';
+			this.crumbs.push('<a href="#" data-bobj="'+bobj+'" data-ix="'+this.crumbs.length+'">'+bt+'</a>');
+			this.#showCrumbs();
 		}, 1);
 	}
 
@@ -49,11 +49,14 @@ class TuneinClass {
 		//console.log(evt);
 		evt.preventDefault();
 		if (evt.target.nodeName != 'A') return;
+		let cix = +evt.target.dataset.ix;
 		const bobj = evt.target.dataset.bobj;
 		const parms = {act:'radio', what: 'home', bobj: bobj};
 		postAction(this.sr, parms, (data) => {
 			const el = document.getElementById('radio');
 			el.innerHTML = data;
+			this.crumbs = this.crumbs.slice(0,cix+1);
+			this.#showCrumbs();
 		}, 1);
 	}
 
@@ -78,6 +81,11 @@ class TuneinClass {
 		}, 1);
 	}
 
+
+	#showCrumbs () {
+		const el = document.getElementById('radcrumbs');
+		el.innerHTML = this.crumbs.join('::');
+	}
 
 	#startPlay (how, url) {
 		const parms = {act:'radio', what: how, bobj: {url: url, realm: currentStream}};
