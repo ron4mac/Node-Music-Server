@@ -8,7 +8,7 @@ D=$(pwd)
 for F in "$UPFILES"*; do
     U="$F"
 done
-cp -a "${D}/${U}/." "${D}/upd/"
+cp -a "${D}/${U}/." "${D}/"
 if [ $? -ne 0 ]; then
   echo "cp command failed!"
   # Handle the error, e.g., exit or log the error

@@ -1,6 +1,6 @@
 'use strict';
 import cntrlr from '../../lib/controller.js';
-import ytdl from '@distube/ytdl-core';
+//import ytdl from '@distube/ytdl-core';
 import {createReadStream,createWriteStream,mkdirSync,readdir,statSync,unlink} from 'fs';
 import WebSocket, {WebSocketServer} from 'ws';
 
