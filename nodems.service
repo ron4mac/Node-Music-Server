@@ -6,6 +6,8 @@ StartLimitBurst=3
 
 [Service]
 Type=simple
+User=<USER>
+Group=<GROUP>
 ExecStart=/usr/bin/node <INSTALL DIRECTORY>/server.js
 WorkingDirectory=<INSTALL DIRECTORY>
 Restart=on-failure
