@@ -155,7 +155,7 @@ const mpdCtrl = async (what, bobj, resp) => {
 		mympd = await MyMPD.init();
 	}
 	if (!mympd || !mympd.mpdc) {
-		console.log(mympd);
+		//resp.end('!MPD not available');
 		resp.end();
 		return;
 	}

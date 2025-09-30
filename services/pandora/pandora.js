@@ -11,7 +11,7 @@ export default class Pandora {
 		this.mpdc = mpdc;
 		this.queue = {};
 		this.queuel = [];
-		if (full && this.mpdc) {
+		if (full && this.mpdc.mstatus) {
 			this.ws = new WebSocketServer({port:cntrlr.config.pandora_socket});
 			this.ws.on('connection', (sc) => {
 				sc.on('error', console.error);
@@ -64,11 +64,7 @@ export default class Pandora {
 			this.browse(b, resp);*/
 			break;
 		case 'play':
-			if (this.mpdc) {
-				this.play(bobj, resp);
-			} else {
-				resp.end(JSON.stringify({error:'Can not play audio at the server'}));
-			}
+			this.play(bobj, resp);
 			break;
 		case 'lplay':
 			this.lplay(bobj, resp);
@@ -177,12 +173,17 @@ export default class Pandora {
 	}
 
 	play (station, resp) {
-		this.mpdc.sendCommand('clear');
-		this.mpdc.realm = station.realm;
-		this.stationid = station.sid;
-		this.stationName = station.snam;
-		this.#getTracks();
-		resp.end('{}');
+		try {
+			this.mpdc.sendCommand('clear');
+			this.mpdc.realm = station.realm;
+			this.stationid = station.sid;
+			this.stationName = station.snam;
+			this.#getTracks();
+			resp.end('{}');
+		} catch (error) {
+			console.error(error);
+			resp.end(JSON.stringify({error: String(error)}));
+		}
 	}
 
 	lplay (station, resp) {

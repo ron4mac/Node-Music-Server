@@ -33,11 +33,7 @@ export default class CalmRadio {
 			this.search(bobj, resp);
 			break;
 		case 'play':
-			if (this.mpdc) {
-				this.play(bobj, resp);
-			} else {
-				resp.end(JSON.stringify({error:'Can not play audio at the server'}));
-			}
+			this.play(bobj, resp);
 			break;
 		case 'lplay':
 			this.lplay(bobj, resp);
@@ -136,11 +132,12 @@ export default class CalmRadio {
 				this.mpdc.sendCommand('add "'+stream+'"');
 				this.mpdc.sendCommand('play');
 				this.mpdc.realm = which.realm;
+				resp.end('{}');
 			} catch (error) {
 				console.error(error);
+				resp.end(JSON.stringify({error: String(error)}));
 			}
 		});
-		resp.end('{}');
 	}
 
 	lplay (which, resp) {

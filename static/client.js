@@ -109,8 +109,9 @@ const showLocalAudio = (svc, pn=false) => {
 };
 
 const laudioEvent = (evt) => {
-console.log(evt);
-	const [what, val] = evt.detail.split(' ', 2);
+	//console.log(evt);
+	let [what, val] = evt.detail.split(' ', 2);
+	val = +val;	//convert to int
 	switch(what) {
 	case 'vset':
 		laudioelm.volume = val/100;
@@ -121,6 +122,8 @@ console.log(evt);
 		nuv = val<0 ? Math.max(nuv,0) : Math.min(nuv,1);
 		laudioelm.volume = nuv;
 		window.localStorage.setItem('nms_lclvol', Math.round(nuv*100));
+		const vel = document.getElementById('mpdvolume');
+		vel.value = +vel.value+val;
 		break;
 	case 'pause':
 		if (val==1) laudioelm.pause();
@@ -278,7 +281,7 @@ const bmpVolume = (amt) => {
 	document.dispatchEvent(new CustomEvent('playctl', {bubbles: true, detail: 'bump '+amt}));
 	const parms = {act:'mpd',what:'bumpVolume',bobj:amt};
 	postAction(null, parms, (data) => {
-		document.getElementById('mpdvolume').value = data;
+		if (data) document.getElementById('mpdvolume').value = data;
 	}, 1);
 };
 

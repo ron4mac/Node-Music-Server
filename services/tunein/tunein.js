@@ -21,12 +21,8 @@ export default class TuneIn {
 			this.search(bobj, resp);
 			break;
 		case 'play':
-			if (this.mpdc) {
-				this.play(bobj.url, resp);
-				this.mpdc.realm = bobj.realm;
-			} else {
-				resp.end(JSON.stringify({error:'Can not play audio at the server'}));
-			}
+			this.play(bobj.url, resp);
+			this.mpdc.realm = bobj.realm;
 			break;
 		case 'lplay':
 			this.lplay(bobj.url, resp);
@@ -80,27 +76,24 @@ export default class TuneIn {
 		}).end();
 	}
 
-	startRadio (surl) {
-		try {
-			this.mpdc.sendCommand('clear');
-			this.mpdc.sendCommand('add '+surl);
-			this.mpdc.sendCommand('play');
-		} catch (error) {
-			console.error(error);
-		}
-	}
-
 	play (url, resp) {
 		let dat = '';
 		http.get(url, (r) => {
 			r.on('data', (chunk) => {
 				dat += chunk;
-			}).on('end', () => {
+			})
+			.on('end', () => {
 				// drove me CRAZY discovering that linefeeds at the end caused things to hang!
 				let surl = dat.replace(/[\r\n]+/gm, '');
-				this.startRadio(surl);
-			//	cntrlr.currentPlaying = {lr: 'remote', f:'webRadio', a:'play', p:url};
-				resp.end('{}');
+				try {
+					this.mpdc.sendCommand('clear');
+					this.mpdc.sendCommand('add '+surl);
+					this.mpdc.sendCommand('play');
+					resp.end('{}');
+				} catch (error) {
+					console.error(error);
+					resp.end(JSON.stringify({error: String(error)}));
+				}
 			});
 		}).end();
 	}
@@ -113,8 +106,6 @@ export default class TuneIn {
 			}).on('end', () => {
 				// drove me CRAZY discovering that linefeeds at the end caused things to hang!
 				let surl = dat.replace(/[\r\n]+/gm, '');
-				//this.startRadio(surl);
-			//	cntrlr.currentPlaying = {lr: 'local', f:'webRadio', a:'lplay', p:url};
 				resp.end(JSON.stringify({url: surl}));
 			});
 		}).end();
