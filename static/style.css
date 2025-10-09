@@ -26,6 +26,34 @@ body {
 	display: flex;
 	flex-direction: column;
 }
+.vertical-text {
+	writing-mode: vertical-lr;
+	text-orientation: upright;
+	font-family: monospace;
+	font-size: medium;
+	/*height: 3rem;*/
+	cursor: pointer;
+}
+
+/* controls area */
+.cntrls-grid {
+	display: grid;
+	grid-template-columns: auto 1fr;
+}
+.cntrls-grid  > div:first-child {
+	grid-row: 1 / 3;
+	/*width: 1.5rem;*/
+	background-color: lightblue;
+	/*cursor: pointer;*/
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-right: 1px solid #CCC;
+	border-bottom: 1px solid #CCC;
+}
+.cntrls-grid div:nth-child(n + 2) {
+	grid-column: 2 / 3;
+}
 
 /* various colorations */
 .warning {
@@ -167,25 +195,6 @@ form i.fa {
 
 
 /* LOCAL AUDIO */
-#localAudio {
-	display: none;
-	background-color: lavender;
-	border-bottom: 1px solid #CCC;
-	padding: 0 .75rem;
-}
-#localAudio audio {
-	height: 30px;
-	vertical-align: middle;
-	margin: 0 .5rem;
-/*	width: 100%;
-	display: none;*/
-}
-#localAudio i {
-	vertical-align: middle;
-}
-#localAudio .noprevnext {
-	color: #CCC;;
-}
 i.lplay {
 	font-size: large;
 	vertical-align: middle;
@@ -296,7 +305,7 @@ i.lplay {
 	margin-right: .5rem;
 	cursor: pointer;
 }
-#mpdvolume {
+#mpdvolume, #lclvolume {
 	height: 5px;
 	width: 100px;
 	vertical-align: middle;
@@ -316,7 +325,13 @@ i.lplay {
 	background-color: lavender;
 	border-bottom: 1px solid #CCC;
 }
-.curstrm, .curtrk {
+.cursvrstrm, .cursvrtrk {
+	color: maroon;
+	font-size: larger;
+	vertical-align: middle;
+	margin-left: .5rem;
+}
+.curlocstrm, .curloctrk {
 	color: maroon;
 	font-size: larger;
 	vertical-align: middle;

@@ -7,6 +7,15 @@ class PlaylistsClass extends ServiceClass {
 	lclix = 0;
 	tcl = false;
 
+	#next = (evt) => {
+		if (this.lcix < this.lclplylst.length) {
+			//console.log('c',this.lclplylst[this.lcix]);
+			playObj.dispCurrentTrack(this.lclplylst[this.lcix].split('/').pop(), true);
+			laObj.playSource(encodeURI(this.lclplylst[this.lcix++]), this);
+			laObj.elem.addEventListener('ended', this.#next);
+		}
+	};
+
 	menu (actn, evt) {
 		//console.log(actn);
 		const slctd = document.querySelectorAll('.plsel:checked'),
@@ -61,16 +70,7 @@ class PlaylistsClass extends ServiceClass {
 			//console.log('b',this.lclplylst);
 			const cnt = this.lclplylst.length;
 			if (!cnt) return;
-			showLocalAudio(this,true);
 			this.lcix = 0;
-			laudioelm.addEventListener('ended', (evt) => {
-				if (this.lcix < cnt) {
-					//console.log('c',this.lclplylst[this.lcix]);
-					displayCurrentTrack(this.lclplylst[this.lcix].split('/').pop());
-					laudioelm.src = encodeURI(this.lclplylst[this.lcix++]);
-//					laudioelm.play();
-				}
-			});
 			if (!this.tcl) {
 				document.addEventListener('pl-laudact', (e) => {
 					//console.log('d','pl-laudact',e.detail);
@@ -78,36 +78,25 @@ class PlaylistsClass extends ServiceClass {
 					case 'prev':
 						if (this.lcix>1) {
 							this.lcix-=2;
-							displayCurrentTrack(this.lclplylst[this.lcix].split('/').pop());
-							laudioelm.src = encodeURI(this.lclplylst[this.lcix++]);
-//							laudioelm.play();
+							this.#next(event);
 						}
 						break;
 					case 'next':
 						if (this.lcix<cnt) {
-							displayCurrentTrack(this.lclplylst[this.lcix].split('/').pop());
-							laudioelm.src = encodeURI(this.lclplylst[this.lcix++]);
-//							laudioelm.play();
+							this.#next(event);
 						}
 						break;
 					}
 				});
 				this.tcl = true;
 			}
-			displayCurrentTrack(this.lclplylst[0].split('/').pop());
-			laudioelm.src = encodeURI(this.lclplylst[this.lcix++]);
-//			laudioelm.play();
+			playObj.dispCurrent('Playlist: ' + atob(plfn), true);
+			this.#next(event);
 		}, 2);
 	}
 
 	lerror () {
-		const cnt = this.lclplylst.length;
-		//console.log('e',this.lclplylst);
-		if (this.lcix<cnt) {
-			displayCurrentTrack(this.lclplylst[this.lcix].split('/').pop());
-			laudioelm.src = encodeURI(this.lclplylst[this.lcix++]);
-//			laudioelm.play();
-		}
+		this.#next(event);
 	}
 
 	plselchg (sel) {

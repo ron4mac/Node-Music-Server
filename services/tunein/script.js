@@ -90,26 +90,20 @@ class TuneinClass {
 	#startPlay (how, url) {
 		const parms = {act:'radio', what: how, bobj: {url: url, realm: currentStream}};
 		postAction(this.sr, parms, (data) => {
-			displayCurrent(currentStream);
 			if (data) {
 				if (data.error) {
 					my.alert(data.error,{class:'warn'});
 				}
 				if (data.url) {
+					playObj.dispCurrent(currentStream, true);
 					// clear the current track display
-					displayCurrentTrack('');
+					playObj.dispCurrentTrack('', true);
 					// try to get any track metadata
 					this.#getAnyMeta(data.url);
-					// stop any current audio
-					if (laudioelm) {
-						laudioelm.pause();
-						laudioelm.currentTime = 0;
-					}
-					// play the local audio
-					showLocalAudio(this.sr);
-//					laudioelm.src = '';
-					laudioelm.src = data.url;
-//					laudioelm.play();
+					// start the local audio play
+					laObj.playSource(data.url, this);
+				} else {
+					playObj.dispCurrent(currentStream);
 				}
 			}
 		}, 2);
@@ -154,7 +148,7 @@ class TuneinClass {
 		} else if (stats.icestats) {
 			ttl = stats.icestats.source.title;
 		}
-		displayCurrentTrack(ttl);
+		playObj.dispCurrentTrack(ttl, true);
 	}
 
 }

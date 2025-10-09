@@ -5,6 +5,20 @@ class PandClass {
 	sr = 'pd';	// service route
 	socket = null;
 	last = '';
+	l_stid = null;
+	l_chnam = null;
+
+	#next = (evt) => {
+		const bobj = {sid: this.l_stid, snam: this.l_chnam};
+		const parms = {what: 'lplay', bobj: bobj};
+		postAction(this.sr, parms, (data) => {
+			if (data) {
+				this.#showTrackArt(data, true, false);
+				laObj.playSource(data.audioUrl, this);
+				laObj.elem.addEventListener('ended', this.#next);
+			}
+		}, 2);
+	};
 
 	play (evt) {
 		evt.preventDefault();
@@ -26,20 +40,16 @@ class PandClass {
 	lplay (evt) {
 		evt.preventDefault();
 		const elm = evt.target.closest('[data-sid]');
-		const sid = elm.dataset.sid;
-		const chnam = elm.querySelector('a').innerHTML;
-		const bobj = {sid: sid, snam: chnam};
+		const sid = this.l_stid = elm.dataset.sid;
+		const chnam = this.l_chnam = elm.querySelector('a').innerHTML;
 		currentStream = 'Pandora: '+chnam;
+		const bobj = {sid: sid, snam: chnam, realm: currentStream};
 		const parms = {what: 'lplay', bobj: bobj};
 		postAction(this.sr, parms, (data) => {
 			if (data) {
-				this.#showTrackArt(data, false);
-				showLocalAudio(this.sr, true);
-				laudioelm.addEventListener('ended', (evt) => {
-					this.#nextLocal(sid,chnam,laudioelm);
-				});
-				laudioelm.src = data.audioUrl;
-				laudioelm.play();
+				this.#showTrackArt(data, true, false);
+				laObj.playSource(data.audioUrl, this);
+				laObj.elem.addEventListener('ended', this.#next);
 			}
 		}, 2);
 		nowPlaying = {name: currentStream, what:'Pand', how: 'lplay', url: bobj};
@@ -51,11 +61,14 @@ class PandClass {
 		// play the saved favorite
 		const parms = {what: how, bobj: url};
 		postAction(this.sr, parms, (data) => {
-			displayCurrent(currentStream);
 			if (data) {
-				showLocalAudio(this.sr, true);
-				laudioelm.src = data;
-				laudioelm.play();
+				playObj.dispCurrent(currentStream, true);
+				laObj.playSource(data, this);
+			//	laObj.elem.addEventListener('ended', (evt) => {
+			//		this.#nextLocal(sid,chnam);
+			//	});
+			} else {
+				playObj.dispCurrent(currentStream);
 			}
 		}, 1);
 	}
@@ -182,28 +195,16 @@ class PandClass {
 	}
 
 
-	#showTrackArt (data, pn=true) {
+	#showTrackArt (data, l=false, pn=true) {
 		const aa = document.getElementById('albumart');
-		displayCurrent('Pandora: '+data.snam);
-		displayCurrentTrack(data.artistName+' - '+data.songName);
+		playObj.dispCurrent('Pandora: '+data.snam, l);
+		playObj.dispCurrentTrack(data.artistName+' - '+data.songName, l);
 		aa.querySelector('img').src = data.albumArtUrl ? data.albumArtUrl : 'static/noimage.svg';
 		aa.querySelector('.artist').innerHTML = data.artistName;
 		aa.querySelector('.album').innerHTML = data.albumName;
 		aa.querySelector('.song').innerHTML = data.songName;
 		aa.querySelector('.prevnext').style.display = pn?'block':'none';
 		aa.style.display = 'block';
-	}
-
-	#nextLocal (sid, snam, aude) {
-		const bobj = {sid: sid, snam: snam};
-		const parms = {what: 'lplay', bobj: bobj};
-		postAction(this.sr, parms, (data) => {
-			if (data) {
-				this.#showTrackArt(data, false);
-				aude.src = data.audioUrl;
-				aude.play();
-			}
-		}, 2);
 	}
 
 	#socket () {
@@ -220,7 +221,7 @@ class PandClass {
 				if (data.state=='play') {
 					this.#showTrackArt(data);
 				} else {
-				//	displayCurrentTrack('');
+				//	playObj.dispCurrentTrack('');
 				//	aa.style.display = 'none';
 				}
 			});

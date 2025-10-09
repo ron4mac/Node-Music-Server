@@ -3,6 +3,7 @@
 class CalmClass {
 
 	sr = 'cr';	// service route
+	sep = '::';
 	crumbs = ['<a href="#" data-url="" data-ix="0">Home</a>'];
 
 	constructor () {
@@ -16,7 +17,7 @@ class CalmClass {
 		const elmwurl = elm.closest('[data-url]');
 		if (!elmwurl) return;
 		if (elmwurl.className=='calm-link') {
-			this.nav(evt, elm);
+			this.nav(evt, elmwurl);
 			return;
 		}
 		const url = elmwurl.dataset.url;
@@ -31,16 +32,13 @@ class CalmClass {
 	}
 
 	nav (evt, elm) {
-		evt.preventDefault();
-		let url = elm.closest('[data-url]').dataset.url;
+		let url = elm.dataset.url;
 		const parms = {what: 'home', bobj: url};
 		postAction(this.sr, parms, (data) => {
-		//	const el = document.getElementById('calm');
-		//	el.innerHTML = data;
+			const bt = elm.querySelector('a').innerHTML;
 			this.pdiv.innerHTML = data;
-			const bt = elm.closest('a').innerHTML;
+			this.#showCrumbs(this.sep + bt);
 			this.crumbs.push('<a href="#" data-url="'+url+'" data-ix="'+this.crumbs.length+'">'+bt+'</a>');
-			this.#showCrumbs();
 		}, 1);
 	}
 
@@ -54,8 +52,10 @@ class CalmClass {
 		const parms = {what: 'home', bobj: url};
 		postAction(this.sr, parms, (data) => {
 			this.pdiv.innerHTML = data;
-			this.crumbs = this.crumbs.slice(0,cix+1);
-			this.#showCrumbs();
+			const plus = this.crumbs[cix].match(/>(.+)</)[1];
+			this.crumbs = this.crumbs.slice(0,cix/*+1*/);
+			this.#showCrumbs((cix?this.sep:'') + plus);
+			if (!cix) this.crumbs.push('<a href="#" data-url="" data-ix="0">Home</a>');
 		}, 1);
 	}
 
@@ -131,9 +131,9 @@ class CalmClass {
 	}
 
 
-	#showCrumbs () {
+	#showCrumbs (plus='') {
 		const el = document.getElementById('calmcrumbs');
-		el.innerHTML = this.crumbs.join('::');
+		el.innerHTML = this.crumbs.join(this.sep) + plus;
 	}
 
 	#useract (dlg, resp, data) {
@@ -183,17 +183,18 @@ class CalmClass {
 	#startPlay (how, url) {
 		const parms = {what: how, bobj: {url: url, realm: currentStream}};
 		postAction(this.sr, parms, (data) => {
-			displayCurrent(currentStream);
-			displayCurrentTrack('');
 			if (data) {
 				if (data.error) {
 					my.alert(data.error,{class:'warn'});
 				}
 				if (data.url) {
-					showLocalAudio(this.sr);
-					// bit of a quirk workaround needed
-					laudioelm.src = data.url + '&_ic2=' + Date.now();
-					laudioelm.play();
+					playObj.dispCurrent(currentStream, true);
+					playObj.dispCurrentTrack('', true);
+					// start the local audio play
+					laObj.playSource(data.url + '&_ic2=' + Date.now(), this);
+				} else {
+					playObj.dispCurrent(currentStream);
+					playObj.dispCurrentTrack('');
 				}
 			}
 		}, 2);

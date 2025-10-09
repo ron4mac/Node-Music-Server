@@ -3,13 +3,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Node Music Server</title>
+<title>%%TITLE%%</title>
 <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <!-- <link rel="stylesheet" href="//rjcrans.net/rjlibs/dlog/dialog.css"> -->
 <link href="static/style.css" rel="stylesheet">
 <link href="static/apple_icon.png" rel="apple-touch-icon">
 <script src="lib/config.js" type="module"></script>
-<script src="static/classes.js"></script>
+<script src="static/classes.js" defer></script>
 <script src="static/client.js"></script>
 <!-- <script src="//rjcrans.net/rjlibs/dlog/dialog.js" type="text/javascript"></script> -->
 <!-- <script src="static/upload.js"></script> -->
@@ -31,29 +31,51 @@
 			<span class="seticon"><img src="static/settings.svg" onclick="settings()"></span>
 		</div>
 		<div class="panels">
-			<div id="mpdcontrols" class="mpdcontrols">
-				<i class="fa fa-arrow-left" onclick="mpdCmd('prev')"></i>
-				<i class="fa fa-stop" onclick="mpdCmd('stop')"></i>
-				<i class="fa fa-pause" onclick="mpdCmd('pause 1')"></i>
-				<i class="fa fa-play" onclick="mpdCmd('pause 0')"></i>
-				<i class="fa fa-arrow-right" onclick="mpdCmd('next')"></i>
-				<i class="fa fa-random" onclick="mpdCmd('shuffle')"></i>
-				<i class="fa fa-bug" onclick="mpdCmdBug()"></i>
-				<span class="curstrm"></span>
-				<i class="fa fa-heart" onclick="Favorites.add()"></i>
-			</div>
-			<div id="marquis" class="marquis">
-				<div class="volume-control">
-				<i class="fa fa-volume-down" onclick="bmpVolume('-5')"></i>
-				<input type="range" id="mpdvolume" name="mpdvolume" oninput="chgVolume(this)" min="0" max="100" step="5">
-				<i class="fa fa-volume-up" onclick="bmpVolume('+5')"></i>
+			<div id="cntrls">
+				<div id="mpd-cntrls" class="cntrls-grid">
+					<!-- ><div onclick="playObj.focus(true)"><span class="vertical-text">SRV</span></div> -->
+					<div onclick="playObj.focus(true)"><img src="static/SRV.png"></div>
+					<div id="mpdcontrols" class="mpdcontrols">
+						<i class="fa fa-arrow-left" onclick="mpdCmd('prev')"></i>
+						<i class="fa fa-stop" onclick="mpdCmd('stop')"></i>
+						<i class="fa fa-pause" onclick="mpdCmd('pause 1')"></i>
+						<i class="fa fa-play" onclick="mpdCmd('pause 0')"></i>
+						<i class="fa fa-arrow-right" onclick="mpdCmd('next')"></i>
+						<i class="fa fa-random" onclick="mpdCmd('shuffle')"></i>
+						<i class="fa fa-bug" onclick="mpdCmdBug()"></i>
+						<span class="cursvrstrm"></span>
+						<i class="fa fa-heart" onclick="Favorites.add()"></i>
+					</div>
+					<div id="marquis" class="marquis">
+						<div class="volume-control">
+						<i class="fa fa-volume-down" onclick="bmpVolume('-5')"></i>
+						<input type="range" id="mpdvolume" name="mpdvolume" oninput="chgVolume(this)" min="0" max="100" step="5">
+						<i class="fa fa-volume-up" onclick="bmpVolume('+5')"></i>
+						</div>
+						<span class="cursvrtrk"></span>
+					</div>
 				</div>
-				<span class="curtrk"></span>
-			</div>
-			<div id="localAudio" onclick="laudioAction(event)">
-				<!-- <audio id ="localaudio" controls>Your browser does not support the audio element.</audio> -->
-				<span class="curstrm"></span>
-				<i class="fa fa-heart" onclick="Favorites.add()"></i>
+				<div id="lcl-cntrls" class="cntrls-grid" style="display:none">
+					<!-- ><div onclick="playObj.focus()"><span class="vertical-text">LOC</span></div> -->
+					<div onclick="playObj.focus()"><img src="static/LOC.png"></div>
+					<div id="lclcontrols" class="mpdcontrols">
+						<i class="fa fa-arrow-left" onclick="lclCmd('prev')"></i>
+						<i class="fa fa-stop" onclick="lclCmd('stop')"></i>
+						<i class="fa fa-pause" onclick="lclCmd('pause 1')"></i>
+						<i class="fa fa-play" onclick="lclCmd('pause 0')"></i>
+						<i class="fa fa-arrow-right" onclick="lclCmd('next')"></i>
+						<span class="curlocstrm"></span>
+						<i class="fa fa-heart" onclick="Favorites.add()"></i>
+					</div>
+					<div id="lclmarquis" class="marquis">
+						<div class="volume-control">
+						<i class="fa fa-volume-down" onclick="lclCmd('bump -5')"></i>
+						<input type="range" id="lclvolume" name="lclvolume" oninput="chgVolume(this)" min="0" max="100" step="5">
+						<i class="fa fa-volume-up" onclick="lclCmd('bump +5')"></i>
+						</div>
+						<span class="curloctrk"></span>
+					</div>
+				</div>
 			</div>
 			<div id="favesTab" class="tabcontent">
 				<div id="favorites"></div>

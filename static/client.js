@@ -74,82 +74,41 @@ const tabMenu = (evt) => {
 }
 
 // UI display
-const displayCurrent = (what) => {
-	document.querySelectorAll('.curstrm').forEach((elm)=>{elm.innerHTML = what});
+const displayCurrent = (what, l=false) => {
+	const sel = l ? '.curlocstrm' : '.cursvrstrm';
+	document.querySelectorAll(sel).forEach((elm)=>{elm.innerHTML = what});
 };
-const displayCurrentTrack = (what) => {
-	document.querySelectorAll('.curtrk').forEach((elm)=>{elm.innerHTML = what});
+const displayCurrentTrack = (what, l=false) => {
+	const sel = l ? '.curloctrk' : '.cursvrtrk';
+	document.querySelectorAll(sel).forEach((elm)=>{elm.innerHTML = what});
 };
 
 
 // LOCAL AUDIO
-const showLocalAudio = (svc, pn=false) => {
-	// remove any existing listener and audio element
-	document.removeEventListener('playctl', laudioEvent);
-//	if (laudioelm) laudioelm.src='';
-	laudioelm = null;
-	// create the audio element
-	laudioelm = document.createElement('audio');
-	// set its volume to reflect the last value
-	const v100 = window.localStorage.getItem('nms_lclvol') || 50;
-	laudioelm.volume = v100/100;
-	document.getElementById('mpdvolume').value = v100;
-	// listen for player controls
-	document.addEventListener('playctl', laudioEvent);
-	// register what service is using the local audio
-	laudiosvu = svc.sr;
-	// when it's ready, play it
-	laudioelm.addEventListener('canplay', () => { laudioelm.play(); })
-	// handle errors
-	laudioelm.addEventListener('error', evt => {
-		console.log(evt);
-		my.alert('!!Could not load audio source: '+decodeURI(laudioelm.src))
-		.then(yn=>svc.lerror(yn));
-	});
-};
-
-const laudioEvent = (evt) => {
-	//console.log(evt);
-	let [what, val] = evt.detail.split(' ', 2);
+const lclCmd = (cmd) => {
+	let [what, val] = cmd.split(' ', 2);
 	val = +val;	//convert to int
 	switch(what) {
 	case 'vset':
-		laudioelm.volume = val/100;
-		window.localStorage.setItem('nms_lclvol', val);
+		laObj.volume(val);
 		break;
 	case 'bump':
-		let nuv = laudioelm.volume + val/100;
-		nuv = val<0 ? Math.max(nuv,0) : Math.min(nuv,1);
-		laudioelm.volume = nuv;
-		window.localStorage.setItem('nms_lclvol', Math.round(nuv*100));
-		const vel = document.getElementById('mpdvolume');
-		vel.value = +vel.value+val;
+		laObj.volume(val, true);
 		break;
 	case 'pause':
-		if (val==1) laudioelm.pause();
-		else laudioelm.play();
+		if (val==1) laObj.pause();
+		else laObj.play();
 		break;
 	case 'stop':
-		laudioelm.src='';
-		document.removeEventListener('playctl', laudioEvent);
-		laudioelm = null;
+		laObj.stop();
+		break;
 		break;
 	case 'next':
 	case 'prev':
-		document.dispatchEvent(new CustomEvent(laudiosvu+'-laudact', {bubbles: true, detail: what}));
+		document.dispatchEvent(new CustomEvent(laObj.svc+'-laudact', {bubbles: true, detail: what}));
 		break;
 	}
-};
-
-const laudioAction = (evt) => {
-	console.log(evt);
-	const telm = evt.target;
-	if (telm.nodeName=='I' && telm.hasAttribute('step')) {
-		//console.log(telm.getAttribute('step'));
-		document.dispatchEvent(new CustomEvent(laudiosvu+'-laudact', {bubbles: true, detail: telm.getAttribute('step')}));
-		//console.log(laudiosvu+'-laudact');
-	}
-};
+}
 
 
 var services = {
@@ -237,7 +196,6 @@ const assureService = async (what) => {
 /* working with MPD */
 // MPD direct
 const mpdCmd = (cmd) => {
-	document.dispatchEvent(new CustomEvent('playctl', {bubbles: true, detail: cmd}));
 	const parms = {act:'mpd', what: 'cmd', bobj: cmd};
 	postAction(null, parms, (data) => {
 		if (data) my.alert(data);
@@ -271,14 +229,12 @@ const setVolSlider = () => {
 	}, 1);
 };
 const chgVolume = (elm) => {
-	document.dispatchEvent(new CustomEvent('playctl', {bubbles: true, detail: 'vset '+elm.value}));
 	const parms = {act:'mpd',what:'setVolume',bobj:elm.value};
 	postAction(null, parms, (data) => {
 		if (data) my.alert(data);
 	}, 1);
 };
 const bmpVolume = (amt) => {
-	document.dispatchEvent(new CustomEvent('playctl', {bubbles: true, detail: 'bump '+amt}));
 	const parms = {act:'mpd',what:'bumpVolume',bobj:amt};
 	postAction(null, parms, (data) => {
 		if (data) document.getElementById('mpdvolume').value = data;
@@ -297,14 +253,14 @@ const mpdSocket = () => {
 		let data = JSON.parse(event.data);
 		document.dispatchEvent(new CustomEvent('mpdchg', {bubbles: true, detail: data}));
 		if (data.track) {
-			displayCurrentTrack(data.track);
+			playObj.dispCurrentTrack(data.track);
 		}
 		if (data.realm) {
-			displayCurrent(data.realm);
+			playObj.dispCurrent(data.realm);
 		}
 		if (data.state=='stop') {
-			displayCurrent('');
-			displayCurrentTrack('');
+			playObj.dispCurrent('');
+			playObj.dispCurrentTrack('');
 		}
 		if (data.service) {
 			console.log(data.service);

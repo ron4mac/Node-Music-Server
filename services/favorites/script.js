@@ -121,9 +121,7 @@ class DirectClass {
 		postAction(this.sr, parms, (data) => {
 			displayCurrent(currentStream);
 			if (data) {
-				showLocalAudio(this.sr);
-				laudioelm.src = data;
-				laudioelm.play();
+				laObj.playSource(data.url, this);
 			}
 		}, 1);
 	}

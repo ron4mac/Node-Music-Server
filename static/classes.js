@@ -194,6 +194,103 @@ class MyClass {
 const my = new MyClass();
 
 
+class PlayerControlsObject {
+	#srvd = null;
+	#locd = null;
+
+	constructor () {
+		this.#srvd = document.getElementById('mpd-cntrls');
+		this.#locd = document.getElementById('lcl-cntrls');
+	}
+
+	focus (l=false) {
+		if (l) {
+			this.#srvd.style.display = 'none';
+			this.#locd.style.display = 'grid';
+		} else {
+			this.#locd.style.display = 'none';
+			this.#srvd.style.display = 'grid';
+		}
+	}
+
+	dispCurrent (what, l=false) {
+		this.#display(what, l ? '.curlocstrm' : '.cursvrstrm');
+	}
+	dispCurrentTrack (what, l=false) {
+		this.#display(what, l ? '.curloctrk' : '.cursvrtrk');
+	}
+
+	#display (what, where) {
+		document.querySelectorAll(where).forEach((elm)=>{elm.innerHTML = what});
+	}
+
+}
+// instantiate it
+const playObj = new PlayerControlsObject();
+
+
+class LocalAudioObject {
+	#elm = null;
+	#sld = null;
+	#usr = null;
+
+	playSource (src, svc=null) {
+		this.#usr = svc.sr;
+		let el = this.#elm;
+		if (el) {
+			el.pause();
+			el.src = '';
+			const v = el.volume;
+			el = this.#elm = document.createElement('audio');
+			el.volume = v;
+		} else {
+			el = this.#elm = document.createElement('audio');
+			const v100 = window.localStorage.getItem('nms_lclvol') || 50;
+			el.volume = v100/100;
+			this.#sld = document.getElementById('lclvolume');
+			this.#sld.value = v100;
+			// listen for player controls
+//			document.addEventListener('playctl', laudioEvent);
+		}
+		playObj.focus(true);
+		el.addEventListener('canplay', e => e.target.play());
+		el.src = src;
+	}
+
+	play () {
+		this.#elm.play();
+	}
+
+	pause () {
+		this.#elm.pause();
+	}
+
+	stop () {
+		el.pause();
+		el.fastSeek(0);
+		el.src = '';
+	}
+
+	volume (v100, bmp=false) {
+		if (bmp) v100 = Math.min(Math.max(+this.#sld.value + v100, 0), 100);
+		this.#elm.volume = v100/100;
+		this.#sld.value = v100;
+		window.localStorage.setItem('nms_lclvol', v100);
+	}
+
+	get elem () {
+		return this.#elm;
+	}
+
+	get svc () {
+		return this.#usr;
+	}
+
+}
+// instantiate it
+const laObj = new LocalAudioObject();
+
+
 // a class for services to extend from for commonality 
 class ServiceClass {
 

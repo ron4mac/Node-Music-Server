@@ -359,6 +359,7 @@ const serveFile = (url, response, request=null) => {
 							}
 							//errs += '</div>'
 						}
+						content = content.replace('%%TITLE%%', config.title ? config.title : 'Node Music Server');
 						content = content.replace('%%ERRORS%%', errs);
 						content = content.replace('%%VERSION%%', cntrlr.nmsversion);
 						response.setHeader('Cache-Control', ['no-cache','no-store','must-revalidate']);
