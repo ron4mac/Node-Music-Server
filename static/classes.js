@@ -233,18 +233,33 @@ class LocalAudioObject {
 	#elm = null;
 	#sld = null;
 	#usr = null;
+	#url = null;
+	#itv = null;
+
+	refreshStream () {
+		if (!this.#elm) return;
+		this.#elm.pause();
+		this.#elm.src = '';
+		this.#elm.load(); // signals Safari to release the buffer
+		this.#elm.src = this.#url;
+		this.#elm.load();
+		this.#elm.play();
+	}
 
 	playSource (src, svc=null) {
+		if (this.#itv) clearInterval(this.#itv);
 		this.#usr = svc.sr;
 		let el = this.#elm;
 		if (el) {
 			el.pause();
 			el.src = '';
+			el.load();
 			const v = el.volume;
 			el = this.#elm = document.createElement('audio');
 			el.volume = v;
 		} else {
 			el = this.#elm = document.createElement('audio');
+			//el.preload = 'none';
 			const v100 = window.localStorage.getItem('nms_lclvol') || 50;
 			el.volume = v100/100;
 			this.#sld = document.getElementById('lclvolume');
@@ -254,7 +269,9 @@ class LocalAudioObject {
 		}
 		playObj.focus(true);
 		el.addEventListener('canplay', e => e.target.play());
+		this.#url = src;
 		el.src = src;
+		this.#itv = setInterval(() => this.refreshStream(), 3600000); // every hour
 	}
 
 	play () {
