@@ -43,10 +43,10 @@
   "homepage": "https://github.com/ron4mac/Node-Music-Server#readme",
   "dependencies": {
     "@tanislav000/bluez": "^1.9.0",
-    "fast-xml-parser": "^5.4.2",
+    "fast-xml-parser": "^5.7.2",
     "mime-lite": "^1.0.3",
     "mpd2": "^1.0.5",
-    "underscore": "^1.13.7",
+    "underscore": "^1.13.8",
     "ws": "^8.18.0"
   }
 }
